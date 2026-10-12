@@ -1,0 +1,311 @@
+import { Link } from 'react-router-dom';
+import logoEscolaDeEsportes from '../../assets/Escola_de_Esportes.png';
+
+// Cores do protótipo
+const AZUL = '#0047B8';
+const AZUL_ESCURO = '#1F2A44';
+const AZUL_CLARO = '#EFF6FF';
+const CINZA_CLARO = '#F3F4F6';
+const CINZA_TEXTO = '#6B7280';
+const VERMELHO_BADGE = '#EF4444';
+
+function Avisos() {
+  // Array com os avisos
+  const avisos = [
+    {
+      id: 1,
+      titulo: 'Treino cancelado por chuva',
+      descricao: 'Os treinos de futebol de hoje (16h) estão cancelados devido à chuva. As atividades serão repostas na próxima semana.',
+      data: 'Hoje',
+      hora: '10:32',
+      novo: true,
+      remetente: 'Administração',
+    },
+    {
+      id: 3,
+      titulo: 'Feriado – sem aulas',
+      descricao: 'Não haverá aulas no dia 21/04 (Tiradentes). As aulas retornam normalmente no dia 22/04.',
+      data: '08/04/2026',
+      hora: '11:20',
+      novo: false,
+      remetente: 'Administração',
+    },
+    {
+      id: 4,
+      titulo: 'Entrega de uniformes',
+      descricao: 'Os uniformes estarão disponíveis para retirada na secretaria a partir de segunda feira.',
+      data: '10/04/2026',
+      hora: '16:45',
+      novo: false,
+      remetente: 'Administração',
+    },
+  ];
+
+  return (
+    <div
+      className="min-vh-100 d-flex flex-column bg-white"
+      style={{ fontFamily: "'Inter', sans-serif" }}
+    >
+      <style>{`
+        .nav-link-home {
+          color: ${AZUL_ESCURO};
+          font-size: 0.9rem;
+          font-weight: 500;
+          text-decoration: none;
+          padding-bottom: 4px;
+          border-bottom: 2px solid transparent;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .nav-link-home:hover {
+          color: ${AZUL};
+        }
+
+        .nav-link-home.ativo {
+          color: ${AZUL};
+          font-weight: 600;
+          border-bottom-color: ${AZUL};
+        }
+
+        .badge-novo {
+          display: inline-block;
+          background-color: ${VERMELHO_BADGE};
+          color: white;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.7rem;
+          font-weight: 600;
+          margin-left: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .card-aviso {
+          display: flex;
+          gap: 1rem;
+          padding: 1.25rem;
+          background-color: #FFFFFF;
+          border: 1px solid #E5E7EB;
+          border-radius: 8px;
+          margin-bottom: 1rem;
+          transition: all 0.3s ease;
+        }
+
+        .card-aviso:hover {
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          border-color: ${AZUL};
+        }
+
+        .icone-som {
+          flex-shrink: 0;
+          width: 50px;
+          height: 50px;
+          background-color: ${AZUL_CLARO};
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+          color: ${AZUL};
+        }
+
+        .conteudo-aviso {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+
+        .header-aviso {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 0.5rem;
+        }
+
+        .titulo-aviso {
+          color: ${AZUL_ESCURO};
+          font-size: 1rem;
+          font-weight: 600;
+          line-height: 1.3;
+          margin: 0;
+          display: inline-block;
+        }
+
+        .data-hora {
+          color: ${CINZA_TEXTO};
+          font-size: 0.85rem;
+          white-space: nowrap;
+          margin-left: auto;
+          padding-left: 1rem;
+        }
+
+        .descricao-aviso {
+          color: ${AZUL_ESCURO};
+          font-size: 0.9rem;
+          line-height: 1.5;
+          margin: 0.5rem 0 0.75rem 0;
+        }
+
+        .remetente-aviso {
+          color: ${CINZA_TEXTO};
+          font-size: 0.8rem;
+          line-height: 1.4;
+        }
+
+        .lista-avisos {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+        }
+
+        .subtitulo-pagina {
+          color: ${CINZA_TEXTO};
+          font-size: 0.95rem;
+          line-height: 1.5;
+          margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+          .card-aviso {
+            padding: 1rem;
+            flex-direction: column;
+          }
+
+          .header-aviso {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+          }
+
+          .data-hora {
+            margin-left: 0;
+            padding-left: 0;
+            margin-top: 0.5rem;
+          }
+
+          .icone-som {
+            width: 45px;
+            height: 45px;
+            font-size: 1.25rem;
+          }
+
+          .titulo-aviso {
+            font-size: 0.95rem;
+          }
+
+          .descricao-aviso {
+            font-size: 0.85rem;
+          }
+        }
+      `}</style>
+
+      {/* Barra de navegação */}
+      <header
+        className="bg-white py-2 px-3 px-lg-5 d-flex justify-content-between align-items-center"
+        style={{ minHeight: '72px', borderBottom: '1px solid #E5E7EB' }}
+      >
+        {/* Logo + nome da escola */}
+        <Link to="/" className="d-flex align-items-center text-decoration-none">
+          <img
+            src={logoEscolaDeEsportes}
+            alt="Logo da Escola de Esporte"
+            className="img-fluid"
+            style={{ maxHeight: '50px' }}
+          />
+          <h5
+            style={{
+              fontSize: '1.25rem',
+              fontWeight: '600',
+              lineHeight: '1.2',
+              marginLeft: '1.5rem',
+              color: 'black',
+              marginTop: '1rem',
+              marginBottom: 0,
+            }}
+          >
+            Escola de Esportes
+            <br />
+            UNIFOR
+          </h5>
+        </Link>
+
+        {/* Links de navegação */}
+        <nav className="d-flex align-items-center gap-3 gap-sm-4">
+          <Link to="/" className="nav-link-home">
+            Início
+          </Link>
+          <Link to="/modalidades" className="nav-link-home">
+            Modalidades
+          </Link>
+        </nav>
+      </header>
+
+      {/* Conteúdo Principal */}
+      <main className="flex-grow-1 w-100 py-4 px-3 px-lg-5" style={{ maxWidth: '100%' }}>
+        <div className="container-fluid" style={{ maxWidth: '900px', margin: '0 auto', padding: '0' }}>
+          {/* Título da página */}
+          <h1
+            style={{
+              color: AZUL_ESCURO,
+              fontSize: '2rem',
+              fontWeight: '600',
+              lineHeight: '1.2',
+              marginBottom: '0.5rem',
+            }}
+          >
+            Avisos
+          </h1>
+
+          {/* Descrição */}
+          <p className="subtitulo-pagina">
+            Comunicados da Escola de Esporte.
+          </p>
+
+          {/* Lista de Avisos */}
+          <div className="lista-avisos">
+            {avisos.map((aviso) => (
+              <div key={aviso.id} className="card-aviso">
+                {/* Ícone de som */}
+                <div className="icone-som">
+                  🔊
+                </div>
+
+                {/* Conteúdo do aviso */}
+                <div className="conteudo-aviso">
+                  {/* Header: Título + Badge + Data */}
+                  <div className="header-aviso">
+                    <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                      <h3 className="titulo-aviso">
+                        {aviso.titulo}
+                      </h3>
+                      {aviso.novo && (
+                        <span className="badge-novo">Novo</span>
+                      )}
+                    </div>
+                    <div className="data-hora">
+                      {aviso.data} · {aviso.hora}
+                    </div>
+                  </div>
+
+                  {/* Descrição */}
+                  <p className="descricao-aviso">
+                    {aviso.descricao}
+                  </p>
+
+                  {/* Remetente */}
+                  <p className="remetente-aviso">
+                    Enviado por {aviso.remetente}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default Avisos;
