@@ -5,6 +5,7 @@ import Modalidades from './pages/publico/Modalidades'; // Importe a página Moda
 import PreenchimentoDados from './pages/publico/PreenchimentoDados'; // Importe a página PreenchimentoDados
 import SelecaoModalidades from './pages/publico/SelecaoModalidades'; // Importe a página SelecaoModalidades
 import Avisos from './pages/publico/Avisos'; // Importe a página Avisos
+import ConfirmacaoInscricao from './pages/publico/ConfirmacaoInscricao'; // Importe a página ConfirmacaoInscricao
 
 function App() {
 
@@ -23,6 +24,8 @@ function App() {
         <Route path="/SelecaoModalidades" element={<SelecaoModalidades />} />
         {/* Quando a URL for /avisos, exiba a página de Avisos */}
         <Route path="/Avisos" element={<Avisos />} />
+        {/* Quando a URL for /confirmacao-inscricao, exiba a página de ConfirmacaoInscricao */}
+        <Route path="/ConfirmacaoInscricao" element={<ConfirmacaoInscricao />} />
         
         {/* Você também precisará de uma rota principal "/" para a home */}
         <Route path="/" element={<div><h1>Home Pública</h1></div>} /> 
