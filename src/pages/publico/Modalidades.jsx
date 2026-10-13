@@ -301,7 +301,7 @@ function Modalidades() {
 
           {/* Atalho para a inscrição na lista de espera */}
           <div className="d-flex justify-content-end mt-4 mb-3">
-            <Link to="/inscricao" className="btn text-white fw-semibold px-4" style={{ backgroundColor: '#0047B8' }}>
+            <Link to="/inscricao/dados" className="btn text-white fw-semibold px-4" style={{ backgroundColor: '#0047B8' }}>
               Fazer inscrição na lista de espera
             </Link>
           </div>

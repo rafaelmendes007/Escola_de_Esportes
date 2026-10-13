@@ -36,7 +36,7 @@ function HomePage() {
             {/* Botões empilhados */}
             <div className="d-grid gap-3" style={{ maxWidth: '632px' }}>
               <Link
-                to="/inscricao"
+                to="/inscricao/dados"
                 className="btn py-3 fw-semibold text-white border-0"
                 style={{ backgroundColor: AZUL, borderRadius: '6px', fontSize: 'clamp(1.1rem, 1.8vw, 1.5rem)' }}
               >

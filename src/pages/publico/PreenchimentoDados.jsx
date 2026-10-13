@@ -107,7 +107,7 @@ function PreenchimentoDados() {
   const handleEnviar = () => {
     console.log('Dados para envio:', formData);
     // Aqui você faria a chamada da API
-    navigate('/inscricao/confirmacao');
+    navigate('/inscricao');
   };
 
   return (
@@ -647,7 +647,7 @@ function PreenchimentoDados() {
               onClick={handleEnviar}
               className="botao-enviar"
             >
-              Enviar inscrição
+              Selecionar Modalidade
             </button>
           </div>
         </div>
