@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import logoEscolaDeEsportes from '../../assets/Escola_de_Esportes.png';
-import imagemSino from '../../assets/sino.png';
+import HeaderPublico from '../../components/HeaderPublico';
 
 // Cores do protótipo
 const AZUL = '#0047B8';
@@ -16,26 +15,8 @@ function ConfirmacaoInscricao() {
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
       <style>{`
-        .nav-link-home {
-          color: ${AZUL_ESCURO};
-          font-size: 0.9rem;
-          font-weight: 500;
-          text-decoration: none;
-          padding-bottom: 4px;
-          border-bottom: 2px solid transparent;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
 
-        .nav-link-home:hover {
-          color: ${AZUL};
-        }
 
-        .nav-link-home.ativo {
-          color: ${AZUL};
-          font-weight: 600;
-          border-bottom-color: ${AZUL};
-        }
 
         .container-confirmacao {
           display: flex;
@@ -205,49 +186,7 @@ function ConfirmacaoInscricao() {
         }
       `}</style>
 
-      {/* Barra de navegação */}
-      <header
-        className="bg-white py-2 px-3 px-lg-5 d-flex justify-content-between align-items-center"
-        style={{ minHeight: '72px', borderBottom: '1px solid #E5E7EB' }}
-      >
-        {/* Logo + nome da escola */}
-        <Link to="/" className="d-flex align-items-center text-decoration-none">
-          <img
-            src={logoEscolaDeEsportes}
-            alt="Logo da Escola de Esporte"
-            className="img-fluid"
-            style={{ maxHeight: '50px' }}
-          />
-          <h5
-            style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              lineHeight: '1.2',
-              marginLeft: '1.5rem',
-              color: 'black',
-              marginTop: '1rem',
-              marginBottom: 0,
-            }}
-          >
-            Escola de Esportes
-            <br />
-            UNIFOR
-          </h5>
-        </Link>
-
-        {/* Links e sino de notificações */}
-        <nav className="d-flex align-items-center gap-3 gap-sm-4">
-          <Link to="/" className="nav-link-home">
-            Início
-          </Link>
-          <Link to="/modalidades" className="nav-link-home">
-            Modalidades
-          </Link>
-          <button type="button" className="btn p-0 border-0" aria-label="Notificações">
-            <img src={imagemSino} alt="" style={{ height: '28px' }} />
-          </button>
-        </nav>
-      </header>
+      <HeaderPublico />
 
       {/* Conteúdo Principal */}
       <main className="flex-grow-1 w-100 d-flex align-items-center justify-content-center" style={{ maxWidth: '100%' }}>

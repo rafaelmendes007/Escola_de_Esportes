@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logoEscolaDeEsportes from '../../assets/Escola_de_Esportes.png';
+import HeaderPublico from '../../components/HeaderPublico';
 
 // Ícones das modalidades
 import iconeAtletismo from '../../assets/modalidades/icone-atletismo.png';
@@ -16,7 +16,6 @@ import iconeVolei4x4 from '../../assets/modalidades/icone-volei4x4.png';
 // Cores do protótipo
 const AZUL = '#0047B8';
 const AZUL_ESCURO = '#1F2A44';
-const CINZA_CLARO = '#F3F4F6';
 const CINZA_BORDA = '#D1D5DB';
 
 function SelecaoModalidades() {
@@ -85,7 +84,7 @@ function SelecaoModalidades() {
       const modalidade = modalidades.find(m => m.id === modalidadeSelecionada);
       console.log('Modalidade selecionada:', modalidade);
       // Aqui você pode navegar para a próxima tela passando a modalidade selecionada
-      navigate('/dados-inscricao', { state: { modalidade } });
+      navigate('/inscricao/dados', { state: { modalidade } });
     }
   };
 
@@ -281,42 +280,14 @@ function SelecaoModalidades() {
         }
       `}</style>
 
-      {/* Barra de navegação */}
-      <header
-        className="bg-white py-2 px-3 px-lg-5 d-flex justify-content-start align-items-center"
-        style={{ minHeight: '72px', borderBottom: '1px solid #E5E7EB' }}
-      >
-        <div className="d-flex align-items-center text-decoration-none" style={{ cursor: 'pointer' }}>
-          <img
-            src={logoEscolaDeEsportes}
-            alt="Logo da Escola de Esporte"
-            className="img-fluid"
-            style={{ maxHeight: '50px' }}
-          />
-          <h5
-            style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              lineHeight: '1.2',
-              marginLeft: '1.5rem',
-              color: 'black',
-              marginTop: '1rem',
-              marginBottom: 0,
-            }}
-          >
-            Escola de Esportes
-            <br />
-            UNIFOR
-          </h5>
-        </div>
-      </header>
+      <HeaderPublico />
 
       {/* Conteúdo Principal */}
       <main className="flex-grow-1 w-100" style={{ maxWidth: '100%', padding: '1.5rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
         <div className="container-fluid" style={{ maxWidth: '100%', margin: '0 auto', padding: '0', flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Botão Voltar */}
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/')}
             className="botao-voltar mb-4"
           >
             <span>←</span>

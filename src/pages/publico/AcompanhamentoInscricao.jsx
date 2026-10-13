@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import logoEscolaDeEsportes from '../../assets/Escola_de_Esportes.png';
-import imagemSino from '../../assets/sino.png';
+import { useNavigate } from 'react-router-dom';
+import HeaderPublico from '../../components/HeaderPublico';
 import ilustracaoLupa from '../../assets/ilustracao-lupa.png';
 
 // Cores do protótipo
@@ -9,9 +8,10 @@ const AZUL = '#0047B8';
 const AZUL_ESCURO = '#1F2A44';
 const CINZA_BORDA = '#D1D5DB';
 const CINZA_TEXTO = '#6B7280';
-const AZUL_CLARO = '#EFF6FF';
 
 function AcompanhamentoInscricao() {
+  const navigate = useNavigate();
+
   // Estado do formulário
   const [formData, setFormData] = useState({
     cpf: '',
@@ -29,8 +29,8 @@ function AcompanhamentoInscricao() {
 
   // Manipular submit do formulário
   const handleConsultar = () => {
-    console.log('Dados para consultar:', formData);
     // Aqui você implementaria a lógica de consulta
+    navigate('/acompanhar-inscricao/resultado', { state: formData });
   };
 
   return (
@@ -39,26 +39,8 @@ function AcompanhamentoInscricao() {
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
       <style>{`
-        .nav-link-home {
-          color: ${AZUL_ESCURO};
-          font-size: 0.9rem;
-          font-weight: 500;
-          text-decoration: none;
-          padding-bottom: 4px;
-          border-bottom: 2px solid transparent;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
 
-        .nav-link-home:hover {
-          color: ${AZUL};
-        }
 
-        .nav-link-home.ativo {
-          color: ${AZUL};
-          font-weight: 600;
-          border-bottom-color: ${AZUL};
-        }
 
         .label-campo {
           color: ${AZUL_ESCURO};
@@ -195,49 +177,7 @@ function AcompanhamentoInscricao() {
         }
       `}</style>
 
-      {/* Barra de navegação */}
-      <header
-        className="bg-white py-2 px-3 px-lg-5 d-flex justify-content-between align-items-center"
-        style={{ minHeight: '72px', borderBottom: '1px solid #E5E7EB' }}
-      >
-        {/* Logo + nome da escola */}
-        <Link to="/" className="d-flex align-items-center text-decoration-none">
-          <img
-            src={logoEscolaDeEsportes}
-            alt="Logo da Escola de Esporte"
-            className="img-fluid"
-            style={{ maxHeight: '50px' }}
-          />
-          <h5
-            style={{
-              fontSize: '1.25rem',
-              fontWeight: '600',
-              lineHeight: '1.2',
-              marginLeft: '1.5rem',
-              color: 'black',
-              marginTop: '1rem',
-              marginBottom: 0,
-            }}
-          >
-            Escola de Esportes
-            <br />
-            UNIFOR
-          </h5>
-        </Link>
-
-        {/* Links e sino de notificações */}
-        <nav className="d-flex align-items-center gap-3 gap-sm-4">
-          <Link to="/" className="nav-link-home ativo">
-            Início
-          </Link>
-          <Link to="/modalidades" className="nav-link-home">
-            Modalidades
-          </Link>
-          <button type="button" className="btn p-0 border-0" aria-label="Notificações">
-            <img src={imagemSino} alt="" style={{ height: '28px' }} />
-          </button>
-        </nav>
-      </header>
+      <HeaderPublico />
 
       {/* Conteúdo Principal */}
       <main className="flex-grow-1 w-100 py-4 px-3 px-lg-5" style={{ maxWidth: '100%' }}>

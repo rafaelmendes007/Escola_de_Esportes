@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import logoEscolaDeEsportes from '../../assets/Escola_de_Esportes.png';
+import { Link, useNavigate } from 'react-router-dom';
+import HeaderPublico from '../../components/HeaderPublico';
 import imagemApito from '../../assets/apito.png';
 import background_login from '../../assets/background_login.png';
 
@@ -8,6 +8,16 @@ const AZUL = '#1E5DB5';
 const AZUL_CLARO = '#DCE8FA';
 
 function Login() {
+  const navigate = useNavigate();
+
+  // Ainda não tem autenticação: e-mail começando com "admin" entra como administrador,
+  // qualquer outro entra como professor
+  const handleEntrar = (e) => {
+    e.preventDefault();
+    const email = new FormData(e.target).get('email') || '';
+    navigate(email.startsWith('admin') ? '/admin' : '/professor');
+  };
+
   return (
     // Fundo da página com altura mínima de 100vh (tela inteira)
     <div
@@ -19,13 +29,7 @@ function Login() {
         fontFamily: "'Inter', sans-serif",
       }}
     >
-      {/* Cabeçalho com a Logo */}
-      <header className="bg-white py-2 d-flex justify-content-center align-items-center" style={{ minHeight: '72px' }}>
-        <img src={logoEscolaDeEsportes} alt="Logo da Escola de Esporte" className="img-fluid" style={{ maxHeight: '50px' }} />
-        <h5 style={{ fontSize: '1.25rem', fontWeight: '600', lineHeight: '1.2', marginLeft: '1.5rem', color: 'black', marginTop: '1rem' }}>
-          Escola de Esportes<br/>
-          UNIFOR</h5>
-      </header>
+      <HeaderPublico />
 
       {/* Conteúdo Principal */}
       {/* Estilo só para telas grandes: afasta o texto do card (ajuste o valor de margin-left se quiser mais perto ou mais longe) */}
@@ -68,7 +72,7 @@ function Login() {
               </p>
 
               {/* Formulário */}
-              <form className="text-start">
+              <form className="text-start" onSubmit={handleEntrar}>
 
                 {/* Campo de E-mail */}
                 <div className="mb-3">
@@ -79,6 +83,7 @@ function Login() {
                     </span>
                     <input
                       type="email"
+                      name="email"
                       className="form-control border-start-0 ps-0"
                       placeholder="Ex.: colaborador@unifor.br"
                       style={{ fontSize: '0.85rem' }}
