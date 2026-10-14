@@ -23,9 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# Configuração local do Claude
-.claude/
-
 # Variáveis de ambiente (NUNCA enviar para GitHub!)
 .env
 .env.local
