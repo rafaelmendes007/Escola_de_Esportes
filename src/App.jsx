@@ -35,58 +35,146 @@ import DetalhesTurmaListaEspera from './pages/admin/DetalhesTurmaListaEspera';
 import DetalhesTurmaHistorico from './pages/admin/DetalhesTurmaHistorico';
 import Frequencia from './pages/admin/Frequencia';
 import AvisosAdmin from './pages/admin/Avisos';
+import { AuthProvider } from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Área pública */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/modalidades" element={<Modalidades />} />
-        <Route path="/avisos" element={<Avisos />} />
+      <AuthProvider>
+        <Routes>
+          {/* Área pública */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/modalidades" element={<Modalidades />} />
+          <Route path="/avisos" element={<Avisos />} />
 
-        {/* Inscrição na lista de espera: modalidade -> dados -> confirmação */}
-        <Route path="/inscricao" element={<SelecaoModalidades />} />
-        <Route path="/inscricao/dados" element={<PreenchimentoDados />} />
-        <Route path="/inscricao/confirmacao" element={<ConfirmacaoInscricao />} />
+          {/* Inscrição na lista de espera: modalidade -> dados -> confirmação */}
+          <Route path="/inscricao" element={<SelecaoModalidades />} />
+          <Route path="/inscricao/dados" element={<PreenchimentoDados />} />
+          <Route path="/inscricao/confirmacao" element={<ConfirmacaoInscricao />} />
 
-        {/* Acompanhamento da inscrição: consulta -> resultado */}
-        <Route path="/acompanhar-inscricao" element={<AcompanhamentoInscricao />} />
-        <Route path="/acompanhar-inscricao/resultado" element={<ResultadoConsulta />} />
+          {/* Acompanhamento da inscrição: consulta -> resultado */}
+          <Route path="/acompanhar-inscricao" element={<AcompanhamentoInscricao />} />
+          <Route path="/acompanhar-inscricao/resultado" element={<ResultadoConsulta />} />
 
-        {/* Login dos colaboradores */}
-        <Route path="/login" element={<Login />} />
+          {/* Login dos colaboradores */}
+          <Route path="/login" element={<Login />} />
 
-        {/* Área do professor */}
-        <Route path="/professor" element={<Painel />} />
-        <Route path="/professor/turmas" element={<Turmas />} />
-        <Route path="/professor/turmas/:turmaId/alunos" element={<AlunosTurma />} />
-        <Route path="/professor/turmas/:turmaId/alunos/:alunoId/historico" element={<HistoricoFrequencia />} />
-        <Route path="/professor/turmas/:turmaId/chamada" element={<ChamadaFrequencia />} />
-        <Route path="/professor/turmas/:turmaId/frequencia-registrada" element={<FrequenciaRegistrada />} />
-        <Route path="/professor/avisos" element={<AvisosProfessor />} />
+          {/* ========== ÁREA DO PROFESSOR (PROTEGIDA) ========== */}
+          <Route path="/professor" element={
+            <PrivateRoute>
+              <Painel />
+            </PrivateRoute>
+          } />
+          <Route path="/professor/turmas" element={
+            <PrivateRoute>
+              <Turmas />
+            </PrivateRoute>
+          } />
+          <Route path="/professor/turmas/:turmaId/alunos" element={
+            <PrivateRoute>
+              <AlunosTurma />
+            </PrivateRoute>
+          } />
+          <Route path="/professor/turmas/:turmaId/alunos/:alunoId/historico" element={
+            <PrivateRoute>
+              <HistoricoFrequencia />
+            </PrivateRoute>
+          } />
+          <Route path="/professor/turmas/:turmaId/chamada" element={
+            <PrivateRoute>
+              <ChamadaFrequencia />
+            </PrivateRoute>
+          } />
+          <Route path="/professor/turmas/:turmaId/frequencia-registrada" element={
+            <PrivateRoute>
+              <FrequenciaRegistrada />
+            </PrivateRoute>
+          } />
+          <Route path="/professor/avisos" element={
+            <PrivateRoute>
+              <AvisosProfessor />
+            </PrivateRoute>
+          } />
 
-        {/* Área do administrador */}
-        <Route path="/admin" element={<Dashboard />} />
-        <Route path="/admin/lista-espera" element={<ListaEspera />} />
-        <Route path="/admin/lista-espera/:inscricaoId" element={<DetalhesListaEspera />} />
-        <Route path="/admin/alunos" element={<Alunos />} />
-        <Route path="/admin/alunos/:alunoId" element={<DetalhesAlunoVisaoGeral />} />
-        <Route path="/admin/alunos/:alunoId/frequencia" element={<DetalhesAlunoFrequencia />} />
-        <Route path="/admin/alunos/:alunoId/documentos" element={<DetalhesAlunoDocumentos />} />
-        <Route path="/admin/alunos/:alunoId/historico" element={<DetalhesAlunoHistorico />} />
-        <Route path="/admin/turmas" element={<TurmasAdmin />} />
-        <Route path="/admin/turmas/:turmaId" element={<DetalhesTurmaAlunos />} />
-        <Route path="/admin/turmas/:turmaId/lista-espera" element={<DetalhesTurmaListaEspera />} />
-        <Route path="/admin/turmas/:turmaId/historico" element={<DetalhesTurmaHistorico />} />
-        <Route path="/admin/frequencia" element={<Frequencia />} />
-        <Route path="/admin/avisos" element={<AvisosAdmin />} />
+          {/* ========== ÁREA DO ADMINISTRADOR (PROTEGIDA) ========== */}
+          <Route path="/admin" element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/lista-espera" element={
+            <PrivateRoute>
+              <ListaEspera />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/lista-espera/:inscricaoId" element={
+            <PrivateRoute>
+              <DetalhesListaEspera />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/alunos" element={
+            <PrivateRoute>
+              <Alunos />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/alunos/:alunoId" element={
+            <PrivateRoute>
+              <DetalhesAlunoVisaoGeral />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/alunos/:alunoId/frequencia" element={
+            <PrivateRoute>
+              <DetalhesAlunoFrequencia />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/alunos/:alunoId/documentos" element={
+            <PrivateRoute>
+              <DetalhesAlunoDocumentos />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/alunos/:alunoId/historico" element={
+            <PrivateRoute>
+              <DetalhesAlunoHistorico />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/turmas" element={
+            <PrivateRoute>
+              <TurmasAdmin />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/turmas/:turmaId" element={
+            <PrivateRoute>
+              <DetalhesTurmaAlunos />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/turmas/:turmaId/lista-espera" element={
+            <PrivateRoute>
+              <DetalhesTurmaListaEspera />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/turmas/:turmaId/historico" element={
+            <PrivateRoute>
+              <DetalhesTurmaHistorico />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/frequencia" element={
+            <PrivateRoute>
+              <Frequencia />
+            </PrivateRoute>
+          } />
+          <Route path="/admin/avisos" element={
+            <PrivateRoute>
+              <AvisosAdmin />
+            </PrivateRoute>
+          } />
 
-        {/* Qualquer URL desconhecida volta para a página inicial */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Qualquer URL desconhecida volta para a página inicial */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
 
-export default App
+export default App;

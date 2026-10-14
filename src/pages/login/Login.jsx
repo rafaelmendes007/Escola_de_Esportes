@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import HeaderPublico from '../../components/HeaderPublico';
 import imagemApito from '../../assets/apito.png';
 import background_login from '../../assets/background_login.png';
@@ -10,12 +13,60 @@ const AZUL_CLARO = '#DCE8FA';
 function Login() {
   const navigate = useNavigate();
 
-  // Ainda não tem autenticação: e-mail começando com "admin" entra como administrador,
-  // qualquer outro entra como professor
-  const handleEntrar = (e) => {
+  // Estado dos inputs
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [mostraSenha, setMostraSenha] = useState(false);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState('');
+
+  // Função de login com Firebase
+  const handleEntrar = async (e) => {
     e.preventDefault();
-    const email = new FormData(e.target).get('email') || '';
-    navigate(email.startsWith('admin') ? '/admin' : '/professor');
+    setErro('');
+    setCarregando(true);
+
+    try {
+      // Fazer login com email e senha
+      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+      const user = userCredential.user;
+
+      console.log('Login bem-sucedido:', user.email);
+
+      // Você pode verificar o email para redirecionar
+      // Por exemplo: se email começa com "admin" -> /admin
+      // Senão -> /professor
+      if (email.startsWith('admin')) {
+        navigate('/admin');
+      } else {
+        navigate('/professor');
+      }
+    } catch (error) {
+      // Tratamento de erros
+      let mensagem = 'Erro ao fazer login. Tente novamente.';
+
+      if (error.code === 'auth/user-not-found') {
+        mensagem = 'Usuário não encontrado.';
+      } else if (error.code === 'auth/wrong-password') {
+        mensagem = 'Senha incorreta.';
+      } else if (error.code === 'auth/invalid-email') {
+        mensagem = 'Email inválido.';
+      } else if (error.code === 'auth/user-disabled') {
+        mensagem = 'Usuário desativado.';
+      } else if (error.code === 'auth/too-many-login-attempts') {
+        mensagem = 'Muitas tentativas de login. Tente novamente mais tarde.';
+      }
+
+      setErro(mensagem);
+      console.error('Erro de autenticação:', error.message);
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  // Alternar visualização de senha
+  const toggleMostraSenha = () => {
+    setMostraSenha(!mostraSenha);
   };
 
   return (
@@ -36,6 +87,21 @@ function Login() {
       <style>{`
         @media (min-width: 992px) {
           .login-texto { margin-left: clamp(2rem, 9vw, 10rem); }
+        }
+
+        .mensagem-erro {
+          color: #DC2626;
+          font-size: 0.85rem;
+          background-color: #FEE2E2;
+          border: 1px solid #FCA5A5;
+          padding: 0.75rem;
+          border-radius: 6px;
+          margin-bottom: 1rem;
+        }
+
+        .botao-carregando {
+          opacity: 0.7;
+          cursor: not-allowed;
         }
       `}</style>
 
@@ -71,6 +137,13 @@ function Login() {
                 Entre com suas credenciais para acessar o sistema da Escola de Esporte Unifor.
               </p>
 
+              {/* Mensagem de Erro */}
+              {erro && (
+                <div className="mensagem-erro">
+                  {erro}
+                </div>
+              )}
+
               {/* Formulário */}
               <form className="text-start" onSubmit={handleEntrar}>
 
@@ -83,10 +156,13 @@ function Login() {
                     </span>
                     <input
                       type="email"
-                      name="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="form-control border-start-0 ps-0"
                       placeholder="Ex.: colaborador@unifor.br"
                       style={{ fontSize: '0.85rem' }}
+                      disabled={carregando}
+                      required
                     />
                   </div>
                 </div>
@@ -99,13 +175,21 @@ function Login() {
                       <i className="bi bi-lock"></i>
                     </span>
                     <input
-                      type="password"
+                      type={mostraSenha ? 'text' : 'password'}
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
                       className="form-control border-start-0 border-end-0 ps-0"
                       placeholder="Sua senha"
                       style={{ fontSize: '0.85rem' }}
+                      disabled={carregando}
+                      required
                     />
-                    <span className="input-group-text bg-white border-start-0" style={{ cursor: 'pointer', color: '#6B7280' }}>
-                      <i className="bi bi-eye"></i>
+                    <span
+                      className="input-group-text bg-white border-start-0"
+                      style={{ cursor: 'pointer', color: '#6B7280' }}
+                      onClick={toggleMostraSenha}
+                    >
+                      <i className={`bi ${mostraSenha ? 'bi-eye-slash' : 'bi-eye'}`}></i>
                     </span>
                   </div>
                 </div>
@@ -120,10 +204,11 @@ function Login() {
                 {/* Botão Entrar */}
                 <button
                   type="submit"
-                  className="btn w-100 py-2 fw-semibold text-white border-0"
+                  className={`btn w-100 py-2 fw-semibold text-white border-0 ${carregando ? 'botao-carregando' : ''}`}
                   style={{ backgroundColor: AZUL, borderRadius: '6px' }}
+                  disabled={carregando}
                 >
-                  Entrar
+                  {carregando ? 'Entrando...' : 'Entrar'}
                 </button>
 
                 {/* Divisor "ou" */}
