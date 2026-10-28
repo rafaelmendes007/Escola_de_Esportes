@@ -11,6 +11,7 @@ export const turmas = [
     faixaEtaria: '14 – 17 anos',
     icone: iconeVolei,
     dias: 'Segundas e Quartas',
+    diasSemana: [1, 3],
     horario: '14h00 – 15h30',
     local: 'Ginásio Principal',
     totalAlunos: 18,
@@ -21,6 +22,7 @@ export const turmas = [
     faixaEtaria: '10 – 13 anos',
     icone: iconeGinastica,
     dias: 'Terças e Quintas',
+    diasSemana: [2, 4],
     horario: '15h30 – 17h00',
     local: 'Sala de Ginástica',
     totalAlunos: 15,
@@ -31,14 +33,12 @@ export const turmas = [
     faixaEtaria: '12 – 15 anos',
     icone: iconeFutebol,
     dias: 'Segundas e Quartas',
+    diasSemana: [1, 3],
     horario: '16h00 – 17h30',
     local: 'Campo 1',
     totalAlunos: 20,
   },
 ];
-
-// Turmas que aparecem no painel em "Turmas de Hoje"
-export const idsTurmasHoje = ['F01'];
 
 export const alunos = [
   { id: 1, nome: 'Ana Silva', idade: 15, responsavel: 'Carlos Silva' },
@@ -94,8 +94,61 @@ export const avisos = [
   },
 ];
 
+// Avisos já vistos pelo professor ficam salvos no navegador (até existir a API)
+const CHAVE_AVISOS_LIDOS = 'avisosLidosProfessor';
+
+export function idsAvisosLidos() {
+  try {
+    return JSON.parse(localStorage.getItem(CHAVE_AVISOS_LIDOS)) || [];
+  } catch {
+    return [];
+  }
+}
+
+export function marcarAvisosComoLidos(ids) {
+  const lidos = [...new Set([...idsAvisosLidos(), ...ids])];
+  try {
+    localStorage.setItem(CHAVE_AVISOS_LIDOS, JSON.stringify(lidos));
+  } catch {
+    // Sem acesso ao armazenamento do navegador: vale só até recarregar a página
+  }
+  return lidos;
+}
+
+// Aviso novo = marcado como novo e ainda não visto
+export function avisoNovo(aviso, lidos = idsAvisosLidos()) {
+  return aviso.novo && !lidos.includes(aviso.id);
+}
+
 export function buscarTurma(id) {
   return turmas.find((turma) => turma.id === id) || turmas[0];
+}
+
+// diasSemana usa a numeração do Date: 0 = domingo, 1 = segunda ... 6 = sábado
+export function temAulaNoDia(turma, data) {
+  return turma.diasSemana.includes(data.getDay());
+}
+
+// Data no formato do input date (AAAA-MM-DD), sem problema de fuso horário
+export function dataISO(data) {
+  const copia = new Date(data);
+  copia.setMinutes(copia.getMinutes() - copia.getTimezoneOffset());
+  return copia.toISOString().slice(0, 10);
+}
+
+// "2026-04-15" -> Date no horário local (new Date("2026-04-15") seria UTC e poderia cair no dia anterior)
+export function lerDataISO(texto) {
+  const [ano, mes, dia] = texto.split('-').map(Number);
+  return new Date(ano, mes - 1, dia);
+}
+
+// Último dia com aula até hoje (para a chamada já abrir numa data válida)
+export function ultimoDiaDeAula(turma, hoje = new Date()) {
+  const data = new Date(hoje);
+  for (let i = 0; i < 7 && !temAulaNoDia(turma, data); i++) {
+    data.setDate(data.getDate() - 1);
+  }
+  return data;
 }
 
 export function buscarAluno(id) {

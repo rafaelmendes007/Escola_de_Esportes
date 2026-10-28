@@ -2,17 +2,10 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { TEXTO, BORDA, VERDE, VERMELHO } from '../../components/cores';
-import { alunos, buscarTurma } from './dados';
-
-// Data de hoje no formato do input date (AAAA-MM-DD)
-function hojeISO() {
-  const hoje = new Date();
-  hoje.setMinutes(hoje.getMinutes() - hoje.getTimezoneOffset());
-  return hoje.toISOString().slice(0, 10);
-}
+import { alunos, buscarTurma, dataISO, lerDataISO, temAulaNoDia, ultimoDiaDeAula } from './dados';
 
 // Botão "Presente" ou "Ausente" de cada aluno
-function BotaoChamada({ tipo, marcado, onClick }) {
+function BotaoChamada({ tipo, marcado, onClick, disabled }) {
   const presente = tipo === 'presente';
   const cor = presente ? VERDE : VERMELHO;
 
@@ -20,6 +13,7 @@ function BotaoChamada({ tipo, marcado, onClick }) {
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       className="btn btn-sm d-inline-flex align-items-center gap-2"
       style={{
         width: '90px',
@@ -41,15 +35,27 @@ function ChamadaFrequencia() {
   const navigate = useNavigate();
   const turma = buscarTurma(turmaId);
 
-  const [data, setData] = useState(hojeISO());
+  const [hoje] = useState(() => dataISO(new Date()));
+  const [data, setData] = useState(() => dataISO(ultimoDiaDeAula(turma)));
   // { idDoAluno: 'presente' | 'ausente' }
   const [chamada, setChamada] = useState({});
+
+  // Só pode fazer chamada em dia que a turma tem aula e que já chegou
+  let erroData = '';
+  if (!data) {
+    erroData = 'Escolha a data da aula.';
+  } else if (data > hoje) {
+    erroData = 'Não é possível fazer a chamada de uma aula que ainda não aconteceu.';
+  } else if (!temAulaNoDia(turma, lerDataISO(data))) {
+    erroData = `A turma não tem aula nesse dia. As aulas são às ${turma.dias.toLowerCase()}.`;
+  }
 
   const marcar = (idAluno, status) => {
     setChamada((anterior) => ({ ...anterior, [idAluno]: status }));
   };
 
   const handleSalvar = () => {
+    if (erroData) return;
     // Aqui você faria a chamada da API para salvar a frequência
     const status = Object.values(chamada);
     navigate(`/professor/turmas/${turma.id}/frequencia-registrada`, {
@@ -81,12 +87,19 @@ function ChamadaFrequencia() {
             id="data-aula"
             type="date"
             className="form-control form-control-sm"
-            style={{ width: '180px', fontSize: '0.75rem', borderColor: BORDA }}
+            style={{ width: '180px', fontSize: '0.75rem', borderColor: erroData ? VERMELHO : BORDA }}
             value={data}
+            max={hoje}
             onChange={(e) => setData(e.target.value)}
           />
         </div>
       </div>
+
+      {erroData && (
+        <div className="d-flex align-items-center gap-2 rounded px-3 py-2 mb-3" style={{ backgroundColor: '#FEE2E2', color: VERMELHO, fontSize: '0.8rem' }}>
+          <i className="bi bi-exclamation-circle"></i> {erroData}
+        </div>
+      )}
 
       <div className="painel-card table-responsive">
         <table className="painel-tabela">
@@ -104,10 +117,10 @@ function ChamadaFrequencia() {
                 <td>{indice + 1}</td>
                 <td>{aluno.nome}</td>
                 <td className="text-center">
-                  <BotaoChamada tipo="presente" marcado={chamada[aluno.id] === 'presente'} onClick={() => marcar(aluno.id, 'presente')} />
+                  <BotaoChamada tipo="presente" marcado={chamada[aluno.id] === 'presente'} onClick={() => marcar(aluno.id, 'presente')} disabled={!!erroData} />
                 </td>
                 <td className="text-center">
-                  <BotaoChamada tipo="ausente" marcado={chamada[aluno.id] === 'ausente'} onClick={() => marcar(aluno.id, 'ausente')} />
+                  <BotaoChamada tipo="ausente" marcado={chamada[aluno.id] === 'ausente'} onClick={() => marcar(aluno.id, 'ausente')} disabled={!!erroData} />
                 </td>
               </tr>
             ))}
@@ -119,7 +132,7 @@ function ChamadaFrequencia() {
         <Link to={`/professor/turmas/${turma.id}/alunos`} className="painel-botao-contorno">
           Cancelar
         </Link>
-        <button type="button" className="painel-botao" onClick={handleSalvar}>
+        <button type="button" className="painel-botao" onClick={handleSalvar} disabled={!!erroData} style={{ opacity: erroData ? 0.5 : 1 }}>
           Salvar frequência
         </button>
       </div>
