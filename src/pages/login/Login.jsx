@@ -196,9 +196,9 @@ function Login() {
 
                 {/* Esqueceu a senha */}
                 <div className="text-center mb-3 mt-3">
-                  <a href="#" className="text-decoration-none fw-medium" style={{ color: AZUL, fontSize: '0.8rem' }}>
+                  <Link to="/esqueci-senha" className="text-decoration-none fw-medium" style={{ color: AZUL, fontSize: '0.8rem' }}>
                     Esqueceu sua senha?
-                  </a>
+                  </Link>
                 </div>
 
                 {/* Botão Entrar */}
