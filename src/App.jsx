@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/login/Login';
+import EsqueciSenha from './pages/login/EsqueciSenha';
 
 // Área pública (fluxo do responsável)
 import HomePage from './pages/publico/HomePage';
@@ -38,6 +39,7 @@ import AvisosAdmin from './pages/admin/Avisos';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 
+
 function App() {
   return (
     <BrowserRouter>
@@ -59,6 +61,7 @@ function App() {
 
           {/* Login dos colaboradores */}
           <Route path="/login" element={<Login />} />
+          <Route path="/esqueci-senha" element={<EsqueciSenha />} />
 
           {/* ========== ÁREA DO PROFESSOR (PROTEGIDA) ========== */}
           <Route path="/professor" element={
