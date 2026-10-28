@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { TEXTO, BORDA, VERDE, VERMELHO } from '../../components/cores';
-import { alunos, buscarTurma, dataISO, lerDataISO, temAulaNoDia, ultimoDiaDeAula } from './dados';
+import { alunos, buscarTurma, dataISO, temAulaNoDia } from './dados';
 
 // Botão "Presente" ou "Ausente" de cada aluno
 function BotaoChamada({ tipo, marcado, onClick, disabled }) {
@@ -35,20 +35,15 @@ function ChamadaFrequencia() {
   const navigate = useNavigate();
   const turma = buscarTurma(turmaId);
 
-  const [hoje] = useState(() => dataISO(new Date()));
-  const [data, setData] = useState(() => dataISO(ultimoDiaDeAula(turma)));
+  // A chamada é sempre do dia em que está sendo feita
+  const [hoje] = useState(() => new Date());
   // { idDoAluno: 'presente' | 'ausente' }
   const [chamada, setChamada] = useState({});
 
-  // Só pode fazer chamada em dia que a turma tem aula e que já chegou
-  let erroData = '';
-  if (!data) {
-    erroData = 'Escolha a data da aula.';
-  } else if (data > hoje) {
-    erroData = 'Não é possível fazer a chamada de uma aula que ainda não aconteceu.';
-  } else if (!temAulaNoDia(turma, lerDataISO(data))) {
-    erroData = `A turma não tem aula nesse dia. As aulas são às ${turma.dias.toLowerCase()}.`;
-  }
+  // Só pode fazer chamada se a turma tem aula hoje
+  const erroData = temAulaNoDia(turma, hoje)
+    ? ''
+    : `A turma não tem aula hoje. As aulas são às ${turma.dias.toLowerCase()}.`;
 
   const marcar = (idAluno, status) => {
     setChamada((anterior) => ({ ...anterior, [idAluno]: status }));
@@ -60,7 +55,7 @@ function ChamadaFrequencia() {
     const status = Object.values(chamada);
     navigate(`/professor/turmas/${turma.id}/frequencia-registrada`, {
       state: {
-        data,
+        data: dataISO(hoje),
         presentes: status.filter((s) => s === 'presente').length,
         ausentes: status.filter((s) => s === 'ausente').length,
         justificados: 0,
@@ -81,17 +76,9 @@ function ChamadaFrequencia() {
           </p>
         </div>
 
-        <div>
-          <label htmlFor="data-aula" className="d-block mb-1" style={{ color: TEXTO, fontSize: '0.65rem' }}>Data da aula</label>
-          <input
-            id="data-aula"
-            type="date"
-            className="form-control form-control-sm"
-            style={{ width: '180px', fontSize: '0.75rem', borderColor: erroData ? VERMELHO : BORDA }}
-            value={data}
-            max={hoje}
-            onChange={(e) => setData(e.target.value)}
-          />
+        <div className="d-flex align-items-center gap-2" style={{ color: TEXTO, fontSize: '0.8rem' }}>
+          <i className="bi bi-calendar3"></i>
+          {hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
         </div>
       </div>
 

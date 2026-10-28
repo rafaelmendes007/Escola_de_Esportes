@@ -136,21 +136,6 @@ export function dataISO(data) {
   return copia.toISOString().slice(0, 10);
 }
 
-// "2026-04-15" -> Date no horário local (new Date("2026-04-15") seria UTC e poderia cair no dia anterior)
-export function lerDataISO(texto) {
-  const [ano, mes, dia] = texto.split('-').map(Number);
-  return new Date(ano, mes - 1, dia);
-}
-
-// Último dia com aula até hoje (para a chamada já abrir numa data válida)
-export function ultimoDiaDeAula(turma, hoje = new Date()) {
-  const data = new Date(hoje);
-  for (let i = 0; i < 7 && !temAulaNoDia(turma, data); i++) {
-    data.setDate(data.getDate() - 1);
-  }
-  return data;
-}
-
 export function buscarAluno(id) {
   return alunos.find((aluno) => aluno.id === Number(id)) || alunos[0];
 }
