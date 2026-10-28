@@ -69,6 +69,23 @@ export const avisosEnviados = [
   { id: 4, titulo: 'Feriado – sem aulas', descricao: 'Não haverá aulas no dia 21/04 (Tiradentes). As aulas retornam dia 22/04.', dataHora: '08/04/2026 · 11:20', publico: 'Todos', turma: 'Todas as turmas' },
 ];
 
+// Usuários que acessam o sistema (administradores e professores)
+export const usuarios = [
+  { id: 1, nome: 'Administrador', email: 'admin@unifor.br', perfil: 'Administrador', cadastradoEm: '01/08/2026' },
+  { id: 2, nome: 'Vinícius Aguiar', email: 'vinicius.aguiar@unifor.br', perfil: 'Professor', cadastradoEm: '05/08/2026' },
+  { id: 3, nome: 'Luís Marcelo', email: 'luis.marcelo@unifor.br', perfil: 'Professor', cadastradoEm: '05/08/2026' },
+];
+
+export function adicionarUsuario(usuario) {
+  const novoUsuario = {
+    id: Math.max(0, ...usuarios.map((u) => u.id)) + 1,
+    cadastradoEm: new Date().toLocaleDateString('pt-BR'),
+    ...usuario,
+  };
+  usuarios.push(novoUsuario);
+  return novoUsuario;
+}
+
 // Inclui uma turma nova na lista (enquanto não há API) e devolve a turma criada
 export function adicionarTurma(turma) {
   const novaTurma = { id: Math.max(0, ...turmas.map((t) => t.id)) + 1, ocupadas: 0, listaEspera: 0, ...turma };

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile, signOut } from "firebase/auth";
 
 // Usar variáveis de ambiente do Vite (import.meta.env)
 const firebaseConfig = {
@@ -15,4 +15,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
+
+// Segunda instância só para cadastrar usuários pelo painel do admin.
+// Criar a conta pela instância principal trocaria o login do admin pelo do usuário novo.
+const authCadastro = getAuth(initializeApp(firebaseConfig, "cadastro"));
+
+export async function cadastrarUsuario(nome, email, senha) {
+  const { user } = await createUserWithEmailAndPassword(authCadastro, email, senha);
+  await updateProfile(user, { displayName: nome });
+  await signOut(authCadastro);
+  return user.uid;
+}
+
 export default app;
