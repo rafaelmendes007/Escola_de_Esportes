@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import logoEscolaDeEsportes from '../assets/Escola_de_Esportes.png';
 import imagemSino from '../assets/sino.png';
 import { AZUL, AZUL_ESCURO, AZUL_MENU_ATIVO, AZUL_CLARO, AZUL_NAVBAR, FUNDO, TEXTO, CINZA_TEXTO, BORDA, VERMELHO } from './cores';
@@ -12,6 +13,9 @@ function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, childre
   // No computador o menu começa aberto; no celular começa fechado
   const [menuAberto, setMenuAberto] = useState(telaGrande);
   const [perfilAberto, setPerfilAberto] = useState(false);
+  // Nome de quem está logado; sem login cai no nome do perfil ("Administrador", "Professor")
+  const { usuario: usuarioLogado } = useAuth();
+  const nomeUsuario = usuarioLogado?.nome || usuario;
 
   // No celular a gaveta fecha ao escolher uma opção
   const fecharNoCelular = () => {
@@ -255,7 +259,7 @@ function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, childre
                 onClick={() => setPerfilAberto(!perfilAberto)}
               >
                 <i className="bi bi-person-circle"></i>
-                <span className="d-none d-sm-inline">{usuario}</span>
+                <span className="d-none d-sm-inline">{nomeUsuario}</span>
                 <i className="bi bi-chevron-down" style={{ fontSize: '0.7rem' }}></i>
               </button>
               {perfilAberto && (

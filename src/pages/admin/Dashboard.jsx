@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import LayoutAdmin from '../../components/LayoutAdmin';
+import { useAuth } from '../../context/AuthContext';
 import { AZUL_ADMIN, BORDA } from '../../components/cores';
 import { Etiqueta } from './componentes';
 import { resumo, turmas } from './dados';
@@ -34,12 +35,13 @@ function CardResumo({ icone, cor, fundoIcone, rotulo, valor, link, textoLink }) 
 
 function Dashboard() {
   const [semestre, setSemestre] = useState('2026.2');
+  const { usuario } = useAuth();
 
   return (
     <LayoutAdmin>
       <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
         <div>
-          <h1 className="fw-semibold m-0" style={{ color: '#111827', fontSize: '1.6rem' }}>Olá Administrador!</h1>
+          <h1 className="fw-semibold m-0" style={{ color: '#111827', fontSize: '1.6rem' }}>Olá {usuario?.nome || 'Administrador'}!</h1>
           <p className="admin-subtitulo">Veja o resumo atual da Escola de Esporte.</p>
         </div>
 

@@ -18,6 +18,8 @@ export function AuthProvider({ children }) {
           uid: user.uid,
           email: user.email,
           displayName: user.displayName,
+          // Nome mostrado nas telas: o nome cadastrado ou, se não tiver, o começo do email
+          nome: user.displayName || user.email.split('@')[0],
         });
       } else {
         setUsuario(null);
