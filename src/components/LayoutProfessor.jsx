@@ -1,9 +1,10 @@
 import { useLocation } from 'react-router-dom';
 import LayoutPainel from './LayoutPainel';
-import { avisos } from '../pages/professor/dados';
+import { avisos, avisoNovo } from '../pages/professor/dados';
 
 // Telas do professor: menu com Painel e Turmas
-function LayoutProfessor({ children }) {
+// avisosLidos: a tela de Avisos passa a lista atualizada para o sino mudar na hora
+function LayoutProfessor({ avisosLidos, children }) {
   const { pathname } = useLocation();
   // Avisos ficam "dentro" do Painel no protótipo
   const emTurmas = pathname.startsWith('/professor/turmas');
@@ -19,7 +20,7 @@ function LayoutProfessor({ children }) {
       menu={menu}
       usuario="Professor"
       linkAvisos="/professor/avisos"
-      temAvisoNovo={avisos.some((aviso) => aviso.novo)}
+      temAvisoNovo={avisos.some((aviso) => avisoNovo(aviso, avisosLidos))}
     >
       {children}
     </LayoutPainel>
