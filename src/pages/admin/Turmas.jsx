@@ -5,6 +5,7 @@ import { BORDA } from '../../components/cores';
 import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
 import ModalNovaTurma from './ModalNovaTurma';
 import { turmas as turmasIniciais, adicionarTurma, normalizar } from './dados';
+import { usePaginacao } from './usePaginacao';
 
 const filtrosVazios = { busca: '', modalidade: 'Todas', faixa: 'Todas', status: 'Todos' };
 
@@ -30,6 +31,7 @@ function Turmas() {
     (aplicados.faixa === 'Todas' || turma.faixaEtaria === aplicados.faixa) &&
     (aplicados.status === 'Todos' || turma.status === aplicados.status)
   );
+  const { itensDaPagina, paginacao } = usePaginacao(turmasFiltradas);
 
   return (
     <LayoutAdmin titulo="Turmas">
@@ -99,7 +101,7 @@ function Turmas() {
               </tr>
             </thead>
             <tbody>
-              {turmasFiltradas.map((turma) => (
+              {itensDaPagina.map((turma) => (
                 <tr key={turma.id} style={{ borderBottom: `1px solid ${BORDA}` }}>
                   <td>{turma.modalidade}</td>
                   <td>{turma.nome}</td>
@@ -119,7 +121,7 @@ function Turmas() {
             </tbody>
           </table>
         </div>
-        <RodapeTabela paginas={2} />
+        <RodapeTabela {...paginacao} />
       </div>
 
       <ModalNovaTurma aberto={modalAberto} onFechar={() => setModalAberto(false)} onSalvar={salvarTurma} />

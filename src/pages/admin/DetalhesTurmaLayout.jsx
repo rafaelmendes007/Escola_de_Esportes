@@ -96,7 +96,7 @@ function DetalhesTurmaLayout({ aba, tituloTabela, rodape, children }) {
             {/* Rodapé com total e paginação */}
             <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 rounded px-3 py-2 mt-auto" style={{ border: '1px solid #D1D5DB', marginTop: '24px' }}>
               <span style={{ fontSize: '0.7rem', color: '#374151' }}><i className="bi bi-book me-2"></i>{rodape}</span>
-              <Paginacao total={2} />
+              <Paginacao />
             </div>
           </div>
         </div>

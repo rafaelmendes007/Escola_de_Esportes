@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 // Peças visuais repetidas nas telas do administrador
 
 // Cores das etiquetas de status
@@ -82,9 +80,8 @@ export function CabecalhoPagina({ titulo, subtitulo, children }) {
   );
 }
 
-// Botões de página (‹ 1 2 3 4 ›). Ainda não carrega outras páginas: só muda a página marcada.
-export function Paginacao({ total = 4 }) {
-  const [pagina, setPagina] = useState(1);
+// Botões de página (‹ 1 2 3 4 ›)
+export function Paginacao({ total = 1, pagina = 1, onMudar: setPagina = () => {} }) {
   const estiloBotao = (ativo) => ({
     width: '24px',
     height: '24px',
@@ -112,19 +109,24 @@ export function Paginacao({ total = 4 }) {
   );
 }
 
-// Rodapé das listagens: itens por página + paginação
-export function RodapeTabela({ paginas }) {
+// Rodapé das listagens: itens por página + paginação (dados vêm do usePaginacao)
+export function RodapeTabela({ pagina, totalPaginas, porPagina, mudarPagina, mudarPorPagina }) {
   return (
     <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-auto pt-4">
       <div className="d-flex align-items-center gap-2" style={{ fontSize: '0.65rem', color: '#374151' }}>
         Itens por página
-        <select className="form-select form-select-sm py-0" style={{ width: '56px', fontSize: '0.7rem' }} defaultValue="10">
+        <select
+          className="form-select form-select-sm py-0"
+          style={{ width: '56px', fontSize: '0.7rem' }}
+          value={porPagina}
+          onChange={(e) => mudarPorPagina(Number(e.target.value))}
+        >
           <option>10</option>
           <option>20</option>
           <option>50</option>
         </select>
       </div>
-      <Paginacao total={paginas} />
+      <Paginacao total={totalPaginas} pagina={pagina} onMudar={mudarPagina} />
     </div>
   );
 }

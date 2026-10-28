@@ -4,6 +4,7 @@ import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
 import { listaEspera, modalidades, normalizar } from './dados';
+import { usePaginacao } from './usePaginacao';
 
 const filtrosVazios = { busca: '', modalidade: 'Todas', faixa: 'Todas', status: 'Todos' };
 
@@ -23,6 +24,7 @@ function ListaEspera() {
     (!faixa || (inscricao.idade >= faixa[1] && inscricao.idade <= faixa[2])) &&
     (aplicados.status === 'Todos' || inscricao.status === aplicados.status)
   );
+  const { itensDaPagina, paginacao } = usePaginacao(inscricoes);
 
   return (
     <LayoutAdmin titulo="Lista de espera">
@@ -86,7 +88,7 @@ function ListaEspera() {
               </tr>
             </thead>
             <tbody>
-              {inscricoes.map((inscricao) => (
+              {itensDaPagina.map((inscricao) => (
                 <tr key={inscricao.id} style={{ borderBottom: `1px solid ${BORDA}` }}>
                   <td>{inscricao.nome}</td>
                   <td>{inscricao.idade}</td>
@@ -105,7 +107,7 @@ function ListaEspera() {
             </tbody>
           </table>
         </div>
-        <RodapeTabela paginas={4} />
+        <RodapeTabela {...paginacao} />
       </div>
     </LayoutAdmin>
   );

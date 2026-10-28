@@ -4,6 +4,7 @@ import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
 import { alunos, modalidades, normalizar } from './dados';
+import { usePaginacao } from './usePaginacao';
 
 const filtrosVazios = { busca: '', modalidade: 'Todas', status: 'Todos' };
 
@@ -19,6 +20,7 @@ function Alunos() {
     (aplicados.modalidade === 'Todas' || aluno.modalidade === aplicados.modalidade) &&
     (aplicados.status === 'Todos' || aluno.status === aplicados.status)
   );
+  const { itensDaPagina, paginacao } = usePaginacao(alunosFiltrados);
 
   return (
     <LayoutAdmin titulo="Alunos">
@@ -74,7 +76,7 @@ function Alunos() {
               </tr>
             </thead>
             <tbody>
-              {alunosFiltrados.map((aluno) => (
+              {itensDaPagina.map((aluno) => (
                 <tr key={aluno.id} style={{ borderBottom: `1px solid ${BORDA}` }}>
                   <td>{aluno.nome}</td>
                   <td>{aluno.idade}</td>
@@ -92,7 +94,7 @@ function Alunos() {
             </tbody>
           </table>
         </div>
-        <RodapeTabela paginas={4} />
+        <RodapeTabela {...paginacao} />
       </div>
     </LayoutAdmin>
   );
