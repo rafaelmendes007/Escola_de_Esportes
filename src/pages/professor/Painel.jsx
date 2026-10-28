@@ -17,7 +17,9 @@ function Painel() {
       </h1>
 
       <h2 className="painel-titulo" style={{ fontSize: '1.5rem' }}>Turmas de Hoje</h2>
-      <p className="painel-subtitulo mb-3">Veja abaixo a turma que você leciona hoje.</p>
+      <p className="painel-subtitulo mb-3">
+        Veja abaixo as turmas que você leciona hoje, {hoje.toLocaleDateString('pt-BR', { weekday: 'long' })}.
+      </p>
 
       <div className="d-flex flex-column gap-3">
         {turmasHoje.map((turma) => (
