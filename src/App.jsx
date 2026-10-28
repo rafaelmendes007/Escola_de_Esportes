@@ -36,7 +36,7 @@ import DetalhesTurmaListaEspera from './pages/admin/DetalhesTurmaListaEspera';
 import DetalhesTurmaHistorico from './pages/admin/DetalhesTurmaHistorico';
 import Frequencia from './pages/admin/Frequencia';
 import AvisosAdmin from './pages/admin/Avisos';
-import Usuarios from './pages/admin/Usuarios';
+import CadastroAdministrador from './pages/admin/CadastroAdministrador';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -172,9 +172,9 @@ function App() {
               <AvisosAdmin />
             </PrivateRoute>
           } />
-          <Route path="/admin/usuarios" element={
+          <Route path="/admin/administradores" element={
             <PrivateRoute>
-              <Usuarios />
+              <CadastroAdministrador />
             </PrivateRoute>
           } />
 

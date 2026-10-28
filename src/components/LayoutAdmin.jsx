@@ -8,7 +8,7 @@ const itensMenu = [
   { to: '/admin/alunos', texto: 'Alunos', icone: 'bi-person' },
   { to: '/admin/frequencia', texto: 'Frequência', icone: 'bi-check-circle' },
   { to: '/admin/avisos', texto: 'Avisos', icone: 'bi-megaphone' },
-  { to: '/admin/usuarios', texto: 'Usuários', icone: 'bi-person-gear' },
+  { to: '/admin/administradores', texto: 'Cadastrar administrador', icone: 'bi-person-plus' },
 ];
 
 // Telas do administrador: menu completo e título da barra superior por tela

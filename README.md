@@ -4,7 +4,7 @@ Sistema web da Escola de Esportes da UNIFOR. Tem três áreas:
 
 - **Responsável (pública):** ver modalidades e avisos, fazer a inscrição na lista de espera e acompanhar a inscrição.
 - **Professor:** ver as turmas, fazer a chamada, ver o histórico de frequência dos alunos e os avisos.
-- **Administrador:** gerenciar turmas, lista de espera, alunos, frequência, avisos e usuários do sistema.
+- **Administrador:** gerenciar turmas, lista de espera, alunos, frequência, avisos e cadastrar administradores.
 
 ## Tecnologias
 
