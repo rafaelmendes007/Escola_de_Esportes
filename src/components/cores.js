@@ -10,6 +10,9 @@ export const BORDA = '#E5E7EB';
 export const VERDE = '#16A34A';
 export const VERMELHO = '#DC2626';
 
+// Azul da barra de navegação (mesmo da tela do responsável)
+export const AZUL_NAVBAR = '#0047B8';
+
 // Cores próprias do protótipo do administrador
 export const AZUL_ADMIN = '#0B6BC2';
 export const AZUL_TITULO = '#1B3A6B';

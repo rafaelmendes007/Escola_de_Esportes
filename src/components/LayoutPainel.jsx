@@ -1,12 +1,22 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AZUL, AZUL_ESCURO, AZUL_MENU_ATIVO, AZUL_CLARO, FUNDO, TEXTO, CINZA_TEXTO, BORDA, VERMELHO } from './cores';
+import logoEscolaDeEsportes from '../assets/Escola_de_Esportes.png';
+import imagemSino from '../assets/sino.png';
+import { AZUL, AZUL_ESCURO, AZUL_MENU_ATIVO, AZUL_CLARO, AZUL_NAVBAR, FUNDO, TEXTO, CINZA_TEXTO, BORDA, VERMELHO } from './cores';
+
+const telaGrande = () => window.innerWidth >= 992;
 
 // Estrutura comum das telas logadas: menu lateral + barra superior.
 // menu: [{ to, texto, icone, ativo }]
 function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, children }) {
-  const [menuAberto, setMenuAberto] = useState(false);
+  // No computador o menu começa aberto; no celular começa fechado
+  const [menuAberto, setMenuAberto] = useState(telaGrande);
   const [perfilAberto, setPerfilAberto] = useState(false);
+
+  // No celular a gaveta fecha ao escolher uma opção
+  const fecharNoCelular = () => {
+    if (!telaGrande()) setMenuAberto(false);
+  };
 
   return (
     <div className="d-flex min-vh-100" style={{ fontFamily: "'Inter', sans-serif", backgroundColor: FUNDO }}>
@@ -51,6 +61,19 @@ function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, childre
           z-index: 1020;
           border-bottom: 1px solid ${BORDA};
         }
+        .painel-topbar-titulo {
+          color: ${AZUL_NAVBAR};
+          font-size: 0.9rem;
+          font-weight: 600;
+          padding-bottom: 4px;
+          border-bottom: 2px solid ${AZUL_NAVBAR};
+        }
+        .painel-perfil {
+          border: 1px solid ${AZUL_NAVBAR};
+          color: ${AZUL_NAVBAR};
+          font-size: 0.8rem;
+        }
+        .painel-perfil:hover { background-color: ${AZUL_CLARO}; color: ${AZUL_NAVBAR}; }
         .painel-card {
           background-color: #FFFFFF;
           border: 1px solid ${BORDA};
@@ -134,19 +157,39 @@ function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, childre
           .painel-sidebar.aberto { transform: translateX(0); }
           .painel-topbar { padding: 0 16px; }
         }
+
+        /* No computador o botão ≡ mostra e esconde o menu lateral */
+        @media (min-width: 992px) {
+          .painel-sidebar:not(.aberto) { display: none; }
+        }
       `}</style>
 
       {/* Menu lateral */}
       <aside className={`painel-sidebar ${menuAberto ? 'aberto' : ''}`}>
-        <div className="fw-semibold mb-4" style={{ fontSize: '1.05rem', lineHeight: 1.2 }}>
-          Escola de Esporte
-          <br />
-          UNIFOR
+        <div className="d-flex justify-content-between align-items-start mb-4">
+          <div className="fw-semibold" style={{ fontSize: '1.05rem', lineHeight: 1.2 }}>
+            Escola de Esporte
+            <br />
+            UNIFOR
+          </div>
+          <button
+            type="button"
+            className="btn p-0 border-0 d-lg-none text-white"
+            aria-label="Fechar menu"
+            onClick={() => setMenuAberto(false)}
+          >
+            <i className="bi bi-x-lg"></i>
+          </button>
         </div>
 
         <nav className="d-flex flex-column gap-1">
           {menu.map((item) => (
-            <Link key={item.to} to={item.to} className={`painel-menu-item ${item.ativo ? 'ativo' : ''}`}>
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`painel-menu-item ${item.ativo ? 'ativo' : ''}`}
+              onClick={fecharNoCelular}
+            >
               <i className={`bi ${item.icone}`}></i> {item.texto}
             </Link>
           ))}
@@ -169,27 +212,37 @@ function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, childre
       )}
 
       <div className="flex-grow-1 d-flex flex-column" style={{ minWidth: 0 }}>
-        {/* Barra superior */}
+        {/* Barra superior, no mesmo padrão da barra das telas públicas */}
         <header className="painel-topbar">
-          <div className="d-flex align-items-center gap-2">
+          <div className="d-flex align-items-center gap-3">
             <button
               type="button"
-              className="btn p-0 border-0"
-              aria-label="Abrir menu"
+              className="btn p-0 border-0 d-flex"
+              aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={menuAberto}
               onClick={() => setMenuAberto(!menuAberto)}
             >
-              <i className="bi bi-list fs-5" style={{ color: TEXTO }}></i>
+              <i className="bi bi-list fs-3" style={{ color: TEXTO }}></i>
             </button>
-            <span className="fw-semibold" style={{ color: TEXTO, fontSize: '0.95rem' }}>{titulo}</span>
+            <Link to={menu[0].to} className="d-flex align-items-center gap-3 text-decoration-none">
+              <img src={logoEscolaDeEsportes} alt="Logo da Escola de Esporte" style={{ height: '48px' }} />
+              <span className="d-none d-sm-block fw-semibold" style={{ fontSize: '1.15rem', lineHeight: 1.2, color: 'black' }}>
+                Escola de Esportes
+                <br />
+                UNIFOR
+              </span>
+            </Link>
           </div>
 
-          <div className="d-flex align-items-center gap-4">
-            <Link to={linkAvisos} className="position-relative" aria-label="Avisos" style={{ color: TEXTO }}>
-              <i className="bi bi-bell fs-5"></i>
+          <div className="d-flex align-items-center gap-3 gap-sm-4">
+            <span className="painel-topbar-titulo d-none d-md-inline">{titulo}</span>
+
+            <Link to={linkAvisos} className="position-relative d-flex" aria-label="Avisos">
+              <img src={imagemSino} alt="" style={{ height: '26px' }} />
               {temAvisoNovo && (
                 <span
                   className="position-absolute rounded-circle"
-                  style={{ width: '7px', height: '7px', backgroundColor: VERMELHO, top: '2px', right: '-1px' }}
+                  style={{ width: '7px', height: '7px', backgroundColor: VERMELHO, top: '0', right: '0' }}
                 ></span>
               )}
             </Link>
@@ -198,17 +251,12 @@ function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, childre
             <div className="position-relative">
               <button
                 type="button"
-                className="btn p-0 border-0 d-flex align-items-center gap-2"
+                className="btn btn-sm painel-perfil d-flex align-items-center gap-1"
                 onClick={() => setPerfilAberto(!perfilAberto)}
               >
-                <span
-                  className="rounded-circle d-inline-flex align-items-center justify-content-center text-white"
-                  style={{ width: '28px', height: '28px', backgroundColor: AZUL, fontSize: '0.8rem' }}
-                >
-                  A
-                </span>
-                <span className="d-none d-sm-inline" style={{ color: TEXTO, fontSize: '0.9rem' }}>{usuario}</span>
-                <i className="bi bi-chevron-down ms-sm-3" style={{ color: TEXTO, fontSize: '0.8rem' }}></i>
+                <i className="bi bi-person-circle"></i>
+                <span className="d-none d-sm-inline">{usuario}</span>
+                <i className="bi bi-chevron-down" style={{ fontSize: '0.7rem' }}></i>
               </button>
               {perfilAberto && (
                 <div className="painel-card position-absolute end-0 mt-2 py-1 shadow-sm" style={{ zIndex: 1020, minWidth: '140px' }}>
