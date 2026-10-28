@@ -4,17 +4,25 @@ import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
 import ModalNovaTurma from './ModalNovaTurma';
-import { turmas, normalizar } from './dados';
+import { turmas as turmasIniciais, adicionarTurma, normalizar } from './dados';
 
 const filtrosVazios = { busca: '', modalidade: 'Todas', faixa: 'Todas', status: 'Todos' };
 
 function Turmas() {
   const [modalAberto, setModalAberto] = useState(false);
+  const [turmas, setTurmas] = useState(() => [...turmasIniciais]);
   // Filtros digitados e filtros aplicados (só valem depois de clicar em Filtrar)
   const [filtros, setFiltros] = useState(filtrosVazios);
   const [aplicados, setAplicados] = useState(filtrosVazios);
 
   const alterar = (e) => setFiltros({ ...filtros, [e.target.name]: e.target.value });
+
+  // Turma nova entra na tabela; os filtros são limpos para ela aparecer
+  const salvarTurma = (turma) => {
+    setTurmas([...turmas, adicionarTurma(turma)]);
+    setFiltros(filtrosVazios);
+    setAplicados(filtrosVazios);
+  };
 
   const turmasFiltradas = turmas.filter((turma) =>
     normalizar(turma.modalidade + ' ' + turma.nome).includes(normalizar(aplicados.busca)) &&
@@ -114,7 +122,7 @@ function Turmas() {
         <RodapeTabela paginas={2} />
       </div>
 
-      <ModalNovaTurma aberto={modalAberto} onFechar={() => setModalAberto(false)} />
+      <ModalNovaTurma aberto={modalAberto} onFechar={() => setModalAberto(false)} onSalvar={salvarTurma} />
     </LayoutAdmin>
   );
 }

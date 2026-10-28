@@ -69,6 +69,13 @@ export const avisosEnviados = [
   { id: 4, titulo: 'Feriado – sem aulas', descricao: 'Não haverá aulas no dia 21/04 (Tiradentes). As aulas retornam dia 22/04.', dataHora: '08/04/2026 · 11:20', publico: 'Todos', turma: 'Todas as turmas' },
 ];
 
+// Inclui uma turma nova na lista (enquanto não há API) e devolve a turma criada
+export function adicionarTurma(turma) {
+  const novaTurma = { id: Math.max(0, ...turmas.map((t) => t.id)) + 1, ocupadas: 0, listaEspera: 0, ...turma };
+  turmas.push(novaTurma);
+  return novaTurma;
+}
+
 export function buscarPorId(lista, id) {
   return lista.find((item) => item.id === Number(id)) || lista[0];
 }

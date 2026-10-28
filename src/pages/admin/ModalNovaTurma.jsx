@@ -16,7 +16,7 @@ function Campo({ rotulo, children }) {
 }
 
 // Cadastro (ou edição) de turma. Usado em Turmas e em Detalhes da turma.
-function ModalNovaTurma({ aberto, onFechar, editar = false }) {
+function ModalNovaTurma({ aberto, onFechar, onSalvar, editar = false }) {
   const [dias, setDias] = useState(['Terça', 'Quinta']);
 
   const alternarDia = (dia) => {
@@ -25,7 +25,20 @@ function ModalNovaTurma({ aberto, onFechar, editar = false }) {
 
   const handleSalvar = (e) => {
     e.preventDefault();
-    // Aqui você faria a chamada da API para salvar a turma
+    const campos = Object.fromEntries(new FormData(e.target));
+
+    // Mesmo formato das turmas da lista (ex.: "Voleibol Misto", "10 a 13")
+    onSalvar?.({
+      modalidade: `${campos.modalidade} ${campos.sexo}`,
+      nome: campos.nome,
+      faixaEtaria: `${campos.faixaMinima} a ${campos.faixaMaxima}`,
+      capacidade: Number(campos.capacidade),
+      status: campos.status,
+      professor: campos.professor,
+      dias,
+      horario: `${campos.inicio} às ${campos.termino}`,
+      local: campos.local,
+    });
     onFechar();
   };
 
@@ -39,7 +52,7 @@ function ModalNovaTurma({ aberto, onFechar, editar = false }) {
 
         <div className="row g-3">
           <Campo rotulo="Modalidade">
-            <select className="form-select form-select-sm admin-campo" defaultValue="Voleibol">
+            <select className="form-select form-select-sm admin-campo" name="modalidade" defaultValue="Voleibol">
               <option>Voleibol</option>
               <option>Futsal</option>
               <option>Atletismo</option>
@@ -48,26 +61,26 @@ function ModalNovaTurma({ aberto, onFechar, editar = false }) {
             </select>
           </Campo>
           <Campo rotulo="Nome da turma">
-            <input className="form-control form-control-sm admin-campo" defaultValue="Turma 3" required />
+            <input className="form-control form-control-sm admin-campo" name="nome" defaultValue="Turma 3" required />
           </Campo>
           <Campo rotulo="Sexo da turma">
-            <select className="form-select form-select-sm admin-campo" defaultValue="Misto">
+            <select className="form-select form-select-sm admin-campo" name="sexo" defaultValue="Misto">
               <option>Misto</option>
               <option>Masculino</option>
               <option>Feminino</option>
             </select>
           </Campo>
           <Campo rotulo="Capacidade">
-            <input type="number" min="1" className="form-control form-control-sm admin-campo" defaultValue="26" required />
+            <input type="number" min="1" className="form-control form-control-sm admin-campo" name="capacidade" defaultValue="26" required />
           </Campo>
           <Campo rotulo="Faixa etária máxima">
-            <input type="number" min="1" className="form-control form-control-sm admin-campo" defaultValue="13" required />
+            <input type="number" min="1" className="form-control form-control-sm admin-campo" name="faixaMaxima" defaultValue="13" required />
           </Campo>
           <Campo rotulo="Faixa etária mínima">
-            <input type="number" min="1" className="form-control form-control-sm admin-campo" defaultValue="10" required />
+            <input type="number" min="1" className="form-control form-control-sm admin-campo" name="faixaMinima" defaultValue="10" required />
           </Campo>
           <Campo rotulo="Professor responsável">
-            <select className="form-select form-select-sm admin-campo" defaultValue="Luís Marcelo">
+            <select className="form-select form-select-sm admin-campo" name="professor" defaultValue="Luís Marcelo">
               <option>Luís Marcelo</option>
               <option>Vinícius Aguiar</option>
               <option>Claudia</option>
@@ -96,13 +109,13 @@ function ModalNovaTurma({ aberto, onFechar, editar = false }) {
             </div>
           </Campo>
           <Campo rotulo="Horário de início">
-            <input type="time" className="form-control form-control-sm admin-campo" defaultValue="17:30" required />
+            <input type="time" className="form-control form-control-sm admin-campo" name="inicio" defaultValue="17:30" required />
           </Campo>
           <Campo rotulo="Horário de término">
-            <input type="time" className="form-control form-control-sm admin-campo" defaultValue="18:30" required />
+            <input type="time" className="form-control form-control-sm admin-campo" name="termino" defaultValue="18:30" required />
           </Campo>
           <Campo rotulo="Local">
-            <select className="form-select form-select-sm admin-campo" defaultValue="Quadra C">
+            <select className="form-select form-select-sm admin-campo" name="local" defaultValue="Quadra C">
               <option>Quadra A</option>
               <option>Quadra B</option>
               <option>Quadra C</option>
@@ -110,7 +123,7 @@ function ModalNovaTurma({ aberto, onFechar, editar = false }) {
             </select>
           </Campo>
           <Campo rotulo="Status da turma">
-            <select className="form-select form-select-sm admin-campo" defaultValue="Ativa">
+            <select className="form-select form-select-sm admin-campo" name="status" defaultValue="Ativa">
               <option>Ativa</option>
               <option>Lotada</option>
               <option>Encerrada</option>
