@@ -9,7 +9,7 @@ const telaGrande = () => window.innerWidth >= 992;
 
 // Estrutura comum das telas logadas: menu lateral + barra superior.
 // menu: [{ to, texto, icone, ativo }]
-function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, children }) {
+function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, onAbrirAvisos, children }) {
   // No computador o menu começa aberto; no celular começa fechado
   const [menuAberto, setMenuAberto] = useState(telaGrande);
   const [perfilAberto, setPerfilAberto] = useState(false);
@@ -241,7 +241,7 @@ function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, childre
           <div className="d-flex align-items-center gap-3 gap-sm-4">
             <span className="painel-topbar-titulo d-none d-md-inline">{titulo}</span>
 
-            <Link to={linkAvisos} className="position-relative d-flex" aria-label="Avisos">
+            <Link to={linkAvisos} className="position-relative d-flex" aria-label="Avisos" onClick={onAbrirAvisos}>
               <img src={imagemSino} alt="" style={{ height: '26px' }} />
               {temAvisoNovo && (
                 <span

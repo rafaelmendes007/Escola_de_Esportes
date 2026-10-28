@@ -23,7 +23,7 @@ function Avisos() {
   });
 
   return (
-    <LayoutProfessor avisosLidos={lidos}>
+    <LayoutProfessor avisosLidos={lidos} onAvisosLidos={setLidos}>
       <div className="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
         <div>
           <h1 className="painel-titulo">Avisos</h1>

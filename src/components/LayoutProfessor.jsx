@@ -1,11 +1,21 @@
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import LayoutPainel from './LayoutPainel';
-import { avisos, avisoNovo } from '../pages/professor/dados';
+import { avisos, avisoNovo, idsAvisosLidos, marcarAvisosComoLidos } from '../pages/professor/dados';
 
 // Telas do professor: menu com Painel e Turmas
-// avisosLidos: a tela de Avisos passa a lista atualizada para o sino mudar na hora
-function LayoutProfessor({ avisosLidos, children }) {
+// avisosLidos / onAvisosLidos: a tela de Avisos compartilha a lista de lidos com o sino
+function LayoutProfessor({ avisosLidos, onAvisosLidos, children }) {
   const { pathname } = useLocation();
+  const [lidos, setLidos] = useState(idsAvisosLidos);
+  const lidosAtuais = avisosLidos ?? lidos;
+
+  // Clicar no sino marca todos os avisos como lidos
+  const abrirAvisos = () => {
+    const atualizados = marcarAvisosComoLidos(avisos.map((aviso) => aviso.id));
+    setLidos(atualizados);
+    onAvisosLidos?.(atualizados);
+  };
   // Avisos ficam "dentro" do Painel no protótipo
   const emTurmas = pathname.startsWith('/professor/turmas');
 
@@ -20,7 +30,8 @@ function LayoutProfessor({ avisosLidos, children }) {
       menu={menu}
       usuario="Professor"
       linkAvisos="/professor/avisos"
-      temAvisoNovo={avisos.some((aviso) => avisoNovo(aviso, avisosLidos))}
+      temAvisoNovo={avisos.some((aviso) => avisoNovo(aviso, lidosAtuais))}
+      onAbrirAvisos={abrirAvisos}
     >
       {children}
     </LayoutPainel>
