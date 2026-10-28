@@ -86,9 +86,8 @@ function PreenchimentoDados() {
     }
   };
 
-  const handleFiles = (files) => {
+  const handleFiles = () => {
     // Aqui você implementaria a lógica de upload
-    console.log('Arquivos recebidos:', files);
   };
 
   const handleRemoverDocumento = (id) => {
@@ -99,13 +98,11 @@ function PreenchimentoDados() {
     );
   };
 
-  const handleAnexarDocumento = (id) => {
+  const handleAnexarDocumento = () => {
     // Aqui você implementaria a lógica de anexar arquivo
-    console.log('Anexar documento:', id);
   };
 
   const handleEnviar = () => {
-    console.log('Dados para envio:', formData);
     // Aqui você faria a chamada da API
     navigate('/inscricao');
   };

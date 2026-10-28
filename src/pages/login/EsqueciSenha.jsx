@@ -31,7 +31,6 @@ function EsqueciSenha() {
     const temMaiuscula = /[A-Z]/.test(senha);
     const temMinuscula = /[a-z]/.test(senha);
     const temNumero = /[0-9]/.test(senha);
-    const temCaractereEspecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(senha);
     const temComprimentoMinimo = senha.length >= 8;
 
     return temMaiuscula && temMinuscula && temNumero && temComprimentoMinimo;

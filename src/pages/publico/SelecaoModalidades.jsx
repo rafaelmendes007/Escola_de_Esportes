@@ -82,7 +82,6 @@ function SelecaoModalidades() {
   const handleContinuar = () => {
     if (modalidadeSelecionada) {
       const modalidade = modalidades.find(m => m.id === modalidadeSelecionada);
-      console.log('Modalidade selecionada:', modalidade);
       // Aqui você pode navegar para a próxima tela passando a modalidade selecionada
       navigate('/inscricao/confirmacao', { state: { modalidade } });
     }

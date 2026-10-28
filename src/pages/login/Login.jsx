@@ -28,10 +28,7 @@ function Login() {
 
     try {
       // Fazer login com email e senha
-      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-      const user = userCredential.user;
-
-      console.log('Login bem-sucedido:', user.email);
+      await signInWithEmailAndPassword(auth, email, senha);
 
       // Você pode verificar o email para redirecionar
       // Por exemplo: se email começa com "admin" -> /admin
