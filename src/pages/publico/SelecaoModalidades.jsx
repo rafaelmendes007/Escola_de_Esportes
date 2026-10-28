@@ -287,7 +287,7 @@ function SelecaoModalidades() {
         <div className="container-fluid" style={{ maxWidth: '100%', margin: '0 auto', padding: '0', flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Botão Voltar */}
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/inscricao/dados')}
             className="botao-voltar mb-4"
           >
             <span>←</span>

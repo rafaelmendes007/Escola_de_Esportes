@@ -406,7 +406,7 @@ function PreenchimentoDados() {
         <div className="container-fluid" style={{ maxWidth: '100%', margin: '0 auto', padding: '0' }}>
           {/* Botão Voltar */}
           <button
-            onClick={() => navigate('/inscricao')}
+            onClick={() => navigate('/')}
             className="botao-voltar mb-4"
           >
             <span>←</span>
