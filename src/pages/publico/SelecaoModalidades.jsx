@@ -65,7 +65,7 @@ function SelecaoModalidades() {
     },
     {
       id: 7,
-      nome: 'Vôleibol',
+      nome: 'Voleibol',
       icone: iconeVoleibol,
     },
     {

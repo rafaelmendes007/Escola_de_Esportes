@@ -1,51 +1,94 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import LayoutAdmin from '../../components/LayoutAdmin';
 import { AZUL_TITULO } from '../../components/cores';
-import { Etiqueta } from './componentes';
-import { buscarPorId, listaEspera, linkWhatsApp } from './dados';
+import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
+import { useCarregar } from '../../hooks/useCarregar';
+import { atualizarStatusInscricao, buscarInscricao, listarInscricoes } from '../../services/inscricoes';
+import { matricularDaInscricao } from '../../services/alunos';
+import { listarTurmas, nomeDaTurma } from '../../services/turmas';
+import { calcularIdade, formatarData, formatarDataHora } from '../../utils/datas';
+import { Etiqueta, Modal } from './componentes';
+import { linkWhatsApp } from './dados';
 
-// Cartão com ícone, título e botão "Editar" opcional
-function CardSecao({ icone, titulo, editavel, children }) {
+// Cartão com ícone e título
+function CardSecao({ icone, titulo, children }) {
   return (
     <div className="painel-card p-3 h-100">
       <div className="d-flex align-items-center gap-2 mb-3">
         <i className={`bi ${icone} fs-5`} style={{ color: AZUL_TITULO }}></i>
-        <h2 className="fw-semibold m-0 flex-grow-1" style={{ color: AZUL_TITULO, fontSize: '0.9rem' }}>{titulo}</h2>
-        {editavel && <button type="button" className="admin-botao-contorno py-0 px-3" style={{ fontSize: '0.75rem' }}>Editar</button>}
+        <h2 className="fw-semibold m-0" style={{ color: AZUL_TITULO, fontSize: '0.9rem' }}>{titulo}</h2>
       </div>
       {children}
     </div>
   );
 }
 
+// Linha "rótulo  valor"; campos vazios aparecem como "—"
 function Linha({ rotulo, children }) {
   return (
-    <div className="row mb-1" style={{ fontSize: '0.7rem' }}>
+    <div className="row mb-1" style={{ fontSize: '0.75rem' }}>
       <div className="col-5" style={{ color: '#4B5563' }}>{rotulo}</div>
-      <div className="col-7" style={{ color: '#374151' }}>{children}</div>
+      <div className="col-7" style={{ color: '#111827' }}>{children || '—'}</div>
     </div>
   );
 }
 
-// Etapas da inscrição na linha do tempo
-const etapas = [
-  ['Inscrição realizada', 'Inscrição incluída na lista de espera.'],
-  ['Aguardando vaga', 'Aguardando surgimento de vaga.'],
-  ['Convocação', 'Será exibida quando o responsável for convocado.'],
-];
+// Junta a resposta com o detalhe ("Outro: avó paterna", "Sim: dipirona")
+const comDetalhe = (valor, detalhe) => (detalhe ? `${valor}: ${detalhe}` : valor);
+
+const ETAPAS = ['Aguardando vaga', 'Convocado', 'Matriculado'];
+const corDoStatus = { 'Aguardando vaga': 'amarelo', Convocado: 'verde', Matriculado: 'azul', Cancelada: 'vermelho' };
+
+// Busca a inscrição e a posição dela na fila
+async function carregarInscricao(id) {
+  const [inscricao, todas] = await Promise.all([buscarInscricao(id), listarInscricoes()]);
+  if (!inscricao) return null;
+  const naFila = todas.find((item) => item.id === id);
+  return { ...inscricao, posicaoCalculada: naFila?.posicaoCalculada ?? null };
+}
 
 function DetalhesListaEspera() {
   const { inscricaoId } = useParams();
   const navigate = useNavigate();
-  const inscricao = buscarPorId(listaEspera, inscricaoId);
-  const [convocado, setConvocado] = useState(inscricao.status === 'Convocado');
-  const [documentos, setDocumentos] = useState(['Comprovante de residência', 'Documento do responsável', 'Atestado médico']);
-  const inputArquivo = useRef(null);
+  const { dados: inscricao, carregando, erro, recarregar } = useCarregar(() => carregarInscricao(inscricaoId), [inscricaoId]);
 
-  const telefone = '(85) 98765-4321';
-  // Etapas concluídas: inscrição sempre; convocação só depois de convocar
-  const etapaAtual = convocado ? 2 : 0;
+  const [salvando, setSalvando] = useState(false);
+  const [erroAcao, setErroAcao] = useState('');
+  const [confirmarCancelamento, setConfirmarCancelamento] = useState(false);
+  const [modalMatricula, setModalMatricula] = useState(false);
+
+  // Roda uma ação no banco mostrando "salvando" e o erro, se houver
+  const executar = async (acao) => {
+    setErroAcao('');
+    setSalvando(true);
+    try {
+      await acao();
+      recarregar();
+    } catch (error) {
+      console.error('Erro na ação da inscrição:', error);
+      setErroAcao('Não foi possível salvar. Tente de novo.');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const mudarStatus = (status) => executar(() => atualizarStatusInscricao(inscricao, status));
+
+  if (carregando) return <LayoutAdmin titulo="Lista de espera"><Carregando /></LayoutAdmin>;
+  if (erro) return <LayoutAdmin titulo="Lista de espera"><ErroCarga onTentarDeNovo={recarregar} /></LayoutAdmin>;
+  if (!inscricao) {
+    return (
+      <LayoutAdmin titulo="Lista de espera">
+        <Vazio texto="Inscrição não encontrada.">
+          <Link to="/admin/lista-espera" className="admin-botao-contorno">Voltar para a lista de espera</Link>
+        </Vazio>
+      </LayoutAdmin>
+    );
+  }
+
+  const etapaAtual = ETAPAS.indexOf(inscricao.status);
+  const encerrada = inscricao.status === 'Matriculado' || inscricao.status === 'Cancelada';
 
   return (
     <LayoutAdmin titulo="Lista de espera">
@@ -55,112 +98,214 @@ function DetalhesListaEspera() {
             <i className="bi bi-arrow-left me-1"></i>Voltar para a lista de espera
           </Link>
           <h1 className="admin-titulo" style={{ fontSize: '1.5rem' }}>Detalhes da inscrição</h1>
+          <div style={{ color: '#4B5563', fontSize: '0.8rem' }}>Protocolo {inscricao.protocolo}</div>
         </div>
 
-        <div className="d-flex gap-3">
-          <div className="d-flex align-items-center gap-2 rounded px-3 py-1" style={{ backgroundColor: convocado ? '#BBF7D0' : '#D7F5D7', color: '#15803D', fontSize: '0.75rem' }}>
-            <i className="bi bi-clock"></i>
-            <div>
-              {convocado ? 'Convocado' : 'Aguardando vaga'}
-              {!convocado && <div style={{ fontSize: '0.65rem' }}>Posição na fila: {inscricao.posicao}</div>}
-            </div>
-          </div>
-          <button type="button" className="admin-botao" disabled={convocado} onClick={() => setConvocado(true)}>
-            <i className="bi bi-megaphone"></i> Convocar responsável
-          </button>
+        <div className="d-flex flex-wrap align-items-center gap-2">
+          <Etiqueta texto={inscricao.status} cor={corDoStatus[inscricao.status]} />
+          {inscricao.status === 'Aguardando vaga' && (
+            <span style={{ fontSize: '0.8rem', color: '#374151' }}>Posição na fila: <strong>{inscricao.posicaoCalculada}</strong></span>
+          )}
+          {inscricao.status === 'Aguardando vaga' && (
+            <button type="button" className="admin-botao" disabled={salvando} onClick={() => mudarStatus('Convocado')}>
+              <i className="bi bi-megaphone"></i> Convocar responsável
+            </button>
+          )}
+          {inscricao.status === 'Convocado' && (
+            <button type="button" className="admin-botao-contorno" disabled={salvando} onClick={() => mudarStatus('Aguardando vaga')}>
+              Voltar para a fila
+            </button>
+          )}
         </div>
       </div>
+
+      {erroAcao && <div className="rounded px-3 py-2 mb-3" style={{ backgroundColor: '#FEE2E2', color: '#B91C1C', fontSize: '0.85rem' }}>{erroAcao}</div>}
 
       <div className="row g-3 mb-3">
         <div className="col-12 col-lg-6">
-          <CardSecao icone="bi-person" titulo="Dados do aluno" editavel>
-            <Linha rotulo="Nome completo">{inscricao.nome}</Linha>
-            <Linha rotulo="Data de nascimento">12/05/2015</Linha>
-            <Linha rotulo="CPF">123.456.789-10</Linha>
-            <Linha rotulo="Sexo">Feminino</Linha>
+          <CardSecao icone="bi-person" titulo="Dados do responsável">
+            <Linha rotulo="Nome completo">{inscricao.nomeResponsavel}</Linha>
+            <Linha rotulo="CPF">{inscricao.cpfResponsavel}</Linha>
+            <Linha rotulo="Telefone (WhatsApp)">{inscricao.telefone}</Linha>
+            <Linha rotulo="E-mail">{inscricao.email}</Linha>
+            <Linha rotulo="Parentesco">{comDetalhe(inscricao.parentesco, inscricao.parentescoOutro)}</Linha>
+            <Linha rotulo="Escolaridade">{comDetalhe(inscricao.escolaridade, inscricao.escolaridadeOutro)}</Linha>
+            <Linha rotulo="Pessoas na residência">{comDetalhe(inscricao.pessoasResidencia, inscricao.pessoasResidenciaOutro)}</Linha>
+            <Linha rotulo="Renda familiar">{inscricao.rendaFamiliar}</Linha>
           </CardSecao>
         </div>
         <div className="col-12 col-lg-6">
-          <CardSecao icone="bi-person" titulo="Dados do responsável" editavel>
-            <Linha rotulo="Nome completo">Mariana Silva Oliveira</Linha>
-            <Linha rotulo="Parentesco">Mãe</Linha>
-            <Linha rotulo="Telefone">{telefone}</Linha>
-            <Linha rotulo="E-mail">mariana@gmail.com</Linha>
-            <Linha rotulo="CPF">098.765.432-10</Linha>
+          <CardSecao icone="bi-person-vcard" titulo="Dados do aluno">
+            <Linha rotulo="Nome completo">{inscricao.nomeAluno}</Linha>
+            <Linha rotulo="Nascimento">{`${formatarData(inscricao.nascimento)} (${calcularIdade(inscricao.nascimento)} anos)`}</Linha>
+            <Linha rotulo="Gênero">{comDetalhe(inscricao.genero, inscricao.generoOutro)}</Linha>
+            <Linha rotulo="CPF ou RG">{inscricao.cpfAluno}</Linha>
+            <Linha rotulo="Endereço">{inscricao.endereco}</Linha>
+            <Linha rotulo="Bairro">{inscricao.bairro}</Linha>
+            <Linha rotulo="Escola">{inscricao.escola && `${inscricao.escola} (${inscricao.tipoEscola})`}</Linha>
+            <Linha rotulo="Série">{inscricao.serie}</Linha>
+            <Linha rotulo="Altura / Peso">{[inscricao.altura, inscricao.peso].filter(Boolean).join(' / ')}</Linha>
+            <Linha rotulo="Uniforme">{inscricao.tamanhoUniforme}</Linha>
           </CardSecao>
         </div>
         <div className="col-12 col-lg-6">
-          <CardSecao icone="bi-dribbble" titulo="Modalidade e turma solicitada" editavel>
-            <Linha rotulo="Modalidade">{inscricao.modalidade}</Linha>
-            <Linha rotulo="Turma">{inscricao.modalidade} - {inscricao.turma}</Linha>
-            <Linha rotulo="Faixa etária da turma">10 a 14 anos</Linha>
-            <Linha rotulo="Horário">15h às 16h</Linha>
-            <Linha rotulo="Local">Ginásio</Linha>
-            <Linha rotulo="Professor">Karine</Linha>
+          <CardSecao icone="bi-heart-pulse" titulo="Saúde do aluno">
+            <Linha rotulo="Plano de saúde">{comDetalhe(inscricao.planoSaude, inscricao.planoSaudeOutro)}</Linha>
+            <Linha rotulo="Plano odontológico">{comDetalhe(inscricao.planoOdonto, inscricao.planoOdontoOutro)}</Linha>
+            <Linha rotulo="Tipo sanguíneo">{[inscricao.tipoSanguineo, inscricao.fatorSanguineo].filter(Boolean).join(' ')}</Linha>
+            <Linha rotulo="Alergia a medicamento">{comDetalhe(inscricao.alergiaMedicamento, inscricao.alergiaMedicamentoQual)}</Linha>
+            <Linha rotulo="Medicamento controlado">{comDetalhe(inscricao.medicamentoControlado, inscricao.medicamentoControladoQual)}</Linha>
+            <Linha rotulo="Alergia a alimento">{comDetalhe(inscricao.alergiaAlimento, inscricao.alergiaAlimentoQual)}</Linha>
+            <Linha rotulo="Problema de saúde">{comDetalhe(inscricao.problemaSaude, inscricao.problemaSaudeOutro)}</Linha>
+            <Linha rotulo="Deficiência">{comDetalhe(inscricao.deficiencia, inscricao.deficienciaOutro)}</Linha>
+            <Linha rotulo="Atenção especial">{comDetalhe(inscricao.atencaoEspecial, inscricao.atencaoEspecialQual)}</Linha>
           </CardSecao>
         </div>
-        <div className="col-12 col-lg-6">
+        <div className="col-12 col-lg-6 d-flex flex-column gap-3">
+          <CardSecao icone="bi-telephone" titulo="Contato de emergência">
+            <Linha rotulo="Nome">{inscricao.emergenciaNome}</Linha>
+            <Linha rotulo="Telefone">{inscricao.emergenciaTelefone}</Linha>
+            <Linha rotulo="Parentesco">{comDetalhe(inscricao.emergenciaParentesco, inscricao.emergenciaParentescoOutro)}</Linha>
+          </CardSecao>
           <CardSecao icone="bi-file-earmark-text" titulo="Informações da inscrição">
-            <Linha rotulo="Data da inscrição">{inscricao.dataInscricao} às 10:32</Linha>
-            <Linha rotulo="Forma de inscrição">Online (site)</Linha>
-            <Linha rotulo="Situação"><Etiqueta texto={convocado ? 'Convocado' : 'Aguardando vaga'} cor="verde" /></Linha>
-            <Linha rotulo="Posição na fila">{inscricao.posicao}</Linha>
-            <Linha rotulo="Observações">-</Linha>
-          </CardSecao>
-        </div>
-        <div className="col-12 col-lg-6">
-          <CardSecao icone="bi-paperclip" titulo="Documentos e informações adicionais">
-            {documentos.map((documento) => (
-              <div key={documento} className="d-flex align-items-center mb-2" style={{ fontSize: '0.7rem' }}>
-                <span className="flex-grow-1" style={{ color: '#4B5563' }}>{documento}</span>
-                <span className="me-4" style={{ color: '#374151', width: '70px' }}>
-                  <i className="bi bi-check-circle-fill me-1" style={{ color: '#16A34A' }}></i>Enviado
-                </span>
-                <button type="button" className="btn btn-link p-0" style={{ fontSize: '0.7rem', color: '#0B6BC2' }}>Visualizar</button>
-              </div>
-            ))}
-            <div className="text-end">
-              <input ref={inputArquivo} type="file" className="d-none" onChange={(e) => e.target.files[0] && setDocumentos([...documentos, e.target.files[0].name])} />
-              <button type="button" className="btn btn-sm" style={{ backgroundColor: '#BFDDF3', color: '#0B6BC2', fontSize: '0.7rem' }} onClick={() => inputArquivo.current.click()}>
-                <i className="bi bi-file-earmark-plus me-1"></i>Adicionar documento
-              </button>
-            </div>
-          </CardSecao>
-        </div>
-        <div className="col-12 col-lg-6">
-          <CardSecao icone="bi-clock-history" titulo="Histórico da inscrição">
-            {etapas.map(([titulo, descricao], indice) => (
-              <div key={titulo} className="d-flex gap-2 mb-2">
-                <i className={`bi ${indice <= etapaAtual ? 'bi-circle-fill' : 'bi-circle'}`} style={{ color: '#0B6BC2', fontSize: '0.7rem' }}></i>
-                <div>
-                  <div className="fw-medium" style={{ color: AZUL_TITULO, fontSize: '0.7rem' }}>{titulo}</div>
-                  <div style={{ color: '#6B7280', fontSize: '0.6rem' }}>{descricao}</div>
+            <Linha rotulo="Modalidade">{inscricao.modalidade}</Linha>
+            <Linha rotulo="Data da inscrição">{formatarDataHora(inscricao.criadoEm)}</Linha>
+            <Linha rotulo="Termos aceitos em">
+              {inscricao.consentimento && `${formatarDataHora(inscricao.consentimento.aceitoEm)} (versão ${inscricao.consentimento.versaoTermos})`}
+            </Linha>
+            {/* Linha do tempo */}
+            <div className="d-flex gap-3 mt-3">
+              {ETAPAS.map((etapa, indice) => (
+                <div key={etapa} className="d-flex align-items-center gap-1" style={{ fontSize: '0.7rem', color: indice <= etapaAtual ? '#0B6BC2' : '#9CA3AF' }}>
+                  <i className={`bi ${indice <= etapaAtual ? 'bi-check-circle-fill' : 'bi-circle'}`}></i>{etapa}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </CardSecao>
         </div>
       </div>
 
+      {/* Ações */}
       <div className="d-flex flex-wrap justify-content-between gap-3">
-        <button
-          type="button"
-          className="btn d-flex align-items-center gap-2"
-          style={{ border: '1px solid #F87171', color: '#DC2626', backgroundColor: '#FFFFFF', fontSize: '0.8rem' }}
-          onClick={() => navigate('/admin/lista-espera')}
-        >
-          <i className="bi bi-trash"></i> Cancelar inscrição
-        </button>
-        <div className="d-flex gap-3">
-          <a href={linkWhatsApp(telefone)} target="_blank" rel="noreferrer" className="admin-botao" style={{ backgroundColor: '#4CD964' }}>
-            <i className="bi bi-whatsapp"></i> Abrir WhatsApp
-          </a>
-          <button type="button" className="admin-botao" onClick={() => navigate('/admin/alunos')}>
-            <i className="bi bi-check-lg"></i> Finalizar matrícula
+        {!encerrada ? (
+          <button
+            type="button"
+            className="btn d-flex align-items-center gap-2"
+            style={{ border: '1px solid #F87171', color: '#DC2626', backgroundColor: '#FFFFFF', fontSize: '0.8rem' }}
+            onClick={() => setConfirmarCancelamento(true)}
+            disabled={salvando}
+          >
+            <i className="bi bi-trash"></i> Cancelar inscrição
           </button>
+        ) : <span></span>}
+        <div className="d-flex gap-3">
+          {inscricao.telefone && (
+            <a href={linkWhatsApp(inscricao.telefone)} target="_blank" rel="noreferrer" className="admin-botao" style={{ backgroundColor: '#4CD964' }}>
+              <i className="bi bi-whatsapp"></i> Abrir WhatsApp
+            </a>
+          )}
+          {inscricao.status === 'Matriculado' && inscricao.alunoId && (
+            <Link to={`/admin/alunos/${inscricao.alunoId}`} className="admin-botao">Ver aluno</Link>
+          )}
+          {!encerrada && (
+            <button type="button" className="admin-botao" disabled={salvando} onClick={() => setModalMatricula(true)}>
+              <i className="bi bi-check-lg"></i> Finalizar matrícula
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Confirmação do cancelamento */}
+      <Modal aberto={confirmarCancelamento} onFechar={() => setConfirmarCancelamento(false)} largura="420px">
+        <h2 className="fw-semibold mb-2" style={{ fontSize: '1.05rem' }}>Cancelar inscrição?</h2>
+        <p style={{ fontSize: '0.85rem', color: '#4B5563' }}>
+          A inscrição de <strong>{inscricao.nomeAluno}</strong> sai da lista de espera. O responsável verá o status "Cancelada" na consulta.
+        </p>
+        <div className="d-flex justify-content-end gap-2">
+          <button type="button" className="admin-botao-contorno" onClick={() => setConfirmarCancelamento(false)}>Voltar</button>
+          <button
+            type="button"
+            className="admin-botao"
+            style={{ backgroundColor: '#DC2626' }}
+            onClick={() => { setConfirmarCancelamento(false); mudarStatus('Cancelada'); }}
+          >
+            Cancelar inscrição
+          </button>
+        </div>
+      </Modal>
+
+      <ModalMatricula
+        aberto={modalMatricula}
+        onFechar={() => setModalMatricula(false)}
+        inscricao={inscricao}
+        onMatriculado={(alunoId) => navigate(`/admin/alunos/${alunoId}`)}
+      />
     </LayoutAdmin>
+  );
+}
+
+// Escolha da turma para matricular o aluno
+function ModalMatricula({ aberto, onFechar, inscricao, onMatriculado }) {
+  const { dados: turmas, carregando } = useCarregar(() => (aberto ? listarTurmas() : Promise.resolve(null)), [aberto]);
+  const [turmaId, setTurmaId] = useState('');
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState('');
+
+  const daModalidade = (turmas || []).filter((turma) => turma.modalidade === inscricao.modalidade && turma.status !== 'Encerrada');
+  const opcoes = daModalidade.length ? daModalidade : (turmas || []).filter((turma) => turma.status !== 'Encerrada');
+
+  const confirmar = async () => {
+    const turma = opcoes.find((item) => item.id === turmaId);
+    if (!turma) return;
+    setSalvando(true);
+    setErro('');
+    try {
+      const alunoId = await matricularDaInscricao(inscricao, turma);
+      onMatriculado(alunoId);
+    } catch (error) {
+      console.error('Erro ao matricular:', error);
+      setErro('Não foi possível matricular. Tente de novo.');
+      setSalvando(false);
+    }
+  };
+
+  return (
+    <Modal aberto={aberto} onFechar={onFechar} largura="460px">
+      <h2 className="fw-semibold mb-1" style={{ fontSize: '1.05rem' }}>Finalizar matrícula</h2>
+      <p style={{ fontSize: '0.8rem', color: '#4B5563' }}>
+        Escolha a turma de <strong>{inscricao.nomeAluno}</strong> ({inscricao.modalidade}).
+      </p>
+
+      {carregando && <Carregando />}
+      {turmas && opcoes.length === 0 && (
+        <Vazio texto="Nenhuma turma cadastrada ainda.">
+          <Link to="/admin/turmas" className="admin-botao-contorno">Cadastrar turma</Link>
+        </Vazio>
+      )}
+      {opcoes.length > 0 && (
+        <>
+          {!daModalidade.length && (
+            <div className="mb-2" style={{ fontSize: '0.75rem', color: '#A16207' }}>
+              Não há turma de {inscricao.modalidade}. Mostrando todas as turmas.
+            </div>
+          )}
+          <select className="form-select form-select-sm admin-campo mb-3" value={turmaId} onChange={(e) => setTurmaId(e.target.value)}>
+            <option value="">Selecione a turma</option>
+            {opcoes.map((turma) => (
+              <option key={turma.id} value={turma.id}>{nomeDaTurma(turma)} ({turma.idadeMinima} a {turma.idadeMaxima} anos)</option>
+            ))}
+          </select>
+        </>
+      )}
+
+      {erro && <div className="mb-2" style={{ color: '#B91C1C', fontSize: '0.8rem' }}>{erro}</div>}
+      <div className="d-flex justify-content-end gap-2">
+        <button type="button" className="admin-botao-contorno" onClick={onFechar} disabled={salvando}>Cancelar</button>
+        <button type="button" className="admin-botao" onClick={confirmar} disabled={!turmaId || salvando}>
+          {salvando ? 'Matriculando...' : 'Confirmar matrícula'}
+        </button>
+      </div>
+    </Modal>
   );
 }
 
