@@ -1,8 +1,19 @@
 import { useState } from 'react';
+import { useCarregar } from '../../hooks/useCarregar';
+import { MODALIDADES, STATUS_TURMA, salvarTurma } from '../../services/turmas';
+import { listarUsuarios } from '../../services/usuarios';
 import { Modal } from './componentes';
 
 // As aulas da Escola de Esportes acontecem só às terças e quintas
 const DIAS = ['Terça', 'Quinta'];
+
+const turmaVazia = {
+  modalidade: '', nome: '', sexo: 'Misto', capacidade: '', idadeMinima: '', idadeMaxima: '',
+  professorId: '', dias: ['Terça', 'Quinta'], horarioInicio: '', horarioFim: '', local: '', status: 'Ativa',
+};
+
+// Campos calculados na tela que não são gravados no banco
+const CAMPOS_CALCULADOS = ['id', 'ocupadas', 'disponiveis', 'listaEspera', 'fila', 'criadoEm', 'atualizadoEm'];
 
 // Campo com rótulo e asterisco de obrigatório
 function Campo({ rotulo, children }) {
@@ -16,115 +27,131 @@ function Campo({ rotulo, children }) {
   );
 }
 
-// Cadastro (ou edição) de turma. Usado em Turmas e em Detalhes da turma.
-function ModalNovaTurma({ aberto, onFechar, editar = false }) {
-  const [dias, setDias] = useState(['Terça', 'Quinta']);
+// Formulário da turma. Recebe "turma" para editar; sem ela, cadastra uma nova.
+function FormularioTurma({ turma, onFechar, onSalvo }) {
+  const [dados, setDados] = useState(() => ({ ...turmaVazia, ...turma }));
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState('');
+  const { dados: usuarios } = useCarregar(listarUsuarios);
+  const professores = (usuarios || []).filter((usuario) => usuario.perfil === 'professor');
 
+  const alterar = (e) => setDados({ ...dados, [e.target.name]: e.target.value });
   const alternarDia = (dia) => {
-    setDias(dias.includes(dia) ? dias.filter((d) => d !== dia) : [...dias, dia]);
+    setDados({ ...dados, dias: dados.dias.includes(dia) ? dados.dias.filter((d) => d !== dia) : [...dados.dias, dia] });
   };
 
-  const handleSalvar = (e) => {
+  const handleSalvar = async (e) => {
     e.preventDefault();
-    // Aqui você faria a chamada da API para salvar a turma
-    onFechar();
+    if (dados.dias.length === 0) return setErro('Escolha pelo menos um dia da semana.');
+    if (Number(dados.idadeMinima) > Number(dados.idadeMaxima)) return setErro('A idade mínima não pode ser maior que a máxima.');
+    if (dados.horarioInicio >= dados.horarioFim) return setErro('O horário de término precisa ser depois do início.');
+
+    const professor = professores.find((p) => p.uid === dados.professorId);
+    const campos = Object.fromEntries(Object.entries(dados).filter(([campo]) => !CAMPOS_CALCULADOS.includes(campo)));
+
+    setSalvando(true);
+    setErro('');
+    try {
+      await salvarTurma({
+        ...campos,
+        capacidade: Number(dados.capacidade),
+        idadeMinima: Number(dados.idadeMinima),
+        idadeMaxima: Number(dados.idadeMaxima),
+        professorNome: professor?.nome || '',
+        // "Lotada" é calculado pela ocupação; no banco fica "Ativa"
+        status: dados.status === 'Lotada' ? 'Ativa' : dados.status,
+      }, turma?.id);
+      onSalvo();
+    } catch (error) {
+      console.error('Erro ao salvar turma:', error);
+      setErro('Não foi possível salvar a turma. Tente de novo.');
+      setSalvando(false);
+    }
   };
 
   return (
+    <form onSubmit={handleSalvar}>
+      <h2 className="fw-semibold mb-1" style={{ color: '#111827', fontSize: '1.1rem' }}>{turma ? 'Editar turma' : 'Nova turma'}</h2>
+      <p style={{ color: '#4B5563', fontSize: '0.8rem' }}>
+        {turma ? 'Altere os dados da turma.' : 'Cadastre uma nova turma para a Escola de Esportes.'}
+      </p>
+
+      <div className="row g-3">
+        <Campo rotulo="Modalidade">
+          <select name="modalidade" className="form-select form-select-sm admin-campo" value={dados.modalidade} onChange={alterar} required>
+            <option value="">Selecione</option>
+            {MODALIDADES.map((modalidade) => <option key={modalidade}>{modalidade}</option>)}
+          </select>
+        </Campo>
+        <Campo rotulo="Nome da turma">
+          <input name="nome" className="form-control form-control-sm admin-campo" placeholder="Ex.: Turma 1" value={dados.nome} onChange={alterar} required />
+        </Campo>
+        <Campo rotulo="Sexo da turma">
+          <select name="sexo" className="form-select form-select-sm admin-campo" value={dados.sexo} onChange={alterar}>
+            <option>Misto</option>
+            <option>Masculino</option>
+            <option>Feminino</option>
+          </select>
+        </Campo>
+        <Campo rotulo="Capacidade">
+          <input name="capacidade" type="number" min="1" className="form-control form-control-sm admin-campo" value={dados.capacidade} onChange={alterar} required />
+        </Campo>
+        <Campo rotulo="Idade mínima">
+          <input name="idadeMinima" type="number" min="3" max="20" className="form-control form-control-sm admin-campo" value={dados.idadeMinima} onChange={alterar} required />
+        </Campo>
+        <Campo rotulo="Idade máxima">
+          <input name="idadeMaxima" type="number" min="3" max="20" className="form-control form-control-sm admin-campo" value={dados.idadeMaxima} onChange={alterar} required />
+        </Campo>
+        <Campo rotulo="Professor responsável">
+          <select name="professorId" className="form-select form-select-sm admin-campo" value={dados.professorId} onChange={alterar} required>
+            <option value="">{usuarios ? 'Selecione' : 'Carregando...'}</option>
+            {professores.map((professor) => <option key={professor.uid} value={professor.uid}>{professor.nome}</option>)}
+          </select>
+          {usuarios && professores.length === 0 && (
+            <div style={{ fontSize: '0.7rem', color: '#A16207' }}>Cadastre um professor em Usuários primeiro.</div>
+          )}
+        </Campo>
+        <Campo rotulo="Dias da semana">
+          <div className="d-flex gap-3 pt-1">
+            {DIAS.map((dia) => (
+              <label key={dia} className="d-flex align-items-center gap-1" style={{ fontSize: '0.8rem' }}>
+                <input type="checkbox" className="form-check-input mt-0" checked={dados.dias.includes(dia)} onChange={() => alternarDia(dia)} />
+                {dia}
+              </label>
+            ))}
+          </div>
+        </Campo>
+        <Campo rotulo="Horário de início">
+          <input name="horarioInicio" type="time" className="form-control form-control-sm admin-campo" value={dados.horarioInicio} onChange={alterar} required />
+        </Campo>
+        <Campo rotulo="Horário de término">
+          <input name="horarioFim" type="time" className="form-control form-control-sm admin-campo" value={dados.horarioFim} onChange={alterar} required />
+        </Campo>
+        <Campo rotulo="Local">
+          <input name="local" className="form-control form-control-sm admin-campo" placeholder="Ex.: Quadra A" value={dados.local} onChange={alterar} required />
+        </Campo>
+        <Campo rotulo="Status da turma">
+          <select name="status" className="form-select form-select-sm admin-campo" value={dados.status === 'Lotada' ? 'Ativa' : dados.status} onChange={alterar}>
+            {STATUS_TURMA.filter((status) => status !== 'Lotada').map((status) => <option key={status}>{status}</option>)}
+          </select>
+        </Campo>
+      </div>
+
+      {erro && <div className="mt-3" style={{ color: '#B91C1C', fontSize: '0.8rem' }}>{erro}</div>}
+      <hr className="my-4" />
+      <div className="d-flex justify-content-end gap-3">
+        <button type="button" className="admin-botao-contorno" onClick={onFechar} disabled={salvando}>Cancelar</button>
+        <button type="submit" className="admin-botao" disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar turma'}</button>
+      </div>
+    </form>
+  );
+}
+
+// O formulário só monta quando o modal abre, então sempre começa com os dados atuais da turma
+function ModalNovaTurma({ aberto, onFechar, onSalvo, turma }) {
+  return (
     <Modal aberto={aberto} onFechar={onFechar} largura="560px">
-      <form onSubmit={handleSalvar}>
-        <h2 className="fw-semibold mb-1" style={{ color: '#111827', fontSize: '1.1rem' }}>{editar ? 'Editar turma' : 'Nova turma'}</h2>
-        <p style={{ color: '#4B5563', fontSize: '0.8rem' }}>
-          {editar ? 'Altere os dados da turma.' : 'Cadastre uma nova turma para a Escola de Esportes.'}
-        </p>
-
-        <div className="row g-3">
-          <Campo rotulo="Modalidade">
-            <select className="form-select form-select-sm admin-campo" defaultValue="Voleibol">
-              <option>Voleibol</option>
-              <option>Futsal</option>
-              <option>Atletismo</option>
-              <option>Lutas</option>
-              <option>Handebol</option>
-            </select>
-          </Campo>
-          <Campo rotulo="Nome da turma">
-            <input className="form-control form-control-sm admin-campo" defaultValue="Turma 3" required />
-          </Campo>
-          <Campo rotulo="Sexo da turma">
-            <select className="form-select form-select-sm admin-campo" defaultValue="Misto">
-              <option>Misto</option>
-              <option>Masculino</option>
-              <option>Feminino</option>
-            </select>
-          </Campo>
-          <Campo rotulo="Capacidade">
-            <input type="number" min="1" className="form-control form-control-sm admin-campo" defaultValue="26" required />
-          </Campo>
-          <Campo rotulo="Faixa etária máxima">
-            <input type="number" min="1" className="form-control form-control-sm admin-campo" defaultValue="13" required />
-          </Campo>
-          <Campo rotulo="Faixa etária mínima">
-            <input type="number" min="1" className="form-control form-control-sm admin-campo" defaultValue="10" required />
-          </Campo>
-          <Campo rotulo="Professor responsável">
-            <select className="form-select form-select-sm admin-campo" defaultValue="Luís Marcelo">
-              <option>Luís Marcelo</option>
-              <option>Vinícius Aguiar</option>
-              <option>Claudia</option>
-              <option>Karine</option>
-            </select>
-          </Campo>
-          <Campo rotulo="Dias da semana">
-            {/* Dias escolhidos aparecem como etiquetas; clique para marcar/desmarcar */}
-            <div className="d-flex flex-wrap gap-1">
-              {DIAS.map((dia) => (
-                <button
-                  key={dia}
-                  type="button"
-                  onClick={() => alternarDia(dia)}
-                  className="rounded-pill px-2"
-                  style={{
-                    fontSize: '0.7rem',
-                    border: '1px solid #D1D5DB',
-                    color: dias.includes(dia) ? '#FFFFFF' : '#374151',
-                    backgroundColor: dias.includes(dia) ? '#0B6BC2' : '#F3F4F6',
-                  }}
-                >
-                  {dia}
-                </button>
-              ))}
-            </div>
-          </Campo>
-          <Campo rotulo="Horário de início">
-            <input type="time" className="form-control form-control-sm admin-campo" defaultValue="17:30" required />
-          </Campo>
-          <Campo rotulo="Horário de término">
-            <input type="time" className="form-control form-control-sm admin-campo" defaultValue="18:30" required />
-          </Campo>
-          <Campo rotulo="Local">
-            <select className="form-select form-select-sm admin-campo" defaultValue="Quadra C">
-              <option>Quadra A</option>
-              <option>Quadra B</option>
-              <option>Quadra C</option>
-              <option>Ginásio principal</option>
-            </select>
-          </Campo>
-          <Campo rotulo="Status da turma">
-            <select className="form-select form-select-sm admin-campo" defaultValue="Ativa">
-              <option>Ativa</option>
-              <option>Lotada</option>
-              <option>Encerrada</option>
-            </select>
-          </Campo>
-        </div>
-
-        <hr className="my-4" />
-        <div className="d-flex justify-content-end gap-3">
-          <button type="button" className="admin-botao-contorno" onClick={onFechar}>Cancelar</button>
-          <button type="submit" className="admin-botao">Salvar turma</button>
-        </div>
-      </form>
+      {aberto && <FormularioTurma turma={turma} onFechar={onFechar} onSalvo={() => { onSalvo?.(); onFechar(); }} />}
     </Modal>
   );
 }
