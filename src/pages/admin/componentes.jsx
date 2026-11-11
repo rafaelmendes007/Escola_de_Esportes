@@ -82,10 +82,14 @@ export function CabecalhoPagina({ titulo, subtitulo, children }) {
   );
 }
 
-// Botões de página (‹ 1 2 3 4 ›). Ainda não carrega outras páginas: só muda a página marcada.
-export function Paginacao({ total = 4 }) {
-  const [pagina, setPagina] = useState(1);
-  const estiloBotao = (ativo) => ({
+// Botões de página (‹ 1 2 3 ›).
+// Com "pagina" e "onMudar" quem controla é a tela; sem eles, só marca a página clicada.
+export function Paginacao({ total = 1, pagina: paginaControlada, onMudar }) {
+  const [paginaInterna, setPaginaInterna] = useState(1);
+  const pagina = paginaControlada ?? paginaInterna;
+  const mudar = (numero) => (onMudar ? onMudar(numero) : setPaginaInterna(numero));
+
+  const estiloBotao = (ativo, desativado) => ({
     width: '24px',
     height: '24px',
     fontSize: '0.7rem',
@@ -93,38 +97,47 @@ export function Paginacao({ total = 4 }) {
     borderRadius: '4px',
     color: ativo ? '#FFFFFF' : '#374151',
     backgroundColor: ativo ? '#0B6BC2' : '#FFFFFF',
+    opacity: desativado ? 0.4 : 1,
   });
 
   return (
     <div className="d-flex gap-1">
-      <button type="button" style={estiloBotao(false)} onClick={() => setPagina(Math.max(1, pagina - 1))} aria-label="Página anterior">
+      <button type="button" style={estiloBotao(false, pagina === 1)} disabled={pagina === 1} onClick={() => mudar(pagina - 1)} aria-label="Página anterior">
         <i className="bi bi-chevron-left"></i>
       </button>
       {Array.from({ length: total }, (_, i) => i + 1).map((numero) => (
-        <button key={numero} type="button" style={estiloBotao(numero === pagina)} onClick={() => setPagina(numero)}>
+        <button key={numero} type="button" style={estiloBotao(numero === pagina)} onClick={() => mudar(numero)} aria-current={numero === pagina ? 'page' : undefined}>
           {numero}
         </button>
       ))}
-      <button type="button" style={estiloBotao(false)} onClick={() => setPagina(Math.min(total, pagina + 1))} aria-label="Próxima página">
+      <button type="button" style={estiloBotao(false, pagina === total)} disabled={pagina === total} onClick={() => mudar(pagina + 1)} aria-label="Próxima página">
         <i className="bi bi-chevron-right"></i>
       </button>
     </div>
   );
 }
 
-// Rodapé das listagens: itens por página + paginação
-export function RodapeTabela({ paginas }) {
+// Rodapé das listagens: itens por página + paginação (recebe o objeto de usePaginacao)
+export function RodapeTabela({ paginacao }) {
+  const { pagina, totalPaginas, setPagina, porPagina, setPorPagina, inicio, fim, totalItens } = paginacao;
+
   return (
     <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-auto pt-4">
       <div className="d-flex align-items-center gap-2" style={{ fontSize: '0.65rem', color: '#374151' }}>
         Itens por página
-        <select className="form-select form-select-sm py-0" style={{ width: '56px', fontSize: '0.7rem' }} defaultValue="10">
-          <option>10</option>
-          <option>20</option>
-          <option>50</option>
+        <select
+          className="form-select form-select-sm py-0"
+          style={{ width: '56px', fontSize: '0.7rem' }}
+          value={porPagina}
+          onChange={(e) => setPorPagina(Number(e.target.value))}
+        >
+          <option value={5}>5</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
         </select>
+        <span>{totalItens === 0 ? 'Nenhum resultado' : `${inicio + 1}–${fim} de ${totalItens}`}</span>
       </div>
-      <Paginacao total={paginas} />
+      <Paginacao total={totalPaginas} pagina={pagina} onMudar={setPagina} />
     </div>
   );
 }

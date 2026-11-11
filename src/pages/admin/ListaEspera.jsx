@@ -4,6 +4,7 @@ import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
 import { listaEspera, modalidades, normalizar } from './dados';
+import { usePaginacao } from './usePaginacao';
 
 const filtrosVazios = { busca: '', modalidade: 'Todas', faixa: 'Todas', status: 'Todos' };
 
@@ -24,6 +25,8 @@ function ListaEspera() {
     (aplicados.status === 'Todos' || inscricao.status === aplicados.status)
   );
 
+  const paginacao = usePaginacao(inscricoes);
+
   return (
     <LayoutAdmin titulo="Lista de espera">
       <CabecalhoPagina titulo="Lista de espera" subtitulo="Confira os alunos que aguardam vagas nas turmas." />
@@ -31,7 +34,7 @@ function ListaEspera() {
       {/* Filtros */}
       <form
         className="painel-card row g-3 align-items-end mx-0 px-2 pb-3 mb-4"
-        onSubmit={(e) => { e.preventDefault(); setAplicados(filtros); }}
+        onSubmit={(e) => { e.preventDefault(); setAplicados(filtros); paginacao.setPagina(1); }}
       >
         <div className="col-12 col-md-3">
           <label className="admin-rotulo">Nome do aluno</label>
@@ -86,7 +89,7 @@ function ListaEspera() {
               </tr>
             </thead>
             <tbody>
-              {inscricoes.map((inscricao) => (
+              {paginacao.itensDaPagina.map((inscricao) => (
                 <tr key={inscricao.id} style={{ borderBottom: `1px solid ${BORDA}` }}>
                   <td>{inscricao.nome}</td>
                   <td>{inscricao.idade}</td>
@@ -105,7 +108,7 @@ function ListaEspera() {
             </tbody>
           </table>
         </div>
-        <RodapeTabela paginas={4} />
+        <RodapeTabela paginacao={paginacao} />
       </div>
     </LayoutAdmin>
   );

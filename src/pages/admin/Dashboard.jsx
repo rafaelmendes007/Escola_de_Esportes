@@ -92,7 +92,7 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {turmas.map((turma) => (
+              {turmas.slice(0, 6).map((turma) => (
                 <tr key={turma.id} style={{ borderBottom: `1px solid ${BORDA}` }}>
                   <td>{turma.modalidade}</td>
                   <td>{turma.nome}</td>

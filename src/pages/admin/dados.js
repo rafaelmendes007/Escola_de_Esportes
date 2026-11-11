@@ -11,6 +11,12 @@ export const turmas = [
   { id: 4, modalidade: 'Lutas Misto', nome: 'Turma 3', faixaEtaria: '10 a 14', capacidade: 30, ocupadas: 24, listaEspera: 6, status: 'Ativa' },
   { id: 5, modalidade: 'Voleibol Misto', nome: 'Turma 2', faixaEtaria: '11 a 13', capacidade: 28, ocupadas: 26, listaEspera: 15, status: 'Ativa' },
   { id: 6, modalidade: 'Voleibol Feminino', nome: 'Turma 5', faixaEtaria: '12 a 15', capacidade: 26, ocupadas: 23, listaEspera: 2, status: 'Ativa' },
+  { id: 7, modalidade: 'Futebol Masculino', nome: 'Turma 1', faixaEtaria: '10 a 13', capacidade: 28, ocupadas: 28, listaEspera: 9, status: 'Lotada' },
+  { id: 8, modalidade: 'Futebol Masculino', nome: 'Turma 2', faixaEtaria: '14 a 17', capacidade: 28, ocupadas: 25, listaEspera: 4, status: 'Ativa' },
+  { id: 9, modalidade: 'Basquete Misto', nome: 'Turma 1', faixaEtaria: '10 a 13', capacidade: 28, ocupadas: 22, listaEspera: 3, status: 'Ativa' },
+  { id: 10, modalidade: 'Basquete Misto', nome: 'Turma 2', faixaEtaria: '14 a 17', capacidade: 28, ocupadas: 27, listaEspera: 5, status: 'Ativa' },
+  { id: 11, modalidade: 'Flag Misto', nome: 'Turma 1', faixaEtaria: '10 a 17', capacidade: 28, ocupadas: 18, listaEspera: 0, status: 'Ativa' },
+  { id: 12, modalidade: 'Vôlei 4x4 Misto', nome: 'Turma 1', faixaEtaria: '10 a 13', capacidade: 12, ocupadas: 12, listaEspera: 7, status: 'Lotada' },
 ];
 
 // Informações extras mostradas em "Detalhes da turma"
@@ -45,13 +51,35 @@ export const detalhesAluno = {
   retornoAte: '30/09/2026',
 };
 
-export const listaEspera = [
+const listaEsperaBase = [
   { id: 1, nome: 'Ana Clara', idade: 12, modalidade: 'Voleibol', turma: 'Turma 1', dataInscricao: '12/08/2026', posicao: 12, status: 'Aguardando vaga' },
   { id: 2, nome: 'Ana Maria', idade: 15, modalidade: 'Futsal', turma: 'Turma 1', dataInscricao: '11/08/2026', posicao: 0, status: 'Convocado' },
   { id: 3, nome: 'Carlos Antônio', idade: 10, modalidade: 'Atletismo', turma: 'Turma 1', dataInscricao: '12/08/2026', posicao: 0, status: 'Convocado' },
   { id: 4, nome: 'Maria Clara', idade: 11, modalidade: 'Vôlei de praia', turma: 'Turma 1', dataInscricao: '10/08/2026', posicao: 23, status: 'Aguardando vaga' },
   { id: 5, nome: 'João Pedro', idade: 13, modalidade: 'Voleibol', turma: 'Turma 1', dataInscricao: '12/08/2026', posicao: 8, status: 'Aguardando vaga' },
   { id: 6, nome: 'Maria Fernanda', idade: 16, modalidade: 'Handebol', turma: 'Turma 1', dataInscricao: '17/08/2026', posicao: 16, status: 'Aguardando vaga' },
+];
+
+// Mais inscrições de exemplo para a lista ter várias páginas (36 no total, como no protótipo)
+const NOMES_EXTRAS = ['Lucas Martins', 'Isabela Teixeira', 'Pedro Henrique', 'Beatriz Rocha', 'Rafael Gomes', 'Sofia Cardoso',
+  'Gustavo Lima', 'Larissa Melo', 'Enzo Ribeiro', 'Valentina Dias', 'Miguel Araújo', 'Helena Castro', 'Arthur Freitas',
+  'Laura Mendes', 'Davi Moreira', 'Alice Pinto', 'Heitor Barros', 'Manuela Ramos', 'Bernardo Nunes', 'Júlia Vieira',
+  'Théo Correia', 'Lívia Monteiro', 'Samuel Rezende', 'Cecília Duarte', 'Benjamin Farias', 'Lorena Campos',
+  'Nicolas Batista', 'Yasmin Lopes', 'Joaquim Sales', 'Clara Fonseca'];
+const MODALIDADES_EXTRAS = ['Voleibol', 'Futsal', 'Atletismo', 'Handebol', 'Lutas', 'Vôlei de praia'];
+
+export const listaEspera = [
+  ...listaEsperaBase,
+  ...NOMES_EXTRAS.map((nome, i) => ({
+    id: listaEsperaBase.length + i + 1,
+    nome,
+    idade: 10 + (i % 8),
+    modalidade: MODALIDADES_EXTRAS[i % MODALIDADES_EXTRAS.length],
+    turma: `Turma ${(i % 3) + 1}`,
+    dataInscricao: `${String((i % 28) + 1).padStart(2, '0')}/08/2026`,
+    posicao: i + 1,
+    status: i % 5 === 0 ? 'Convocado' : 'Aguardando vaga',
+  })),
 ];
 
 export const frequenciaTurma = [

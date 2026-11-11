@@ -4,9 +4,13 @@ import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
 import ModalNovaTurma from './ModalNovaTurma';
+import { usePaginacao } from './usePaginacao';
 import { turmas, normalizar } from './dados';
 
 const filtrosVazios = { busca: '', modalidade: 'Todas', faixa: 'Todas', status: 'Todos' };
+
+// Modalidades do filtro, tiradas das próprias turmas ("Futsal Masculino" -> "Futsal")
+const modalidadesDasTurmas = [...new Set(turmas.map((turma) => turma.modalidade.split(' ')[0]))].sort();
 
 function Turmas() {
   const [modalAberto, setModalAberto] = useState(false);
@@ -23,6 +27,8 @@ function Turmas() {
     (aplicados.status === 'Todos' || turma.status === aplicados.status)
   );
 
+  const paginacao = usePaginacao(turmasFiltradas);
+
   return (
     <LayoutAdmin titulo="Turmas">
       <CabecalhoPagina titulo="Turmas" subtitulo="Visualize e gerencie todas as turmas da Escola de Esportes.">
@@ -34,7 +40,7 @@ function Turmas() {
       {/* Filtros */}
       <form
         className="painel-card row g-3 align-items-end mx-0 px-2 pb-3 mb-4"
-        onSubmit={(e) => { e.preventDefault(); setAplicados(filtros); }}
+        onSubmit={(e) => { e.preventDefault(); setAplicados(filtros); paginacao.setPagina(1); }}
       >
         <div className="col-12 col-md-3">
           <label className="admin-rotulo">Nome da turma</label>
@@ -47,10 +53,7 @@ function Turmas() {
           <label className="admin-rotulo">Modalidade</label>
           <select name="modalidade" className="form-select form-select-sm admin-campo" value={filtros.modalidade} onChange={alterar}>
             <option>Todas</option>
-            <option>Atletismo</option>
-            <option>Futsal</option>
-            <option>Lutas</option>
-            <option>Voleibol</option>
+            {modalidadesDasTurmas.map((modalidade) => <option key={modalidade}>{modalidade}</option>)}
           </select>
         </div>
         <div className="col-6 col-md-2">
@@ -91,7 +94,7 @@ function Turmas() {
               </tr>
             </thead>
             <tbody>
-              {turmasFiltradas.map((turma) => (
+              {paginacao.itensDaPagina.map((turma) => (
                 <tr key={turma.id} style={{ borderBottom: `1px solid ${BORDA}` }}>
                   <td>{turma.modalidade}</td>
                   <td>{turma.nome}</td>
@@ -111,7 +114,7 @@ function Turmas() {
             </tbody>
           </table>
         </div>
-        <RodapeTabela paginas={2} />
+        <RodapeTabela paginacao={paginacao} />
       </div>
 
       <ModalNovaTurma aberto={modalAberto} onFechar={() => setModalAberto(false)} />

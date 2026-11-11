@@ -4,6 +4,7 @@ import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
 import { alunos, modalidades, normalizar } from './dados';
+import { usePaginacao } from './usePaginacao';
 
 const filtrosVazios = { busca: '', modalidade: 'Todas', status: 'Todos' };
 
@@ -20,6 +21,8 @@ function Alunos() {
     (aplicados.status === 'Todos' || aluno.status === aplicados.status)
   );
 
+  const paginacao = usePaginacao(alunosFiltrados);
+
   return (
     <LayoutAdmin titulo="Alunos">
       <CabecalhoPagina titulo="Alunos" subtitulo="Gerencie os alunos matriculados na escola de esportes" />
@@ -27,7 +30,7 @@ function Alunos() {
       {/* Filtros */}
       <form
         className="painel-card row g-3 align-items-end mx-0 px-2 pb-3 mb-4"
-        onSubmit={(e) => { e.preventDefault(); setAplicados(filtros); }}
+        onSubmit={(e) => { e.preventDefault(); setAplicados(filtros); paginacao.setPagina(1); }}
       >
         <div className="col-12 col-md-4">
           <label className="admin-rotulo">Buscar por nome ou CPF</label>
@@ -74,7 +77,7 @@ function Alunos() {
               </tr>
             </thead>
             <tbody>
-              {alunosFiltrados.map((aluno) => (
+              {paginacao.itensDaPagina.map((aluno) => (
                 <tr key={aluno.id} style={{ borderBottom: `1px solid ${BORDA}` }}>
                   <td>{aluno.nome}</td>
                   <td>{aluno.idade}</td>
@@ -92,7 +95,7 @@ function Alunos() {
             </tbody>
           </table>
         </div>
-        <RodapeTabela paginas={4} />
+        <RodapeTabela paginacao={paginacao} />
       </div>
     </LayoutAdmin>
   );
