@@ -1,41 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
+import { CampoOpcoes, CampoSelect, CampoSimNao } from './CamposInscricao';
+import {
+  DEFICIENCIAS, ESCOLARIDADES, FAIXAS_RENDA, FATORES_SANGUINEOS, PARENTESCOS, PESSOAS_RESIDENCIA, PLANOS_ODONTO,
+  PLANOS_SAUDE, PROBLEMAS_SAUDE, SERIES, TAMANHOS_UNIFORME, TIPOS_ESCOLA, TIPOS_SANGUINEOS,
+} from './opcoesInscricao';
 
 // Cores do protótipo
 const AZUL = '#0047B8';
 const AZUL_ESCURO = '#1F2A44';
 const CINZA_CLARO = '#F3F4F6';
 const CINZA_BORDA = '#D1D5DB';
-
-// Opções dos novos campos do responsável
-const PARENTESCOS = ['Mãe', 'Pai', 'Avó/Avô', 'Tia/Tio', 'Irmã/Irmão', 'Outro'];
-const FAIXAS_RENDA = [
-  'Até 01 salário mínimo',
-  'Entre 01 e 02 salários',
-  'Entre 02 e 04 salários',
-  'Entre 04 e 06 salários',
-  'Acima de 06 salários',
-];
-// Opções iguais às do formulário de inscrição da Unifor
-const ESCOLARIDADES = [
-  'Ensino fundamental 1 incompleto',
-  'Ensino fundamental 2 incompleto',
-  'Ensino médio completo',
-  'Ensino superior incompleto',
-  'Ensino superior completo',
-  'Pós-graduação',
-  'Mestrado',
-  'Doutorado',
-  'Outro',
-];
-const PESSOAS_RESIDENCIA = [
-  'Entre 1 a 3 pessoas',
-  'Entre 4 a 6 pessoas',
-  'Entre 7 a 9 pessoas',
-  'Mais de 10 pessoas',
-  'Outro',
-];
 
 function PreenchimentoDados() {
   const navigate = useNavigate();
@@ -67,7 +43,15 @@ function PreenchimentoDados() {
     nomeAluno: '',
     nascimento: '',
     genero: '',
+    cpfAluno: '',
+    endereco: '',
+    bairro: '',
+    tipoEscola: '',
     escola: '',
+    serie: '',
+    altura: '',
+    peso: '',
+    tamanhoUniforme: '',
     nomeResponsavel: '',
     cpfResponsavel: '',
     telefone: '',
@@ -82,6 +66,25 @@ function PreenchimentoDados() {
     emergenciaNome: '',
     emergenciaTelefone: '',
     emergenciaParentesco: '',
+    // Saúde do aluno
+    planoSaude: '',
+    planoSaudeOutro: '',
+    planoOdonto: '',
+    planoOdontoOutro: '',
+    tipoSanguineo: '',
+    fatorSanguineo: '',
+    alergiaMedicamento: '',
+    alergiaMedicamentoQual: '',
+    medicamentoControlado: '',
+    medicamentoControladoQual: '',
+    alergiaAlimento: '',
+    alergiaAlimentoQual: '',
+    problemaSaude: '',
+    problemaSaudeOutro: '',
+    deficiencia: '',
+    deficienciaOutro: '',
+    atencaoEspecial: '',
+    atencaoEspecialQual: '',
   });
 
   const [dragActive, setDragActive] = useState(false);
@@ -263,6 +266,22 @@ function PreenchimentoDados() {
           height: 16px;
           accent-color: ${AZUL};
           cursor: pointer;
+        }
+
+        .secao-saude {
+          margin-top: 2rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid ${CINZA_BORDA};
+        }
+
+        .grade-saude {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+          .grade-saude { grid-template-columns: 1fr; }
         }
 
         .subsecao-titulo {
@@ -553,9 +572,47 @@ function PreenchimentoDados() {
               </div>
 
 
-              {/* Escola em que estuda */}
+              {/* CPF ou RG do aluno (opcional, como no formulário) */}
               <div className="caixa-grupo-campos">
-                <label className="label-campo">Escola em que estuda</label>
+                <label className="label-campo">CPF ou RG do aluno</label>
+                <input
+                  type="text"
+                  name="cpfAluno"
+                  value={formData.cpfAluno}
+                  onChange={handleInputChange}
+                  placeholder="000.000.000-00"
+                  className="campo-input"
+                />
+              </div>
+
+              {/* Endereço */}
+              <div className="caixa-grupo-campos">
+                <label className="label-campo label-obrigatorio">Endereço (rua e número)</label>
+                <input
+                  type="text"
+                  name="endereco"
+                  value={formData.endereco}
+                  onChange={handleInputChange}
+                  placeholder="Ex.: Rua das Flores, 123"
+                  className="campo-input"
+                />
+              </div>
+              <div className="caixa-grupo-campos">
+                <label className="label-campo label-obrigatorio">Bairro</label>
+                <input
+                  type="text"
+                  name="bairro"
+                  value={formData.bairro}
+                  onChange={handleInputChange}
+                  placeholder="Ex.: Edson Queiroz"
+                  className="campo-input"
+                />
+              </div>
+
+              {/* Escola */}
+              <CampoOpcoes rotulo="Cursa a educação básica em que tipo de escola?" obrigatorio nome="tipoEscola" opcoes={TIPOS_ESCOLA} dados={formData} onChange={handleInputChange} emLinha />
+              <div className="caixa-grupo-campos">
+                <label className="label-campo label-obrigatorio">Nome da escola</label>
                 <input
                   type="text"
                   name="escola"
@@ -565,6 +622,34 @@ function PreenchimentoDados() {
                   className="campo-input"
                 />
               </div>
+              <CampoSelect rotulo="Série que está cursando" obrigatorio nome="serie" opcoes={SERIES} dados={formData} onChange={handleInputChange} />
+
+              {/* Medidas e uniforme */}
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ flex: 1 }}>
+                  <label className="label-campo">Altura</label>
+                  <input
+                    type="text"
+                    name="altura"
+                    value={formData.altura}
+                    onChange={handleInputChange}
+                    placeholder="Ex.: 1,45 m"
+                    className="campo-input"
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="label-campo">Peso</label>
+                  <input
+                    type="text"
+                    name="peso"
+                    value={formData.peso}
+                    onChange={handleInputChange}
+                    placeholder="Ex.: 40 kg"
+                    className="campo-input"
+                  />
+                </div>
+              </div>
+              <CampoSelect rotulo="Tamanho do uniforme" obrigatorio nome="tamanhoUniforme" opcoes={TAMANHOS_UNIFORME} dados={formData} onChange={handleInputChange} />
             </div>
 
             {/* COLUNA 2: Dados do Responsável */}
@@ -623,111 +708,10 @@ function PreenchimentoDados() {
                 />
               </div>
 
-              {/* Grau de parentesco do responsável com o aluno */}
-              <div className="caixa-grupo-campos">
-                <label className="label-campo label-obrigatorio">Grau de parentesco com o aluno</label>
-                <div className="grupo-opcoes">
-                  {PARENTESCOS.map((parentesco) => (
-                    <label key={parentesco} className="opcao">
-                      <input
-                        type="radio"
-                        name="parentesco"
-                        value={parentesco}
-                        checked={formData.parentesco === parentesco}
-                        onChange={handleInputChange}
-                      />
-                      {parentesco}
-                    </label>
-                  ))}
-                </div>
-                {formData.parentesco === 'Outro' && (
-                  <input
-                    type="text"
-                    name="parentescoOutro"
-                    value={formData.parentescoOutro}
-                    onChange={handleInputChange}
-                    placeholder="Qual?"
-                    className="campo-input mt-2"
-                  />
-                )}
-              </div>
-
-              {/* Escolaridade do responsável */}
-              <div className="caixa-grupo-campos">
-                <label className="label-campo label-obrigatorio">Qual o grau de escolaridade do responsável?</label>
-                <div className="d-flex flex-column gap-2">
-                  {ESCOLARIDADES.map((escolaridade) => (
-                    <label key={escolaridade} className="opcao">
-                      <input
-                        type="radio"
-                        name="escolaridade"
-                        value={escolaridade}
-                        checked={formData.escolaridade === escolaridade}
-                        onChange={handleInputChange}
-                      />
-                      {escolaridade}
-                    </label>
-                  ))}
-                </div>
-                {formData.escolaridade === 'Outro' && (
-                  <input
-                    type="text"
-                    name="escolaridadeOutro"
-                    value={formData.escolaridadeOutro}
-                    onChange={handleInputChange}
-                    placeholder="Qual?"
-                    className="campo-input mt-2"
-                  />
-                )}
-              </div>
-
-              {/* Quantidade de pessoas na residência */}
-              <div className="caixa-grupo-campos">
-                <label className="label-campo">Quantas pessoas moram na residência?</label>
-                <div className="d-flex flex-column gap-2">
-                  {PESSOAS_RESIDENCIA.map((opcao) => (
-                    <label key={opcao} className="opcao">
-                      <input
-                        type="radio"
-                        name="pessoasResidencia"
-                        value={opcao}
-                        checked={formData.pessoasResidencia === opcao}
-                        onChange={handleInputChange}
-                      />
-                      {opcao}
-                    </label>
-                  ))}
-                </div>
-                {formData.pessoasResidencia === 'Outro' && (
-                  <input
-                    type="text"
-                    name="pessoasResidenciaOutro"
-                    value={formData.pessoasResidenciaOutro}
-                    onChange={handleInputChange}
-                    placeholder="Quantas?"
-                    className="campo-input mt-2"
-                  />
-                )}
-              </div>
-
-              {/* Renda familiar */}
-              <div className="caixa-grupo-campos">
-                <label className="label-campo label-obrigatorio">Aproximadamente qual o total da renda familiar da residência?</label>
-                <div className="d-flex flex-column gap-2">
-                  {FAIXAS_RENDA.map((faixa) => (
-                    <label key={faixa} className="opcao">
-                      <input
-                        type="radio"
-                        name="rendaFamiliar"
-                        value={faixa}
-                        checked={formData.rendaFamiliar === faixa}
-                        onChange={handleInputChange}
-                      />
-                      {faixa}
-                    </label>
-                  ))}
-                </div>
-              </div>
+              <CampoOpcoes rotulo="Grau de parentesco com o aluno" obrigatorio nome="parentesco" opcoes={PARENTESCOS} dados={formData} onChange={handleInputChange} emLinha />
+              <CampoOpcoes rotulo="Qual o grau de escolaridade do responsável?" obrigatorio nome="escolaridade" opcoes={ESCOLARIDADES} dados={formData} onChange={handleInputChange} />
+              <CampoOpcoes rotulo="Quantas pessoas moram na residência?" nome="pessoasResidencia" opcoes={PESSOAS_RESIDENCIA} dados={formData} onChange={handleInputChange} placeholderOutro="Quantas?" />
+              <CampoOpcoes rotulo="Aproximadamente qual o total da renda familiar da residência?" obrigatorio nome="rendaFamiliar" opcoes={FAIXAS_RENDA} dados={formData} onChange={handleInputChange} />
 
               {/* Contato de emergência */}
               <div className="subsecao-titulo">Em caso de emergência, ligar para:</div>
@@ -845,6 +829,43 @@ function PreenchimentoDados() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Saúde do aluno */}
+          <div className="secao-saude">
+            <div className="secao-titulo">Saúde do aluno</div>
+            <div className="grade-saude">
+              <div>
+                <CampoSelect rotulo="Possui plano de saúde?" obrigatorio nome="planoSaude" opcoes={PLANOS_SAUDE} dados={formData} onChange={handleInputChange} />
+                {formData.planoSaude === 'Outro' && (
+                  <input type="text" name="planoSaudeOutro" value={formData.planoSaudeOutro} onChange={handleInputChange} placeholder="Qual plano?" className="campo-input mb-4" />
+                )}
+                <CampoSelect rotulo="Possui plano odontológico?" obrigatorio nome="planoOdonto" opcoes={PLANOS_ODONTO} dados={formData} onChange={handleInputChange} />
+                {formData.planoOdonto === 'Outro' && (
+                  <input type="text" name="planoOdontoOutro" value={formData.planoOdontoOutro} onChange={handleInputChange} placeholder="Qual plano?" className="campo-input mb-4" />
+                )}
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <CampoSelect rotulo="Tipo sanguíneo" nome="tipoSanguineo" opcoes={TIPOS_SANGUINEOS} dados={formData} onChange={handleInputChange} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <CampoSelect rotulo="Fator sanguíneo" nome="fatorSanguineo" opcoes={FATORES_SANGUINEOS} dados={formData} onChange={handleInputChange} />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <CampoSimNao rotulo="É alérgico a algum medicamento?" nome="alergiaMedicamento" dados={formData} onChange={handleInputChange} rotuloQual="Qual medicamento?" />
+                <CampoSimNao rotulo="Usa algum medicamento controlado?" nome="medicamentoControlado" dados={formData} onChange={handleInputChange} rotuloQual="Qual medicamento?" />
+                <CampoSimNao rotulo="É alérgico a algum alimento?" nome="alergiaAlimento" dados={formData} onChange={handleInputChange} rotuloQual="Qual alimento?" />
+                <CampoSimNao rotulo="Necessita de atenção especial?" nome="atencaoEspecial" dados={formData} onChange={handleInputChange} rotuloQual="Qual atenção?" />
+              </div>
+
+              <div>
+                <CampoOpcoes rotulo="Apresenta algum problema de saúde?" obrigatorio nome="problemaSaude" opcoes={PROBLEMAS_SAUDE} dados={formData} onChange={handleInputChange} placeholderOutro="Descreva" />
+                <CampoOpcoes rotulo="Apresenta algum tipo de deficiência?" obrigatorio nome="deficiencia" opcoes={DEFICIENCIAS} dados={formData} onChange={handleInputChange} placeholderOutro="Descreva" />
               </div>
             </div>
           </div>
