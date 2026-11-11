@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '../../config/firebase';
+import { AREA_DO_PERFIL, buscarUsuario, mensagemDeErro } from '../../services/usuarios';
 import HeaderPublico from '../../components/HeaderPublico';
 import imagemApito from '../../assets/apito.png';
 import background_login from '../../assets/background_login.png';
@@ -28,35 +29,19 @@ function Login() {
 
     try {
       // Fazer login com email e senha
-      const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-      const user = userCredential.user;
+      const { user } = await signInWithEmailAndPassword(auth, email, senha);
 
-      console.log('Login bem-sucedido:', user.email);
-
-      // Você pode verificar o email para redirecionar
-      // Por exemplo: se email começa com "admin" -> /admin
-      // Senão -> /professor
-      if (email.startsWith('admin')) {
-        navigate('/admin');
-      } else {
-        navigate('/professor');
+      // O perfil (admin ou professor) fica no Firestore, em usuarios/{uid}
+      const dados = await buscarUsuario(user.uid);
+      if (!dados?.perfil) {
+        await signOut(auth);
+        setErro('Seu usuário ainda não tem perfil cadastrado. Fale com a administração.');
+        return;
       }
+
+      navigate(AREA_DO_PERFIL[dados.perfil]);
     } catch (error) {
-      // Tratamento de erros
-      let mensagem = 'Erro ao fazer login. Tente novamente.';
-
-      if (error.code === 'auth/user-not-found') {
-        mensagem = 'Usuário não encontrado.';
-      } else if (error.code === 'auth/wrong-password') {
-        mensagem = 'Senha incorreta.';
-      } else if (error.code === 'auth/invalid-email') {
-        mensagem = 'Email inválido.';
-      } else if (error.code === 'auth/user-disabled') {
-        mensagem = 'Usuário desativado.';
-      } else if (error.code === 'auth/too-many-login-attempts') {
-        mensagem = 'Muitas tentativas de login. Tente novamente mais tarde.';
-      }
-
+      const mensagem = mensagemDeErro(error);
       setErro(mensagem);
       console.error('Erro de autenticação:', error.message);
     } finally {

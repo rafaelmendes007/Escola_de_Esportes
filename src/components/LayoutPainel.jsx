@@ -1,10 +1,20 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { AZUL, AZUL_ESCURO, AZUL_MENU_ATIVO, AZUL_CLARO, FUNDO, TEXTO, CINZA_TEXTO, BORDA, VERMELHO } from './cores';
 
 // Estrutura comum das telas logadas: menu lateral + barra superior.
 // menu: [{ to, texto, icone, ativo }]
-function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, children }) {
+function LayoutPainel({ titulo, menu, perfil, linkAvisos, temAvisoNovo, children }) {
+  const { usuario, logout } = useAuth();
+  const navigate = useNavigate();
+  // Nome de quem está logado (ou o perfil, enquanto não houver nome)
+  const nome = usuario?.nome || perfil;
+
+  const sair = async () => {
+    await logout();
+    navigate('/login');
+  };
   const [menuAberto, setMenuAberto] = useState(false);
   const [perfilAberto, setPerfilAberto] = useState(false);
 
@@ -96,6 +106,7 @@ function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, childre
           gap: 6px;
         }
         .painel-botao:hover { background-color: #184E9A; color: #FFFFFF; }
+        .painel-botao:disabled { opacity: 0.5; cursor: not-allowed; }
         .painel-tabela { width: 100%; font-size: 0.8rem; color: ${TEXTO}; border-collapse: collapse; }
         .painel-tabela th {
           font-weight: 500;
@@ -153,9 +164,9 @@ function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, childre
         </nav>
 
         <div className="mt-auto pt-3" style={{ borderTop: '1px solid rgba(255, 255, 255, 0.5)' }}>
-          <Link to="/login" className="painel-menu-item">
+          <button type="button" className="painel-menu-item w-100 border-0 bg-transparent" onClick={sair}>
             <i className="bi bi-box-arrow-right"></i> Sair
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -205,16 +216,19 @@ function LayoutPainel({ titulo, menu, usuario, linkAvisos, temAvisoNovo, childre
                   className="rounded-circle d-inline-flex align-items-center justify-content-center text-white"
                   style={{ width: '28px', height: '28px', backgroundColor: AZUL, fontSize: '0.8rem' }}
                 >
-                  A
+                  {nome.charAt(0).toUpperCase()}
                 </span>
-                <span className="d-none d-sm-inline" style={{ color: TEXTO, fontSize: '0.9rem' }}>{usuario}</span>
+                <span className="d-none d-sm-inline text-start" style={{ color: TEXTO, fontSize: '0.9rem', lineHeight: 1.1 }}>
+                  {nome}
+                  <span className="d-block" style={{ color: CINZA_TEXTO, fontSize: '0.65rem' }}>{perfil}</span>
+                </span>
                 <i className="bi bi-chevron-down ms-sm-3" style={{ color: TEXTO, fontSize: '0.8rem' }}></i>
               </button>
               {perfilAberto && (
                 <div className="painel-card position-absolute end-0 mt-2 py-1 shadow-sm" style={{ zIndex: 1020, minWidth: '140px' }}>
-                  <Link to="/login" className="d-block px-3 py-2 text-decoration-none small" style={{ color: TEXTO }}>
+                  <button type="button" className="d-block w-100 text-start px-3 py-2 border-0 bg-transparent small" style={{ color: TEXTO }} onClick={sair}>
                     <i className="bi bi-box-arrow-right me-2"></i>Sair
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>

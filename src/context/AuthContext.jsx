@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../config/firebase';
+import { buscarUsuario } from '../services/usuarios';
 
 // Criar o contexto de autenticação
 const AuthContext = createContext();
@@ -12,12 +13,22 @@ export function AuthProvider({ children }) {
 
   // Monitorar mudanças de autenticação
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // Segura as rotas protegidas até o perfil chegar (evita voltar para o login)
+        setCarregando(true);
+        // Perfil (admin ou professor) e nome ficam no Firestore, em usuarios/{uid}
+        let dados = null;
+        try {
+          dados = await buscarUsuario(user.uid);
+        } catch (error) {
+          console.error('Erro ao buscar o perfil do usuário:', error);
+        }
         setUsuario({
           uid: user.uid,
           email: user.email,
-          displayName: user.displayName,
+          nome: dados?.nome || user.email,
+          perfil: dados?.perfil || null,
         });
       } else {
         setUsuario(null);

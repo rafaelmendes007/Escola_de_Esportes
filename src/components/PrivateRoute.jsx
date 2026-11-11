@@ -1,8 +1,10 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { AREA_DO_PERFIL } from '../services/usuarios';
 
-// Componente que protege rotas que precisam de autenticação
-function PrivateRoute({ children }) {
+// Protege rotas que precisam de login.
+// perfil: 'admin' ou 'professor'. Quem tem outro perfil vai para a própria área.
+function PrivateRoute({ perfil, children }) {
   const { usuario, carregando } = useAuth();
 
   // Se está carregando, mostrar um loader
@@ -16,12 +18,16 @@ function PrivateRoute({ children }) {
     );
   }
 
-  // Se não tem usuário logado, redirecionar para login
-  if (!usuario) {
+  // Se não tem usuário logado (ou ele não tem perfil cadastrado), redirecionar para login
+  if (!usuario || !usuario.perfil) {
     return <Navigate to="/login" replace />;
   }
 
-  // Se tem usuário, renderizar o componente
+  // Logado, mas na área de outro perfil
+  if (perfil && usuario.perfil !== perfil) {
+    return <Navigate to={AREA_DO_PERFIL[usuario.perfil]} replace />;
+  }
+
   return children;
 }
 

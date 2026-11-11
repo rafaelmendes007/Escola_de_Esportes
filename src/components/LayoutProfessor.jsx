@@ -17,7 +17,7 @@ function LayoutProfessor({ children }) {
     <LayoutPainel
       titulo="Painel do Professor"
       menu={menu}
-      usuario="Professor"
+      perfil="Professor"
       linkAvisos="/professor/avisos"
       temAvisoNovo={avisos.some((aviso) => aviso.novo)}
     >
