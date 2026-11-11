@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { sendPasswordResetEmail, confirmPasswordReset } from 'firebase/auth';
+import { Link } from 'react-router-dom';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 import HeaderPublico from '../../components/HeaderPublico';
 import imagemApito from '../../assets/apito.png';
@@ -9,52 +9,25 @@ import background_login from '../../assets/background_login.png';
 // Cor principal do protótipo
 const AZUL = '#1E5DB5';
 const AZUL_CLARO = '#DCE8FA';
-const VERDE = '#10B981';
 
 function EsqueciSenha() {
-  const navigate = useNavigate();
-
   // Estados
-  const [etapa, setEtapa] = useState(1); // 1: email | 2: código e nova senha
+  const [etapa, setEtapa] = useState(1); // 1: digitar o e-mail | 2: e-mail enviado
   const [email, setEmail] = useState('');
-  const [novaSenha, setNovaSenha] = useState('');
-  const [confirmarSenha, setConfirmarSenha] = useState('');
-  const [codigoResetado, setCodigoResetado] = useState('');
-  const [mostraSenha, setMostraSenha] = useState(false);
-  const [mostraConfirmar, setMostraConfirmar] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
-  const [mensagem, setMensagem] = useState('');
-
-  // Validar senha forte
-  const validarSenhaForte = (senha) => {
-    const temMaiuscula = /[A-Z]/.test(senha);
-    const temMinuscula = /[a-z]/.test(senha);
-    const temNumero = /[0-9]/.test(senha);
-    const temCaractereEspecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(senha);
-    const temComprimentoMinimo = senha.length >= 8;
-
-    return temMaiuscula && temMinuscula && temNumero && temComprimentoMinimo;
-  };
 
   // Etapa 1: Enviar email de recuperação
   const handleEnviarEmail = async (e) => {
     e.preventDefault();
     setErro('');
-    setMensagem('');
     setCarregando(true);
 
     try {
-      // Enviar email de reset com Firebase
-      await sendPasswordResetEmail(auth, email);
-
-      setMensagem('Email de recuperação enviado! Verifique sua caixa de entrada ou spam.');
-      
-      // Avançar para etapa 2 após 2 segundos
-      setTimeout(() => {
-        setEtapa(2);
-        setMensagem('');
-      }, 2000);
+      // O e-mail traz um link para uma página do Firebase onde a pessoa cria a nova senha.
+      // Depois de trocar, o botão "Continuar" dessa página volta para o login do app.
+      await sendPasswordResetEmail(auth, email, { url: `${window.location.origin}/login` });
+      setEtapa(2);
     } catch (error) {
       let mensagemErro = 'Erro ao enviar email. Tente novamente.';
 
@@ -71,67 +44,6 @@ function EsqueciSenha() {
     } finally {
       setCarregando(false);
     }
-  };
-
-  // Etapa 2: Resetar senha com código
-  const handleResetarSenha = async (e) => {
-    e.preventDefault();
-    setErro('');
-    setMensagem('');
-
-    // Validações
-    if (!codigoResetado.trim()) {
-      setErro('Por favor, insira o código de reset.');
-      return;
-    }
-
-    if (novaSenha !== confirmarSenha) {
-      setErro('As senhas não coincidem.');
-      return;
-    }
-
-    if (!validarSenhaForte(novaSenha)) {
-      setErro('Senha fraca. Use pelo menos 8 caracteres, maiúsculas, minúsculas e números.');
-      return;
-    }
-
-    setCarregando(true);
-
-    try {
-      // Confirmar password reset com Firebase
-      await confirmPasswordReset(auth, codigoResetado, novaSenha);
-
-      setMensagem('Senha alterada com sucesso! Redirecionando...');
-
-      // Redirecionar para login após 2 segundos
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    } catch (error) {
-      let mensagemErro = 'Erro ao resetar senha. Tente novamente.';
-
-      if (error.code === 'auth/expired-action-code') {
-        mensagemErro = 'Código de reset expirado. Solicite um novo email.';
-      } else if (error.code === 'auth/invalid-action-code') {
-        mensagemErro = 'Código inválido. Verifique o email recebido.';
-      } else if (error.code === 'auth/weak-password') {
-        mensagemErro = 'Senha muito fraca. Use uma senha mais forte.';
-      }
-
-      setErro(mensagemErro);
-      console.error('Erro ao resetar senha:', error.message);
-    } finally {
-      setCarregando(false);
-    }
-  };
-
-  // Alternar visualização de senhas
-  const toggleMostraSenha = () => {
-    setMostraSenha(!mostraSenha);
-  };
-
-  const toggleMostraConfirmar = () => {
-    setMostraConfirmar(!mostraConfirmar);
   };
 
   return (
@@ -161,16 +73,6 @@ function EsqueciSenha() {
           margin-bottom: 1rem;
         }
 
-        .mensagem-sucesso {
-          color: #059669;
-          font-size: 0.85rem;
-          background-color: #ECFDF5;
-          border: 1px solid #6EE7B7;
-          padding: 0.75rem;
-          border-radius: 6px;
-          margin-bottom: 1rem;
-        }
-
         .botao-carregando {
           opacity: 0.7;
           cursor: not-allowed;
@@ -179,32 +81,6 @@ function EsqueciSenha() {
         .campo-obrigatorio {
           color: #DC2626;
           margin-left: 2px;
-        }
-
-        .indicador-senha {
-          font-size: 0.75rem;
-          margin-top: 0.5rem;
-          padding: 0.5rem;
-          border-radius: 4px;
-          background-color: #F3F4F6;
-        }
-
-        .requisito-senha {
-          display: flex;
-          align-items: center;
-          margin: 0.25rem 0;
-          font-size: 0.8rem;
-        }
-
-        .icon-requisito {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-right: 0.5rem;
-          font-size: 0.6rem;
         }
       `}</style>
 
@@ -229,30 +105,23 @@ function EsqueciSenha() {
                   className="rounded-circle d-flex align-items-center justify-content-center"
                   style={{ width: '80px', height: '80px', backgroundColor: AZUL_CLARO, color: '#1B2A6B' }}
                 >
-                  <i className={`bi ${etapa === 1 ? 'bi-envelope' : 'bi-check-circle'} fs-2`}></i>
+                  <i className={`bi ${etapa === 1 ? 'bi-envelope' : 'bi-envelope-check'} fs-2`}></i>
                 </div>
               </div>
 
               <h4 className="fw-semibold mb-2" style={{ color: '#1F2A44' }}>
-                {etapa === 1 ? 'Recuperar Senha' : 'Criar Nova Senha'}
+                {etapa === 1 ? 'Recuperar Senha' : 'Verifique seu e-mail'}
               </h4>
               <p className="small mb-4" style={{ color: '#6B7280', fontSize: '0.85rem' }}>
                 {etapa === 1
-                  ? 'Digite seu email para receber um código de recuperação.'
-                  : 'Insira o código recebido e crie uma nova senha.'}
+                  ? 'Digite seu e-mail para receber um link de recuperação de senha.'
+                  : 'Se o e-mail estiver cadastrado, você vai receber um link para criar uma nova senha.'}
               </p>
 
               {/* Mensagem de Erro */}
               {erro && (
                 <div className="mensagem-erro">
                   {erro}
-                </div>
-              )}
-
-              {/* Mensagem de Sucesso */}
-              {mensagem && (
-                <div className="mensagem-sucesso">
-                  {mensagem}
                 </div>
               )}
 
@@ -286,7 +155,7 @@ function EsqueciSenha() {
                     style={{ backgroundColor: AZUL, borderRadius: '6px' }}
                     disabled={carregando}
                   >
-                    {carregando ? 'Enviando...' : 'Enviar Código'}
+                    {carregando ? 'Enviando...' : 'Enviar link'}
                   </button>
 
                   <div className="d-flex align-items-center my-3">
@@ -310,131 +179,25 @@ function EsqueciSenha() {
                 </form>
               )}
 
-              {/* ETAPA 2: Código e Nova Senha */}
+              {/* ETAPA 2: E-mail enviado */}
               {etapa === 2 && (
-                <form className="text-start" onSubmit={handleResetarSenha}>
-
-                  {/* Campo de Código */}
-                  <div className="mb-3">
-                    <label className="form-label small fw-medium" style={{ color: '#374151' }}>
-                      Código de Reset <span className="campo-obrigatorio">*</span>
-                    </label>
-                    <p className="small" style={{ color: '#6B7280', fontSize: '0.8rem', marginBottom: '0.5rem' }}>
-                      Verifique o email enviado para <strong>{email}</strong>
-                    </p>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white border-end-0" style={{ color: '#6B7280' }}>
-                        <i className="bi bi-key"></i>
-                      </span>
-                      <input
-                        type="text"
-                        value={codigoResetado}
-                        onChange={(e) => setCodigoResetado(e.target.value)}
-                        className="form-control border-start-0 ps-0"
-                        placeholder="Cole o código aqui"
-                        style={{ fontSize: '0.85rem' }}
-                        disabled={carregando}
-                        required
-                      />
-                    </div>
+                <div className="text-start">
+                  <div className="rounded p-3 mb-3" style={{ backgroundColor: '#F3F7FD', border: '1px solid #B9CDEA', fontSize: '0.85rem', color: '#374151' }}>
+                    <p className="mb-2">Enviamos o link para <strong>{email}</strong>.</p>
+                    <ol className="mb-0 ps-3">
+                      <li>Abra o e-mail (confira também a caixa de spam).</li>
+                      <li>Clique no link e crie a nova senha.</li>
+                      <li>Volte aqui e entre com a senha nova.</li>
+                    </ol>
                   </div>
 
-                  {/* Campo de Nova Senha */}
-                  <div className="mb-3">
-                    <label className="form-label small fw-medium" style={{ color: '#374151' }}>
-                      Nova Senha <span className="campo-obrigatorio">*</span>
-                    </label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white border-end-0" style={{ color: '#6B7280' }}>
-                        <i className="bi bi-lock"></i>
-                      </span>
-                      <input
-                        type={mostraSenha ? 'text' : 'password'}
-                        value={novaSenha}
-                        onChange={(e) => setNovaSenha(e.target.value)}
-                        className="form-control border-start-0 border-end-0 ps-0"
-                        placeholder="Mínimo 8 caracteres"
-                        style={{ fontSize: '0.85rem' }}
-                        disabled={carregando}
-                        required
-                      />
-                      <span
-                        className="input-group-text bg-white border-start-0"
-                        style={{ cursor: 'pointer', color: '#6B7280' }}
-                        onClick={toggleMostraSenha}
-                      >
-                        <i className={`bi ${mostraSenha ? 'bi-eye-slash' : 'bi-eye'}`}></i>
-                      </span>
-                    </div>
-                    
-                    {/* Indicador de força da senha */}
-                    {novaSenha && (
-                      <div className="indicador-senha">
-                        <div className="requisito-senha">
-                          <span className="icon-requisito" style={{ backgroundColor: novaSenha.length >= 8 ? VERDE : '#D1D5DB', color: 'white' }}>
-                            {novaSenha.length >= 8 ? '✓' : '✗'}
-                          </span>
-                          <span style={{ color: novaSenha.length >= 8 ? VERDE : '#6B7280' }}>Mínimo 8 caracteres</span>
-                        </div>
-                        <div className="requisito-senha">
-                          <span className="icon-requisito" style={{ backgroundColor: /[A-Z]/.test(novaSenha) ? VERDE : '#D1D5DB', color: 'white' }}>
-                            {/[A-Z]/.test(novaSenha) ? '✓' : '✗'}
-                          </span>
-                          <span style={{ color: /[A-Z]/.test(novaSenha) ? VERDE : '#6B7280' }}>Contém maiúscula</span>
-                        </div>
-                        <div className="requisito-senha">
-                          <span className="icon-requisito" style={{ backgroundColor: /[a-z]/.test(novaSenha) ? VERDE : '#D1D5DB', color: 'white' }}>
-                            {/[a-z]/.test(novaSenha) ? '✓' : '✗'}
-                          </span>
-                          <span style={{ color: /[a-z]/.test(novaSenha) ? VERDE : '#6B7280' }}>Contém minúscula</span>
-                        </div>
-                        <div className="requisito-senha">
-                          <span className="icon-requisito" style={{ backgroundColor: /[0-9]/.test(novaSenha) ? VERDE : '#D1D5DB', color: 'white' }}>
-                            {/[0-9]/.test(novaSenha) ? '✓' : '✗'}
-                          </span>
-                          <span style={{ color: /[0-9]/.test(novaSenha) ? VERDE : '#6B7280' }}>Contém número</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Campo de Confirmar Senha */}
-                  <div className="mb-3">
-                    <label className="form-label small fw-medium" style={{ color: '#374151' }}>
-                      Confirmar Senha <span className="campo-obrigatorio">*</span>
-                    </label>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white border-end-0" style={{ color: '#6B7280' }}>
-                        <i className="bi bi-lock-fill"></i>
-                      </span>
-                      <input
-                        type={mostraConfirmar ? 'text' : 'password'}
-                        value={confirmarSenha}
-                        onChange={(e) => setConfirmarSenha(e.target.value)}
-                        className="form-control border-start-0 border-end-0 ps-0"
-                        placeholder="Confirme sua nova senha"
-                        style={{ fontSize: '0.85rem' }}
-                        disabled={carregando}
-                        required
-                      />
-                      <span
-                        className="input-group-text bg-white border-start-0"
-                        style={{ cursor: 'pointer', color: '#6B7280' }}
-                        onClick={toggleMostraConfirmar}
-                      >
-                        <i className={`bi ${mostraConfirmar ? 'bi-eye-slash' : 'bi-eye'}`}></i>
-                      </span>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className={`btn w-100 py-2 fw-semibold text-white border-0 ${carregando ? 'botao-carregando' : ''}`}
+                  <Link
+                    to="/login"
+                    className="btn w-100 py-2 fw-semibold text-white border-0"
                     style={{ backgroundColor: AZUL, borderRadius: '6px' }}
-                    disabled={carregando || !validarSenhaForte(novaSenha)}
                   >
-                    {carregando ? 'Alterando...' : 'Alterar Senha'}
-                  </button>
+                    Voltar para Login
+                  </Link>
 
                   <div className="text-center mt-3">
                     <button
@@ -443,10 +206,10 @@ function EsqueciSenha() {
                       className="btn btn-link text-decoration-none fw-medium p-0"
                       style={{ color: AZUL, fontSize: '0.8rem' }}
                     >
-                      Voltar
+                      Não recebeu? Enviar de novo
                     </button>
                   </div>
-                </form>
+                </div>
               )}
 
             </div>
