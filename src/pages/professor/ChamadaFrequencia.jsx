@@ -3,13 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { TEXTO, BORDA, VERDE, VERMELHO } from '../../components/cores';
 import { alunos, buscarTurma } from './dados';
-
-// Data de hoje no formato do input date (AAAA-MM-DD)
-function hojeISO() {
-  const hoje = new Date();
-  hoje.setMinutes(hoje.getMinutes() - hoje.getTimezoneOffset());
-  return hoje.toISOString().slice(0, 10);
-}
+import { ehDiaDeAula, ultimoDiaDeAula } from '../../utils/diasAula';
 
 // Botão "Presente" ou "Ausente" de cada aluno
 function BotaoChamada({ tipo, marcado, onClick }) {
@@ -41,7 +35,7 @@ function ChamadaFrequencia() {
   const navigate = useNavigate();
   const turma = buscarTurma(turmaId);
 
-  const [data, setData] = useState(hojeISO());
+  const [data, setData] = useState(ultimoDiaDeAula());
   // { idDoAluno: 'presente' | 'ausente' }
   const [chamada, setChamada] = useState({});
 
@@ -85,6 +79,9 @@ function ChamadaFrequencia() {
             value={data}
             onChange={(e) => setData(e.target.value)}
           />
+          {!ehDiaDeAula(data) && (
+            <div className="mt-1" style={{ color: VERMELHO, fontSize: '0.65rem' }}>As aulas são só às terças e quintas.</div>
+          )}
         </div>
       </div>
 
@@ -119,7 +116,7 @@ function ChamadaFrequencia() {
         <Link to={`/professor/turmas/${turma.id}/alunos`} className="painel-botao-contorno">
           Cancelar
         </Link>
-        <button type="button" className="painel-botao" onClick={handleSalvar}>
+        <button type="button" className="painel-botao" onClick={handleSalvar} disabled={!ehDiaDeAula(data)}>
           Salvar frequência
         </button>
       </div>

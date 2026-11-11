@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Modal } from './componentes';
 
-const DIAS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+// As aulas da Escola de Esportes acontecem só às terças e quintas
+const DIAS = ['Terça', 'Quinta'];
 
 // Campo com rótulo e asterisco de obrigatório
 function Campo({ rotulo, children }) {

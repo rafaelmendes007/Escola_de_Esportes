@@ -11,7 +11,7 @@ function FrequenciaRegistrada() {
   const turma = buscarTurma(turmaId);
 
   // Resultado enviado pela tela de chamada (valores do protótipo se a tela for aberta direto)
-  const resultado = useLocation().state || { data: '2026-04-15', presentes: 15, ausentes: 2, justificados: 1 };
+  const resultado = useLocation().state || { data: '2026-04-16', presentes: 15, ausentes: 2, justificados: 1 };
   const [ano, mes, dia] = resultado.data.split('-');
   const diaSemana = DIAS_SEMANA[new Date(ano, mes - 1, dia).getDay()];
 

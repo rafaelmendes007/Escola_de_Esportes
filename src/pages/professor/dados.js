@@ -10,7 +10,7 @@ export const turmas = [
     modalidade: 'Vôlei',
     faixaEtaria: '14 – 17 anos',
     icone: iconeVolei,
-    dias: 'Segundas e Quartas',
+    dias: 'Terças e Quintas',
     horario: '14h00 – 15h30',
     local: 'Ginásio Principal',
     totalAlunos: 18,
@@ -30,7 +30,7 @@ export const turmas = [
     modalidade: 'Futebol',
     faixaEtaria: '12 – 15 anos',
     icone: iconeFutebol,
-    dias: 'Segundas e Quartas',
+    dias: 'Terças e Quintas',
     horario: '16h00 – 17h30',
     local: 'Campo 1',
     totalAlunos: 20,
@@ -52,11 +52,11 @@ export const alunos = [
 ];
 
 export const historicoAulas = [
-  { data: '15/04/2026', diaSemana: 'Quarta-feira', status: 'ausente', observacao: '–' },
-  { data: '13/04/2026', diaSemana: 'Segunda-feira', status: 'presente', observacao: '–' },
-  { data: '10/04/2026', diaSemana: 'Sexta-feira', status: 'presente', observacao: '–' },
-  { data: '08/04/2026', diaSemana: 'Quarta-feira', status: 'justificado', observacao: 'Atestado médico' },
-  { data: '06/04/2026', diaSemana: 'Segunda-feira', status: 'presente', observacao: '–' },
+  { data: '16/04/2026', diaSemana: 'Quinta-feira', status: 'ausente', observacao: '–' },
+  { data: '14/04/2026', diaSemana: 'Terça-feira', status: 'presente', observacao: '–' },
+  { data: '09/04/2026', diaSemana: 'Quinta-feira', status: 'presente', observacao: '–' },
+  { data: '07/04/2026', diaSemana: 'Terça-feira', status: 'justificado', observacao: 'Atestado médico' },
+  { data: '02/04/2026', diaSemana: 'Quinta-feira', status: 'presente', observacao: '–' },
 ];
 
 export const avisos = [

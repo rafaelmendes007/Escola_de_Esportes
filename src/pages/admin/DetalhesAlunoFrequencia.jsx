@@ -12,10 +12,10 @@ const situacoes = {
 };
 
 const historico = [
-  { data: '28/09/2026 (Seg)', situacao: 'Ausente', justificativa: '—', observacao: '—' },
-  { data: '23/09/2026 (Qua)', situacao: 'Presente', justificativa: '—', observacao: '—' },
-  { data: '21/09/2026 (Seg)', situacao: 'Justificado', justificativa: 'Atestado médico', observacao: 'Consulta médica' },
-  { data: '16/09/2026 (Qua)', situacao: 'Presente', justificativa: '—', observacao: '—' },
+  { data: '29/09/2026 (Ter)', situacao: 'Ausente', justificativa: '—', observacao: '—' },
+  { data: '24/09/2026 (Qui)', situacao: 'Presente', justificativa: '—', observacao: '—' },
+  { data: '22/09/2026 (Ter)', situacao: 'Justificado', justificativa: 'Atestado médico', observacao: 'Consulta médica' },
+  { data: '17/09/2026 (Qui)', situacao: 'Presente', justificativa: '—', observacao: '—' },
 ];
 
 function DetalhesAlunoFrequencia() {

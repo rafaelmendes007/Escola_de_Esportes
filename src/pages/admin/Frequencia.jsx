@@ -4,11 +4,13 @@ import { BORDA } from '../../components/cores';
 import { CabecalhoPagina, CardIndicador, Etiqueta } from './componentes';
 import ModalJustificar from './ModalJustificar';
 import { frequenciaTurma } from './dados';
+import { ehDiaDeAula } from '../../utils/diasAula';
 
 function Frequencia() {
   const [registros, setRegistros] = useState(frequenciaTurma);
   const [modalAberto, setModalAberto] = useState(false);
   const [salvo, setSalvo] = useState(false);
+  const [data, setData] = useState('2026-03-19');
 
   const presentes = registros.filter((registro) => registro.presente).length;
   // Quem chegou a 3 faltas seguidas sem justificativa
@@ -35,7 +37,10 @@ function Frequencia() {
         </div>
         <div className="col-6 col-md-3">
           <label className="admin-rotulo">Data</label>
-          <input type="date" className="form-control form-control-sm admin-campo" defaultValue="2026-03-20" />
+          <input type="date" className="form-control form-control-sm admin-campo" value={data} onChange={(e) => setData(e.target.value)} />
+          {!ehDiaDeAula(data) && (
+            <div className="mt-1" style={{ color: '#DC2626', fontSize: '0.65rem' }}>As aulas são só às terças e quintas.</div>
+          )}
         </div>
         <div className="col-6 col-md-3">
           <label className="admin-rotulo">Semestre</label>
@@ -124,7 +129,7 @@ function Frequencia() {
         <div className="d-flex justify-content-end align-items-center gap-3 mt-3">
           {salvo && <span style={{ fontSize: '0.75rem', color: '#15803D' }}><i className="bi bi-check-circle-fill me-1"></i>Frequência salva</span>}
           {/* Aqui você faria a chamada da API para salvar a frequência */}
-          <button type="button" className="admin-botao" onClick={() => setSalvo(true)}>
+          <button type="button" className="admin-botao" onClick={() => setSalvo(true)} disabled={!ehDiaDeAula(data)}>
             <i className="bi bi-floppy"></i> Salvar frequência
           </button>
         </div>

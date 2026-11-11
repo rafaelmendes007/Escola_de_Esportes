@@ -85,7 +85,7 @@ function DetalhesAlunoVisaoGeral() {
             <Linha rotulo="Modalidade">{aluno.modalidade}</Linha>
             <Linha rotulo="Turma">{aluno.turma}</Linha>
             <Linha rotulo="Professor(a)">Claudia</Linha>
-            <Linha rotulo="Dias e horários">Segunda e quarta, 17h às 18h</Linha>
+            <Linha rotulo="Dias e horários">Terça e quinta, 17h às 18h</Linha>
             <Linha rotulo="Local">Ginásio principal - Unifor</Linha>
           </CardSecao>
         </div>
