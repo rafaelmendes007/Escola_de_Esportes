@@ -17,6 +17,25 @@ const FAIXAS_RENDA = [
   'Entre 04 e 06 salários',
   'Acima de 06 salários',
 ];
+// Opções iguais às do formulário de inscrição da Unifor
+const ESCOLARIDADES = [
+  'Ensino fundamental 1 incompleto',
+  'Ensino fundamental 2 incompleto',
+  'Ensino médio completo',
+  'Ensino superior incompleto',
+  'Ensino superior completo',
+  'Pós-graduação',
+  'Mestrado',
+  'Doutorado',
+  'Outro',
+];
+const PESSOAS_RESIDENCIA = [
+  'Entre 1 a 3 pessoas',
+  'Entre 4 a 6 pessoas',
+  'Entre 7 a 9 pessoas',
+  'Mais de 10 pessoas',
+  'Outro',
+];
 
 function PreenchimentoDados() {
   const navigate = useNavigate();
@@ -55,6 +74,10 @@ function PreenchimentoDados() {
     email: '',
     parentesco: '',
     parentescoOutro: '',
+    escolaridade: '',
+    escolaridadeOutro: '',
+    pessoasResidencia: '',
+    pessoasResidenciaOutro: '',
     rendaFamiliar: '',
     emergenciaNome: '',
     emergenciaTelefone: '',
@@ -624,6 +647,64 @@ function PreenchimentoDados() {
                     value={formData.parentescoOutro}
                     onChange={handleInputChange}
                     placeholder="Qual?"
+                    className="campo-input mt-2"
+                  />
+                )}
+              </div>
+
+              {/* Escolaridade do responsável */}
+              <div className="caixa-grupo-campos">
+                <label className="label-campo label-obrigatorio">Qual o grau de escolaridade do responsável?</label>
+                <div className="d-flex flex-column gap-2">
+                  {ESCOLARIDADES.map((escolaridade) => (
+                    <label key={escolaridade} className="opcao">
+                      <input
+                        type="radio"
+                        name="escolaridade"
+                        value={escolaridade}
+                        checked={formData.escolaridade === escolaridade}
+                        onChange={handleInputChange}
+                      />
+                      {escolaridade}
+                    </label>
+                  ))}
+                </div>
+                {formData.escolaridade === 'Outro' && (
+                  <input
+                    type="text"
+                    name="escolaridadeOutro"
+                    value={formData.escolaridadeOutro}
+                    onChange={handleInputChange}
+                    placeholder="Qual?"
+                    className="campo-input mt-2"
+                  />
+                )}
+              </div>
+
+              {/* Quantidade de pessoas na residência */}
+              <div className="caixa-grupo-campos">
+                <label className="label-campo">Quantas pessoas moram na residência?</label>
+                <div className="d-flex flex-column gap-2">
+                  {PESSOAS_RESIDENCIA.map((opcao) => (
+                    <label key={opcao} className="opcao">
+                      <input
+                        type="radio"
+                        name="pessoasResidencia"
+                        value={opcao}
+                        checked={formData.pessoasResidencia === opcao}
+                        onChange={handleInputChange}
+                      />
+                      {opcao}
+                    </label>
+                  ))}
+                </div>
+                {formData.pessoasResidencia === 'Outro' && (
+                  <input
+                    type="text"
+                    name="pessoasResidenciaOutro"
+                    value={formData.pessoasResidenciaOutro}
+                    onChange={handleInputChange}
+                    placeholder="Quantas?"
                     className="campo-input mt-2"
                   />
                 )}
