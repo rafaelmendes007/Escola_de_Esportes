@@ -8,6 +8,7 @@ const itensMenu = [
   { to: '/admin/alunos', texto: 'Alunos', icone: 'bi-person' },
   { to: '/admin/frequencia', texto: 'Frequência', icone: 'bi-check-circle' },
   { to: '/admin/avisos', texto: 'Avisos', icone: 'bi-megaphone' },
+  { to: '/admin/usuarios', texto: 'Usuários', icone: 'bi-person-gear' },
 ];
 
 // Telas do administrador: menu completo e título da barra superior por tela
@@ -20,7 +21,7 @@ function LayoutAdmin({ titulo = 'Painel Administrativo', children }) {
   ];
 
   return (
-    <LayoutPainel titulo={titulo} menu={menu} usuario="Administrador" linkAvisos="/admin/avisos" temAvisoNovo={false}>
+    <LayoutPainel titulo={titulo} menu={menu} perfil="Administrador" linkAvisos="/admin/avisos" temAvisoNovo={false}>
       <style>{`
         .admin-titulo { color: ${AZUL_TITULO}; font-size: 1.75rem; font-weight: 600; margin: 0; }
         .admin-subtitulo { color: #4B5563; font-size: 0.8rem; margin: 4px 0 0; }
