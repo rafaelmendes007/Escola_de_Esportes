@@ -19,11 +19,11 @@ function CardTurma({ turma }) {
           {turma.modalidade}{' '}
           <span style={{ fontWeight: 400, fontSize: '0.75rem' }}>({turma.faixaEtaria})</span>
         </div>
-        <div style={{ color: CINZA_TEXTO, fontSize: '0.7rem' }}>Turma {turma.id}</div>
+        <div style={{ color: CINZA_TEXTO, fontSize: '0.7rem' }}>{turma.nome}</div>
 
         <div className="d-flex flex-wrap align-items-end mt-2" style={{ color: TEXTO, fontSize: '0.7rem', columnGap: '48px' }}>
           <div>
-            <div><i className="bi bi-calendar3 me-2"></i>{turma.dias}</div>
+            <div><i className="bi bi-calendar3 me-2"></i>{turma.diasTexto}</div>
             <div><i className="bi bi-clock me-2"></i>{turma.horario}</div>
           </div>
           <div><i className="bi bi-geo-alt me-1"></i>{turma.local}</div>

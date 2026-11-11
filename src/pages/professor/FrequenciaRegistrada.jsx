@@ -1,19 +1,24 @@
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom';
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { TEXTO, CINZA_TEXTO, AZUL, AZUL_CLARO, VERDE } from '../../components/cores';
+import { Carregando } from '../../components/EstadoDados';
+import { useCarregar } from '../../hooks/useCarregar';
+import { buscarTurma } from '../../services/turmas';
+import { diaDaSemana, formatarData } from '../../utils/datas';
 import CardResumo from './CardResumo';
-import { buscarTurma } from './dados';
-
-const DIAS_SEMANA = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+import { paraTela } from './dadosProfessor';
 
 function FrequenciaRegistrada() {
   const { turmaId } = useParams();
-  const turma = buscarTurma(turmaId);
+  // Resultado enviado pela tela de chamada
+  const resultado = useLocation().state;
+  const { dados: turmaBanco } = useCarregar(() => buscarTurma(turmaId), [turmaId]);
 
-  // Resultado enviado pela tela de chamada (valores do protótipo se a tela for aberta direto)
-  const resultado = useLocation().state || { data: '2026-04-16', presentes: 15, ausentes: 2, justificados: 1 };
-  const [ano, mes, dia] = resultado.data.split('-');
-  const diaSemana = DIAS_SEMANA[new Date(ano, mes - 1, dia).getDay()];
+  // Aberta direto, sem uma chamada recém-salva: volta para a turma
+  if (!resultado) return <Navigate to={`/professor/turmas/${turmaId}/alunos`} replace />;
+  if (!turmaBanco) return <LayoutProfessor><Carregando /></LayoutProfessor>;
+
+  const turma = paraTela(turmaBanco);
 
   return (
     <LayoutProfessor>
@@ -35,13 +40,13 @@ function FrequenciaRegistrada() {
           </div>
           <div className="flex-grow-1">
             <div className="fw-semibold" style={{ color: TEXTO, fontSize: '0.85rem' }}>{turma.modalidade} ({turma.faixaEtaria})</div>
-            <div style={{ color: CINZA_TEXTO, fontSize: '0.7rem' }}>Turma {turma.id}</div>
+            <div style={{ color: CINZA_TEXTO, fontSize: '0.7rem' }}>{turma.nome}</div>
           </div>
           <div className="ps-3" style={{ borderLeft: '1px solid #D1D5DB' }}>
             <div className="fw-semibold" style={{ color: TEXTO, fontSize: '0.8rem' }}>
-              <i className="bi bi-calendar3 me-1"></i>{dia}/{mes}/{ano}
+              <i className="bi bi-calendar3 me-1"></i>{formatarData(resultado.data)}
             </div>
-            <div style={{ color: CINZA_TEXTO, fontSize: '0.7rem' }}>{diaSemana}</div>
+            <div style={{ color: CINZA_TEXTO, fontSize: '0.7rem' }}>{diaDaSemana(resultado.data)}</div>
           </div>
         </div>
 

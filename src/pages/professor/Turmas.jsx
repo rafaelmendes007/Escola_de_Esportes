@@ -1,41 +1,34 @@
-import { useState } from 'react';
 import LayoutProfessor from '../../components/LayoutProfessor';
-import { TEXTO, BORDA } from '../../components/cores';
+import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
+import { useAuth } from '../../context/AuthContext';
+import { useCarregar } from '../../hooks/useCarregar';
 import CardTurma from './CardTurma';
-import { turmas } from './dados';
+import { carregarTurmasDoProfessor } from './dadosProfessor';
 
 function Turmas() {
-  const [semestre, setSemestre] = useState('2026.1');
+  const { usuario } = useAuth();
+  const { dados: turmas, carregando, erro, recarregar } = useCarregar(() => carregarTurmasDoProfessor(usuario.uid), [usuario.uid]);
 
   return (
     <LayoutProfessor>
-      <div className="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
-        <div>
-          <h1 className="painel-titulo">Minhas turmas</h1>
-          <p className="painel-subtitulo">Veja abaixo as turmas que você leciona e acesse as informações.</p>
-        </div>
-
-        {/* Filtro de semestre */}
-        <div>
-          <label htmlFor="semestre" className="d-block mb-1" style={{ color: TEXTO, fontSize: '0.65rem' }}>Semestre</label>
-          <select
-            id="semestre"
-            className="form-select form-select-sm"
-            style={{ width: '180px', fontSize: '0.75rem', borderColor: BORDA }}
-            value={semestre}
-            onChange={(e) => setSemestre(e.target.value)}
-          >
-            <option value="2026.1">2026.1</option>
-            <option value="2025.2">2025.2</option>
-          </select>
-        </div>
+      <div className="mb-3">
+        <h1 className="painel-titulo">Minhas turmas</h1>
+        <p className="painel-subtitulo">Veja abaixo as turmas que você leciona e acesse as informações.</p>
       </div>
 
-      <div className="d-flex flex-column gap-3">
-        {turmas.map((turma) => (
-          <CardTurma key={turma.id} turma={turma} />
-        ))}
-      </div>
+      {carregando && <Carregando />}
+      {erro && <ErroCarga onTentarDeNovo={recarregar} />}
+      {turmas && (
+        turmas.length === 0 ? (
+          <div className="painel-card">
+            <Vazio texto="Nenhuma turma vinculada a você ainda. A administração define o professor de cada turma." />
+          </div>
+        ) : (
+          <div className="d-flex flex-column gap-3">
+            {turmas.map((turma) => <CardTurma key={turma.id} turma={turma} />)}
+          </div>
+        )
+      )}
     </LayoutProfessor>
   );
 }
