@@ -1,144 +1,80 @@
-import { useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState } from 'react';
 import { AZUL_TITULO } from '../../components/cores';
+import { atualizarAluno, DOCUMENTOS_ALUNO, eventoHistorico } from '../../services/alunos';
 import { CardIndicador } from './componentes';
 import DetalhesAlunoLayout from './DetalhesAlunoLayout';
 import ModalRematricular from './ModalRematricular';
-import { alunos, buscarPorId, detalhesAluno, linkWhatsApp } from './dados';
 
-// Aparência de cada status de documento
-const statusDocumento = {
-  Recebido: { icone: 'bi-check-circle-fill', cor: '#16A34A' },
-  Pendente: { icone: 'bi-exclamation-circle-fill', cor: '#DC2626', fundo: '#FECACA' },
-  Atualizar: { icone: 'bi-exclamation-triangle', cor: '#CA8A04', fundo: '#FEF9C3' },
-};
-
-const documentosIniciais = [
-  { id: 1, nome: 'Certidão/RG', descricao: 'Cópia da certidão de nascimento ou RG do aluno', status: 'Recebido', detalhe: 'em 12/03/2026', arquivo: 'certidao_ana.pdf', tamanho: '1,2 MB' },
-  { id: 2, nome: 'Comprovante de residência', descricao: 'Conta recente em nome do responsável', status: 'Pendente', arquivo: null },
-  { id: 3, nome: 'Foto 3x4', descricao: 'Foto atualizada do aluno', status: 'Atualizar', arquivo: 'foto_3x4.jpg', tamanho: '320 KB' },
-];
-
+// Os documentos são entregues na secretaria; aqui o admin marca o que já recebeu
 function DetalhesAlunoDocumentos() {
-  const { alunoId } = useParams();
-  const aluno = buscarPorId(alunos, alunoId);
-  const [documentos, setDocumentos] = useState(documentosIniciais);
-  const [modalAberto, setModalAberto] = useState(false);
-  // Documento que vai receber o arquivo escolhido no seletor
-  const [documentoAlvo, setDocumentoAlvo] = useState(null);
-  const inputArquivo = useRef(null);
-
-  const escolherArquivo = (idDocumento) => {
-    setDocumentoAlvo(idDocumento);
-    inputArquivo.current.click();
-  };
-
-  const handleArquivo = (e) => {
-    const arquivo = e.target.files[0];
-    if (!arquivo) return;
-    setDocumentos(documentos.map((doc) =>
-      doc.id === documentoAlvo ? { ...doc, arquivo: arquivo.name, tamanho: `${Math.ceil(arquivo.size / 1024)} KB`, status: 'Recebido', detalhe: 'agora' } : doc
-    ));
-    e.target.value = '';
-  };
-
-  const marcarComoRecebido = () => {
-    setDocumentos(documentos.map((doc) => (doc.arquivo ? { ...doc, status: 'Recebido', detalhe: doc.detalhe || 'agora' } : doc)));
-  };
-
-  const recebidos = documentos.filter((doc) => doc.status === 'Recebido').length;
+  const [rematriculando, setRematriculando] = useState(false);
+  const [salvando, setSalvando] = useState(null); // documento sendo salvo
 
   return (
     <DetalhesAlunoLayout
       aba="Documentos"
-      acoes={[
-        { texto: 'Abrir WhatsApp', icone: 'bi-whatsapp', estilo: 'whatsapp', href: linkWhatsApp(detalhesAluno.telefoneResponsavel) },
-        { texto: 'Adicionar documento', icone: 'bi-file-earmark-plus', estilo: 'primario', onClick: () => escolherArquivo(documentos.find((d) => !d.arquivo)?.id) },
-        { texto: 'Marcar como recebido', icone: 'bi-check-circle', estilo: 'secundario', onClick: marcarComoRecebido },
-        { texto: 'Rematricular Aluno', icone: 'bi-file-earmark', estilo: 'contorno', onClick: () => setModalAberto(true) },
+      acoes={({ whatsapp }) => [
+        whatsapp && { texto: 'Abrir WhatsApp', icone: 'bi-whatsapp', estilo: 'whatsapp', href: whatsapp },
+        { texto: 'Rematricular aluno', icone: 'bi-file-earmark', estilo: 'contorno', onClick: () => setRematriculando(true) },
       ]}
-      datas={[['Contatado em:', detalhesAluno.contatadoEm], ['Retorno até:', detalhesAluno.retornoAte]]}
-      informacao="Mantenha os documentos do aluno sempre atualizados para garantir sua permanência nas atividades."
+      informacao="Os documentos são entregues na secretaria. Marque cada um assim que for conferido."
     >
-      <input ref={inputArquivo} type="file" className="d-none" onChange={handleArquivo} />
+      {({ aluno, recarregar }) => {
+        const documentos = aluno.documentos || {};
+        const recebidos = DOCUMENTOS_ALUNO.filter(([chave]) => documentos[chave]).length;
 
-      <div className="painel-card p-3">
-        <h2 className="fw-semibold m-0" style={{ color: AZUL_TITULO, fontSize: '0.95rem' }}>Documentos do aluno</h2>
-        <p style={{ color: '#4B5563', fontSize: '0.7rem' }}>Gerencie os documentos obrigatórios para a matrícula e permanência.</p>
+        const alternar = async (chave, rotulo) => {
+          const recebido = !documentos[chave];
+          setSalvando(chave);
+          try {
+            await atualizarAluno(
+              aluno.id,
+              { [`documentos.${chave}`]: recebido },
+              eventoHistorico(recebido ? 'Documento recebido' : 'Documento marcado como pendente', rotulo, 'Documentos'),
+            );
+            recarregar();
+          } finally {
+            setSalvando(null);
+          }
+        };
 
-        <div className="row g-3 mb-3">
-          <div className="col-6"><CardIndicador icone="bi-file-earmark-check" rotulo="Recebidos" valor={recebidos} cor="verde" /></div>
-          <div className="col-6"><CardIndicador icone="bi-file-earmark-x" rotulo="Pendentes" valor={documentos.length - recebidos} cor="vermelho" /></div>
-        </div>
+        return (
+          <div className="painel-card p-3">
+            <h2 className="fw-semibold m-0" style={{ color: AZUL_TITULO, fontSize: '0.95rem' }}>Documentos do aluno</h2>
+            <p style={{ color: '#4B5563', fontSize: '0.7rem' }}>Documentos obrigatórios para a matrícula e a permanência.</p>
 
-        <div className="table-responsive rounded mb-3" style={{ border: '1px solid #D1D5DB' }}>
-          <table className="table m-0 align-middle" style={{ fontSize: '0.7rem' }}>
-            <thead>
-              <tr>
-                <th className="fw-medium" style={{ backgroundColor: '#E8F0FA' }}>Documento</th>
-                <th className="fw-medium" style={{ backgroundColor: '#E8F0FA' }}>Status</th>
-                <th className="fw-medium" style={{ backgroundColor: '#E8F0FA' }}>Arquivo</th>
-                <th className="fw-medium" style={{ backgroundColor: '#E8F0FA' }}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {documentos.map((doc) => {
-                const status = statusDocumento[doc.status];
+            <div className="row g-3 mb-3">
+              <div className="col-6"><CardIndicador icone="bi-file-earmark-check" rotulo="Recebidos" valor={recebidos} cor="verde" /></div>
+              <div className="col-6"><CardIndicador icone="bi-file-earmark-x" rotulo="Pendentes" valor={DOCUMENTOS_ALUNO.length - recebidos} cor="vermelho" /></div>
+            </div>
+
+            <div className="d-flex flex-column gap-2">
+              {DOCUMENTOS_ALUNO.map(([chave, rotulo]) => {
+                const recebido = Boolean(documentos[chave]);
                 return (
-                  <tr key={doc.id}>
-                    <td>
-                      <div className="d-flex gap-2">
-                        <span className="rounded-circle d-inline-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '28px', height: '28px', backgroundColor: '#C9DDF0', color: '#0B6BC2' }}>
-                          <i className="bi bi-file-earmark-text"></i>
-                        </span>
-                        <div>
-                          <div className="fw-medium" style={{ color: AZUL_TITULO }}>{doc.nome}</div>
-                          <div style={{ fontSize: '0.6rem', color: '#6B7280' }}>{doc.descricao}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="d-inline-flex align-items-center gap-1 rounded px-2 py-1" style={{ color: status.cor, backgroundColor: status.fundo || 'transparent' }}>
-                        <i className={`bi ${status.icone}`}></i>{doc.status}
-                      </span>
-                      {doc.detalhe && <div style={{ fontSize: '0.6rem', color: '#6B7280' }}>{doc.detalhe}</div>}
-                    </td>
-                    <td>
-                      {doc.arquivo ? (
-                        <div className="d-flex gap-1">
-                          <i className="bi bi-file-earmark"></i>
-                          <div>
-                            <div>{doc.arquivo}</div>
-                            <div style={{ fontSize: '0.6rem', color: '#6B7280' }}>{doc.tamanho}</div>
-                          </div>
-                        </div>
-                      ) : '—'}
-                    </td>
-                    <td>
-                      {doc.arquivo ? (
-                        <button type="button" className="btn btn-sm" style={{ backgroundColor: '#BFDDF3', color: '#0B6BC2', fontSize: '0.7rem', border: '1px solid #93C5E8' }}>
-                          <i className="bi bi-eye me-1"></i>Visualizar
-                        </button>
-                      ) : (
-                        <button type="button" className="admin-botao py-1 px-2" style={{ fontSize: '0.7rem' }} onClick={() => escolherArquivo(doc.id)}>
-                          Adicionar arquivo
-                        </button>
-                      )}
-                    </td>
-                  </tr>
+                  <label
+                    key={chave}
+                    className="d-flex align-items-center gap-3 rounded px-3 py-2"
+                    style={{ border: `1px solid ${recebido ? '#86EFAC' : '#D1D5DB'}`, backgroundColor: recebido ? '#F0FDF4' : '#FFFFFF', cursor: 'pointer' }}
+                  >
+                    <input
+                      type="checkbox"
+                      className="form-check-input mt-0"
+                      checked={recebido}
+                      disabled={salvando === chave}
+                      onChange={() => alternar(chave, rotulo)}
+                    />
+                    <span className="flex-grow-1" style={{ fontSize: '0.8rem', color: '#111827' }}>{rotulo}</span>
+                    <span style={{ fontSize: '0.7rem', color: recebido ? '#15803D' : '#DC2626' }}>{recebido ? 'Recebido' : 'Pendente'}</span>
+                  </label>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </div>
 
-        <div className="d-flex gap-2 rounded p-2" style={{ border: '1px solid #D1D5DB', fontSize: '0.65rem', color: '#374151' }}>
-          <i className="bi bi-info-circle"></i>
-          Todos os documentos são obrigatórios para matrícula e devem estar atualizados. Em caso de dúvidas entre em contato com a secretaria.
-        </div>
-      </div>
-
-      <ModalRematricular aberto={modalAberto} onFechar={() => setModalAberto(false)} aluno={aluno.nome} />
+            <ModalRematricular aberto={rematriculando} onFechar={() => setRematriculando(false)} aluno={aluno} onSalvo={recarregar} />
+          </div>
+        );
+      }}
     </DetalhesAlunoLayout>
   );
 }

@@ -2,21 +2,31 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
+import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
+import { useCarregar } from '../../hooks/useCarregar';
+import { listarAlunos } from '../../services/alunos';
+import { MODALIDADES } from '../../services/turmas';
+import { calcularIdade, formatarData } from '../../utils/datas';
+import { somenteDigitos } from '../../utils/validacao';
 import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
-import { alunos, modalidades, normalizar } from './dados';
+import { normalizar } from './dados';
 import { usePaginacao } from './usePaginacao';
 
-const filtrosVazios = { busca: '', modalidade: 'Todas', status: 'Todos' };
+const filtrosVazios = { busca: '', modalidade: 'Todas', status: 'Ativo' };
 
 function Alunos() {
   const [filtros, setFiltros] = useState(filtrosVazios);
   const [aplicados, setAplicados] = useState(filtrosVazios);
+  const { dados: alunos, carregando, erro, recarregar } = useCarregar(listarAlunos);
 
   const alterar = (e) => setFiltros({ ...filtros, [e.target.name]: e.target.value });
 
-  // Busca pelo nome ou pela matrícula (até a API ter o CPF)
-  const alunosFiltrados = alunos.filter((aluno) =>
-    (normalizar(aluno.nome).includes(normalizar(aplicados.busca)) || aluno.matricula.includes(aplicados.busca)) &&
+  // Busca pelo nome, pela matrícula ou pelo CPF/RG
+  const busca = normalizar(aplicados.busca);
+  const buscaDigitos = somenteDigitos(aplicados.busca);
+  const alunosFiltrados = (alunos || []).filter((aluno) =>
+    (normalizar(aluno.nome || '').includes(busca) ||
+      (buscaDigitos && (String(aluno.matricula).includes(buscaDigitos) || somenteDigitos(aluno.cpfAluno).includes(buscaDigitos)))) &&
     (aplicados.modalidade === 'Todas' || aluno.modalidade === aplicados.modalidade) &&
     (aplicados.status === 'Todos' || aluno.status === aplicados.status)
   );
@@ -33,17 +43,17 @@ function Alunos() {
         onSubmit={(e) => { e.preventDefault(); setAplicados(filtros); paginacao.setPagina(1); }}
       >
         <div className="col-12 col-md-4">
-          <label className="admin-rotulo">Buscar por nome ou CPF</label>
+          <label className="admin-rotulo">Buscar por nome, matrícula ou CPF</label>
           <div className="input-group input-group-sm">
             <span className="input-group-text bg-light"><i className="bi bi-search"></i></span>
-            <input name="busca" className="form-control admin-campo bg-light" placeholder="Digite o nome ou CPF..." value={filtros.busca} onChange={alterar} />
+            <input name="busca" className="form-control admin-campo bg-light" placeholder="Digite o nome, matrícula ou CPF..." value={filtros.busca} onChange={alterar} />
           </div>
         </div>
         <div className="col-6 col-md-3">
           <label className="admin-rotulo">Modalidade</label>
           <select name="modalidade" className="form-select form-select-sm admin-campo" value={filtros.modalidade} onChange={alterar}>
             <option>Todas</option>
-            {modalidades.map((modalidade) => <option key={modalidade}>{modalidade}</option>)}
+            {MODALIDADES.map((modalidade) => <option key={modalidade}>{modalidade}</option>)}
           </select>
         </div>
         <div className="col-6 col-md-3">
@@ -51,7 +61,7 @@ function Alunos() {
           <select name="status" className="form-select form-select-sm admin-campo" value={filtros.status} onChange={alterar}>
             <option>Todos</option>
             <option>Ativo</option>
-            <option>Desistente</option>
+            <option>Desligado</option>
           </select>
         </div>
         <div className="col-12 col-md-2">
@@ -60,42 +70,52 @@ function Alunos() {
       </form>
 
       <div className="painel-card p-3 d-flex flex-column" style={{ minHeight: '360px' }}>
-        <h2 className="fw-semibold mb-3" style={{ color: '#111827', fontSize: '0.95rem' }}>
-          Total de {alunosFiltrados.length} alunos matriculados
-        </h2>
-        <div className="table-responsive">
-          <table className="admin-tabela">
-            <thead>
-              <tr>
-                <th>Nome do aluno</th>
-                <th>Idade</th>
-                <th>Modalidade</th>
-                <th>Turma desejada</th>
-                <th>Data de matrícula</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginacao.itensDaPagina.map((aluno) => (
-                <tr key={aluno.id} style={{ borderBottom: `1px solid ${BORDA}` }}>
-                  <td>{aluno.nome}</td>
-                  <td>{aluno.idade}</td>
-                  <td>{aluno.modalidade}</td>
-                  <td>{aluno.turma}</td>
-                  <td>{aluno.dataMatricula}</td>
-                  <td><Etiqueta texto={aluno.status} /></td>
-                  <td>
-                    <Link to={`/admin/alunos/${aluno.id}`} className="admin-link">
-                      Ver detalhes <i className="bi bi-chevron-right"></i>
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <RodapeTabela paginacao={paginacao} />
+        {carregando && <Carregando />}
+        {erro && <ErroCarga onTentarDeNovo={recarregar} />}
+        {alunos && (
+          <>
+            <h2 className="fw-semibold mb-3" style={{ color: '#111827', fontSize: '0.95rem' }}>
+              Total de {alunosFiltrados.length} alunos
+            </h2>
+            {alunosFiltrados.length === 0 ? (
+              <Vazio texto={alunos.length ? 'Nenhum aluno com esses filtros.' : 'Nenhum aluno matriculado ainda. Os alunos entram pela lista de espera.'} />
+            ) : (
+              <div className="table-responsive">
+                <table className="admin-tabela">
+                  <thead>
+                    <tr>
+                      <th>Nome do aluno</th>
+                      <th>Idade</th>
+                      <th>Matrícula</th>
+                      <th>Turma</th>
+                      <th>Data de matrícula</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginacao.itensDaPagina.map((aluno) => (
+                      <tr key={aluno.id} style={{ borderBottom: `1px solid ${BORDA}` }}>
+                        <td>{aluno.nome}</td>
+                        <td>{calcularIdade(aluno.nascimento) ?? '—'}</td>
+                        <td>{aluno.matricula}</td>
+                        <td>{aluno.turmaNome || '—'}</td>
+                        <td>{formatarData(aluno.dataMatricula)}</td>
+                        <td><Etiqueta texto={aluno.status} cor={aluno.status === 'Ativo' ? 'verde' : 'vermelho'} /></td>
+                        <td>
+                          <Link to={`/admin/alunos/${aluno.id}`} className="admin-link">
+                            Ver detalhes <i className="bi bi-chevron-right"></i>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <RodapeTabela paginacao={paginacao} />
+          </>
+        )}
       </div>
     </LayoutAdmin>
   );

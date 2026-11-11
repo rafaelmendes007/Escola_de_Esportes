@@ -1,4 +1,4 @@
-import { doc, getDoc, getDocs, collection, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 // frequencias/{turmaId_AAAA-MM-DD}: chamada de uma turma em um dia
@@ -19,6 +19,14 @@ export async function salvarChamada(turmaId, data, registros, registradoPor) {
     data,
     registros,
     registradoPor,
+    atualizadoEm: serverTimestamp(),
+  });
+}
+
+// Grava a justificativa de uma falta já registrada na chamada
+export async function justificarFalta(turmaId, data, alunoId, justificativa) {
+  await updateDoc(doc(db, 'frequencias', idDaChamada(turmaId, data)), {
+    [`registros.${alunoId}.justificativa`]: justificativa,
     atualizadoEm: serverTimestamp(),
   });
 }

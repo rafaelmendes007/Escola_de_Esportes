@@ -1,101 +1,93 @@
 import { useState } from 'react';
+import { Vazio } from '../../components/EstadoDados';
+import { justificarFalta } from '../../services/frequencias';
+import { diaDaSemana, formatarData } from '../../utils/datas';
 import { CardIndicador } from './componentes';
 import DetalhesAlunoLayout from './DetalhesAlunoLayout';
 import ModalJustificar from './ModalJustificar';
-import { detalhesAluno, linkWhatsApp } from './dados';
 
-// Situação de cada aula no histórico
+// Aparência de cada situação no histórico
 const situacoes = {
   Ausente: { icone: 'bi-x-circle-fill', cor: '#DC2626' },
   Presente: { icone: 'bi-check-circle-fill', cor: '#16A34A' },
   Justificado: { icone: 'bi-file-earmark-text', cor: '#0B6BC2' },
 };
 
-const historico = [
-  { data: '29/09/2026 (Ter)', situacao: 'Ausente', justificativa: '—', observacao: '—' },
-  { data: '24/09/2026 (Qui)', situacao: 'Presente', justificativa: '—', observacao: '—' },
-  { data: '22/09/2026 (Ter)', situacao: 'Justificado', justificativa: 'Atestado médico', observacao: 'Consulta médica' },
-  { data: '17/09/2026 (Qui)', situacao: 'Presente', justificativa: '—', observacao: '—' },
-];
-
 function DetalhesAlunoFrequencia() {
   const [modalAberto, setModalAberto] = useState(false);
-  const [mostrarAnteriores, setMostrarAnteriores] = useState(false);
 
   return (
     <DetalhesAlunoLayout
       aba="Frequência"
-      acoes={[
-        { texto: 'Abrir WhatsApp', icone: 'bi-whatsapp', estilo: 'whatsapp', href: linkWhatsApp(detalhesAluno.telefoneResponsavel) },
+      acoes={({ whatsapp, abrirDesligamento, aluno }) => [
+        whatsapp && { texto: 'Abrir WhatsApp', icone: 'bi-whatsapp', estilo: 'whatsapp', href: whatsapp },
         { texto: 'Registrar justificativa', icone: 'bi-file-earmark-text', estilo: 'primario', onClick: () => setModalAberto(true) },
-        { texto: 'Desligar aluno', icone: 'bi-trash', estilo: 'perigo' },
+        aluno.status === 'Ativo' && { texto: 'Desligar aluno', icone: 'bi-trash', estilo: 'perigo', onClick: abrirDesligamento },
       ]}
-      datas={[['Contatado em:', detalhesAluno.contatadoEm], ['Retorno até:', detalhesAluno.retornoAte]]}
-      informacao="Apenas Administrador/Estagiário pode justificar faltas e corrigir o semestre atual."
+      informacao="Apenas Administrador/Estagiário pode justificar faltas. O professor registra só presente ou ausente."
     >
-      <div className="painel-card p-3">
-        <label className="admin-rotulo" style={{ fontSize: '0.7rem' }}>Semestre</label>
-        <select className="form-select form-select-sm admin-campo mb-3" style={{ maxWidth: '180px' }} defaultValue="2026.2">
-          <option>2026.2</option>
-          <option>2026.1</option>
-        </select>
+      {({ aluno, frequencia, recarregar }) => {
+        const faltasSemJustificativa = frequencia.aulas.filter((aula) => aula.situacao === 'Ausente').map((aula) => aula.data);
 
-        <div className="row g-3 mb-3">
-          <div className="col-6 col-md-3"><CardIndicador icone="bi-calendar3" rotulo="Presenças" valor={18} cor="verde" /></div>
-          <div className="col-6 col-md-3"><CardIndicador icone="bi-file-earmark-text" rotulo="Faltas justificadas" valor={1} cor="azul" /></div>
-          <div className="col-6 col-md-3"><CardIndicador icone="bi-x-lg" rotulo="Faltas não justificadas" valor={2} cor="vermelho" /></div>
-          <div className="col-6 col-md-3"><CardIndicador icone="bi-exclamation-triangle" rotulo="Faltas consecutivas não justificadas" valor="2/3" cor="amarelo" /></div>
-        </div>
+        return (
+          <div className="painel-card p-3">
+            <div className="row g-3 mb-3">
+              <div className="col-6 col-md-3"><CardIndicador icone="bi-calendar3" rotulo="Presenças" valor={frequencia.presencas} cor="verde" /></div>
+              <div className="col-6 col-md-3"><CardIndicador icone="bi-file-earmark-text" rotulo="Faltas justificadas" valor={frequencia.justificadas} cor="azul" /></div>
+              <div className="col-6 col-md-3"><CardIndicador icone="bi-x-lg" rotulo="Faltas não justificadas" valor={frequencia.ausencias} cor="vermelho" /></div>
+              <div className="col-6 col-md-3"><CardIndicador icone="bi-exclamation-triangle" rotulo="Faltas seguidas sem justificativa" valor={`${frequencia.faltasSeguidas}/3`} cor="amarelo" /></div>
+            </div>
 
-        <div className="d-flex align-items-center gap-2 rounded px-3 py-2 mb-3" style={{ backgroundColor: '#FBF2C0', color: '#A16207', fontSize: '0.7rem' }}>
-          <i className="bi bi-exclamation-triangle"></i>
-          Ao atingir 3/3 faltas consecutivas não justificadas, contatar responsável.
-        </div>
+            {frequencia.faltasSeguidas >= 3 && (
+              <div className="d-flex align-items-center gap-2 rounded px-3 py-2 mb-3" style={{ backgroundColor: '#FECACA', color: '#B91C1C', fontSize: '0.75rem' }}>
+                <i className="bi bi-exclamation-triangle"></i>
+                {aluno.nome} atingiu {frequencia.faltasSeguidas} faltas seguidas sem justificativa. Contate o responsável.
+              </div>
+            )}
 
-        <h2 className="fw-semibold mb-2" style={{ color: '#1B3A6B', fontSize: '0.9rem' }}>Histórico de frequência</h2>
-        <div className="table-responsive rounded mb-3" style={{ border: '1px solid #D1D5DB' }}>
-          <table className="table table-bordered m-0" style={{ fontSize: '0.7rem' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#E8F0FA' }}>
-                <th className="fw-medium" style={{ backgroundColor: 'inherit' }}>Data</th>
-                <th className="fw-medium" style={{ backgroundColor: 'inherit' }}>Situação</th>
-                <th className="fw-medium" style={{ backgroundColor: 'inherit' }}>Justificativa</th>
-                <th className="fw-medium" style={{ backgroundColor: 'inherit' }}>Observação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {historico.map((aula) => (
-                <tr key={aula.data}>
-                  <td>{aula.data}</td>
-                  <td style={{ color: situacoes[aula.situacao].cor }}>
-                    <i className={`bi ${situacoes[aula.situacao].icone} me-1`}></i>{aula.situacao}
-                  </td>
-                  <td>{aula.justificativa}</td>
-                  <td>{aula.observacao}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            <h2 className="fw-semibold mb-2" style={{ color: '#1B3A6B', fontSize: '0.9rem' }}>
+              Histórico de frequência {frequencia.percentual !== null && <span style={{ fontWeight: 400 }}>· {frequencia.percentual}% de frequência</span>}
+            </h2>
+            {frequencia.aulas.length === 0 ? (
+              <Vazio texto="Nenhuma chamada registrada para este aluno ainda." />
+            ) : (
+              <div className="table-responsive rounded" style={{ border: '1px solid #D1D5DB' }}>
+                <table className="table table-bordered m-0" style={{ fontSize: '0.75rem' }}>
+                  <thead>
+                    <tr>
+                      {['Data', 'Situação', 'Justificativa'].map((titulo) => (
+                        <th key={titulo} className="fw-medium" style={{ backgroundColor: '#E8F0FA' }}>{titulo}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {frequencia.aulas.map((aula) => (
+                      <tr key={aula.data}>
+                        <td>{formatarData(aula.data)} ({diaDaSemana(aula.data).slice(0, 3)})</td>
+                        <td style={{ color: situacoes[aula.situacao].cor }}>
+                          <i className={`bi ${situacoes[aula.situacao].icone} me-1`}></i>{aula.situacao}
+                        </td>
+                        <td>{aula.justificativa || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-        {/* Semestres anteriores ficam fechados e só podem ser lidos */}
-        <button
-          type="button"
-          className="btn btn-sm w-100 d-flex align-items-center gap-2 bg-white"
-          style={{ border: '1px solid #D1D5DB', fontSize: '0.7rem' }}
-          onClick={() => setMostrarAnteriores(!mostrarAnteriores)}
-        >
-          <i className="bi bi-book"></i> Semestres anteriores - somente leitura
-          <i className={`bi bi-chevron-${mostrarAnteriores ? 'up' : 'down'} ms-auto`}></i>
-        </button>
-        {mostrarAnteriores && (
-          <div className="p-2" style={{ fontSize: '0.7rem', color: '#4B5563' }}>
-            2026.1 — 22 presenças, 1 falta justificada, 0 faltas não justificadas.
+            <ModalJustificar
+              aberto={modalAberto}
+              onFechar={() => setModalAberto(false)}
+              aluno={aluno.nome}
+              faltas={faltasSemJustificativa}
+              onSalvar={async (data, texto) => {
+                await justificarFalta(aluno.turmaId, data, aluno.id, texto);
+                recarregar();
+              }}
+            />
           </div>
-        )}
-      </div>
-
-      <ModalJustificar aberto={modalAberto} onFechar={() => setModalAberto(false)} />
+        );
+      }}
     </DetalhesAlunoLayout>
   );
 }

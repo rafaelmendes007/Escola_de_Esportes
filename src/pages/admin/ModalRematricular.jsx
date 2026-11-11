@@ -1,115 +1,100 @@
 import { useState } from 'react';
+import { Carregando } from '../../components/EstadoDados';
+import { useCarregar } from '../../hooks/useCarregar';
+import { atualizarAluno, eventoHistorico } from '../../services/alunos';
+import { listarTurmas, nomeDaTurma } from '../../services/turmas';
 import { Modal } from './componentes';
 
-// Rematrícula presencial do aluno (aberta em Detalhes do aluno > Documentos)
-function ModalRematricular({ aberto, onFechar, aluno }) {
-  const [mudarModalidade, setMudarModalidade] = useState('nao');
+// Rematrícula presencial: confirma os dados, a assinatura e a turma do próximo período
+function ModalRematricular({ aberto, onFechar, aluno, onSalvo }) {
+  return (
+    <Modal aberto={aberto} onFechar={onFechar} largura="560px">
+      {aberto && <FormularioRematricula aluno={aluno} onFechar={onFechar} onSalvo={onSalvo} />}
+    </Modal>
+  );
+}
 
-  const handleConfirmar = (e) => {
+function FormularioRematricula({ aluno, onFechar, onSalvo }) {
+  const { dados: turmas, carregando } = useCarregar(listarTurmas);
+  const [turmaId, setTurmaId] = useState(aluno.turmaId || '');
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState('');
+
+  const abertas = (turmas || []).filter((turma) => turma.status !== 'Encerrada');
+
+  const confirmar = async (e) => {
     e.preventDefault();
-    // Aqui você faria a chamada da API para registrar a rematrícula
-    onFechar();
+    const turma = abertas.find((item) => item.id === turmaId);
+    if (!turma) return;
+    setSalvando(true);
+    setErro('');
+    try {
+      const mudouDeTurma = turma.id !== aluno.turmaId;
+      await atualizarAluno(
+        aluno.id,
+        { status: 'Ativo', turmaId: turma.id, turmaNome: nomeDaTurma(turma), modalidade: turma.modalidade },
+        eventoHistorico(
+          'Rematrícula confirmada',
+          mudouDeTurma ? `Rematriculado na turma ${nomeDaTurma(turma)} (antes: ${aluno.turmaNome || '—'}).` : `Rematriculado na turma ${nomeDaTurma(turma)}.`,
+          'Rematrícula',
+        ),
+      );
+      onFechar();
+      onSalvo();
+    } catch (error) {
+      console.error('Erro na rematrícula:', error);
+      setErro('Não foi possível confirmar a rematrícula. Tente de novo.');
+      setSalvando(false);
+    }
   };
 
   return (
-    <Modal aberto={aberto} onFechar={onFechar} largura="620px">
-      <form onSubmit={handleConfirmar}>
-        <h2 className="fw-semibold mb-1" style={{ color: '#111827', fontSize: '1.05rem' }}>Rematricular Aluno</h2>
-        <p style={{ color: '#4B5563', fontSize: '0.75rem' }}>Confirme os dados e registre a matrícula presencial.</p>
+    <form onSubmit={confirmar}>
+      <h2 className="fw-semibold mb-1" style={{ color: '#111827', fontSize: '1.05rem' }}>Rematricular aluno</h2>
+      <p style={{ color: '#4B5563', fontSize: '0.75rem' }}>Confirme os dados e registre a matrícula presencial de <strong>{aluno.nome}</strong>.</p>
 
-        {/* Resumo do aluno */}
-        <div className="row g-2 rounded p-3 mx-0 mb-3" style={{ backgroundColor: '#C9DDF0', fontSize: '0.75rem' }}>
-          <div className="col-4">
-            <div style={{ fontSize: '0.6rem', color: '#4B5563' }}>Aluno</div>
-            <div className="fw-medium">{aluno}</div>
-          </div>
-          <div className="col-4">
-            <div style={{ fontSize: '0.6rem', color: '#4B5563' }}>Turma atual</div>
-            <div className="fw-medium">Voleibol Misto 1</div>
-          </div>
-          <div className="col-4">
-            <div style={{ fontSize: '0.6rem', color: '#4B5563' }}>Situação de frequência</div>
-            <span className="rounded px-2" style={{ backgroundColor: '#BBF7D0', color: '#15803D', fontSize: '0.65rem' }}>
-              <i className="bi bi-check-circle-fill me-1"></i>Apto para rematrícula
+      <div className="row g-3 mb-3">
+        <div className="col-12 col-sm-6">
+          <label className="d-flex gap-2" style={{ fontSize: '0.75rem' }}>
+            <input type="checkbox" className="form-check-input mt-0 flex-shrink-0" required />
+            <span>
+              <span className="fw-medium">Dados confirmados <span style={{ color: '#DC2626' }}>*</span></span>
+              <span className="d-block" style={{ fontSize: '0.65rem', color: '#4B5563' }}>Os dados do aluno e do responsável foram conferidos.</span>
             </span>
-          </div>
-        </div>
-
-        <label className="admin-rotulo" style={{ fontSize: '0.75rem' }}>Idade atualizada <span style={{ color: '#DC2626' }}>*</span></label>
-        <div className="d-flex align-items-center gap-2 mb-3">
-          <input type="number" min="1" className="form-control form-control-sm admin-campo" style={{ width: '120px' }} defaultValue="13" required />
-          <span style={{ fontSize: '0.7rem', color: '#4B5563' }}>Anos</span>
-        </div>
-
-        <div className="row g-3 mb-3">
-          <div className="col-12 col-sm-6">
-            <label className="d-flex gap-2" style={{ fontSize: '0.75rem' }}>
-              <input type="checkbox" className="form-check-input mt-0 flex-shrink-0" required />
-              <span>
-                <span className="fw-medium">Dados confirmados <span style={{ color: '#DC2626' }}>*</span></span>
-                <span className="d-block" style={{ fontSize: '0.65rem', color: '#4B5563' }}>Confirme que os dados do aluno e responsável foram conferidos.</span>
-              </span>
-            </label>
-          </div>
-          <div className="col-12 col-sm-6">
-            <label className="d-flex gap-2" style={{ fontSize: '0.75rem' }}>
-              <input type="checkbox" className="form-check-input mt-0 flex-shrink-0" required />
-              <span>
-                <span className="fw-medium">Assinatura presencial coletada <span style={{ color: '#DC2626' }}>*</span></span>
-                <span className="d-block" style={{ fontSize: '0.65rem', color: '#4B5563' }}>Declare que a assinatura do responsável foi coletada presencialmente.</span>
-              </span>
-            </label>
-          </div>
-        </div>
-
-        <div className="admin-rotulo" style={{ fontSize: '0.75rem' }}>Solicitou mudança de modalidade? <span style={{ color: '#DC2626' }}>*</span></div>
-        <div className="d-flex gap-4 mb-3" style={{ fontSize: '0.75rem' }}>
-          <label className="d-flex align-items-center gap-1">
-            <input type="radio" name="mudar" className="form-check-input mt-0" checked={mudarModalidade === 'nao'} onChange={() => setMudarModalidade('nao')} /> Não
-          </label>
-          <label className="d-flex align-items-center gap-1">
-            <input type="radio" name="mudar" className="form-check-input mt-0" checked={mudarModalidade === 'sim'} onChange={() => setMudarModalidade('sim')} /> Sim
           </label>
         </div>
-
-        {/* Só dá para escolher outra modalidade se o responsável pediu mudança */}
-        <div className="row g-3 mb-3">
-          <div className="col-12 col-sm-6">
-            <label className="admin-rotulo" style={{ fontSize: '0.75rem' }}>Modalidade desejada</label>
-            <select className="form-select form-select-sm admin-campo" defaultValue="Voleibol" disabled={mudarModalidade === 'nao'}>
-              <option>Voleibol</option>
-              <option>Futsal</option>
-              <option>Atletismo</option>
-            </select>
-          </div>
-          <div className="col-12 col-sm-6">
-            <label className="admin-rotulo" style={{ fontSize: '0.75rem' }}>Turma desejada</label>
-            <select className="form-select form-select-sm admin-campo" defaultValue="Voleibol Misto 2">
-              <option>Voleibol Misto 1</option>
-              <option>Voleibol Misto 2</option>
-            </select>
-            <div className="text-end mt-1">
-              <span className="rounded px-2" style={{ backgroundColor: '#BBF7D0', color: '#15803D', fontSize: '0.65rem' }}>
-                <i className="bi bi-check-circle-fill me-1"></i>Vaga disponível
-              </span>
-            </div>
-          </div>
+        <div className="col-12 col-sm-6">
+          <label className="d-flex gap-2" style={{ fontSize: '0.75rem' }}>
+            <input type="checkbox" className="form-check-input mt-0 flex-shrink-0" required />
+            <span>
+              <span className="fw-medium">Assinatura presencial coletada <span style={{ color: '#DC2626' }}>*</span></span>
+              <span className="d-block" style={{ fontSize: '0.65rem', color: '#4B5563' }}>A assinatura do responsável foi coletada presencialmente.</span>
+            </span>
+          </label>
         </div>
+      </div>
 
-        <div className="d-flex gap-3 rounded p-3 mb-4" style={{ backgroundColor: '#C9DDF0' }}>
-          <i className="bi bi-file-earmark fs-4" style={{ color: '#0B6BC2' }}></i>
-          <div>
-            <div className="fw-semibold" style={{ color: '#0B6BC2', fontSize: '0.8rem' }}>Documentos já cadastrados reaproveitados</div>
-            <div style={{ fontSize: '0.7rem', color: '#374151' }}>Os documentos do aluno permanecem válidos para a próxima matrícula.</div>
-          </div>
-        </div>
+      <label className="admin-rotulo" htmlFor="turma-rematricula" style={{ fontSize: '0.75rem' }}>Turma <span style={{ color: '#DC2626' }}>*</span></label>
+      {carregando ? <Carregando /> : (
+        <select id="turma-rematricula" className="form-select form-select-sm admin-campo mb-3" value={turmaId} onChange={(e) => setTurmaId(e.target.value)} required>
+          <option value="">Selecione</option>
+          {abertas.map((turma) => (
+            <option key={turma.id} value={turma.id}>{nomeDaTurma(turma)} ({turma.idadeMinima} a {turma.idadeMaxima} anos)</option>
+          ))}
+        </select>
+      )}
 
-        <div className="d-flex justify-content-end gap-3">
-          <button type="button" className="admin-botao-contorno" onClick={onFechar}>Cancelar</button>
-          <button type="submit" className="admin-botao">Confirmar matrícula</button>
-        </div>
-      </form>
-    </Modal>
+      <div className="d-flex gap-3 rounded p-3 mb-4" style={{ backgroundColor: '#C9DDF0' }}>
+        <i className="bi bi-file-earmark fs-4" style={{ color: '#0B6BC2' }}></i>
+        <div style={{ fontSize: '0.7rem', color: '#374151' }}>Os documentos já entregues continuam valendo para a nova matrícula.</div>
+      </div>
+
+      {erro && <div className="mb-2" style={{ color: '#B91C1C', fontSize: '0.8rem' }}>{erro}</div>}
+      <div className="d-flex justify-content-end gap-3">
+        <button type="button" className="admin-botao-contorno" onClick={onFechar} disabled={salvando}>Cancelar</button>
+        <button type="submit" className="admin-botao" disabled={salvando || !turmaId}>{salvando ? 'Salvando...' : 'Confirmar matrícula'}</button>
+      </div>
+    </form>
   );
 }
 
