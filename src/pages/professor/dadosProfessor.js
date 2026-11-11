@@ -8,6 +8,7 @@ import iconeLutas from '../../assets/modalidades/icone-lutas.png';
 import iconeVolei4x4 from '../../assets/modalidades/icone-volei4x4.png';
 import iconeVoleibol from '../../assets/modalidades/icone-voleibol.png';
 import { listarAlunosDaTurma } from '../../services/alunos';
+import { avisoNovo, listarAvisos } from '../../services/avisos';
 import { buscarTurma, listarTurmasDoProfessor } from '../../services/turmas';
 
 const ICONES = {
@@ -56,4 +57,13 @@ export async function carregarTurmaComAlunos(turmaId) {
 // "Ana Silva" -> "AS"
 export function iniciais(nome = '') {
   return nome.split(' ').map((parte) => parte[0]).slice(0, 2).join('').toUpperCase();
+}
+
+// Avisos para professores: os gerais e os das turmas deste professor (mais recentes primeiro)
+export async function carregarAvisosDoProfessor(professorId) {
+  const [avisos, turmas] = await Promise.all([listarAvisos(), listarTurmasDoProfessor(professorId)]);
+  const minhasTurmas = new Set(turmas.map((turma) => turma.id));
+  return avisos
+    .filter((aviso) => aviso.paraProfessores && (!aviso.turmaId || minhasTurmas.has(aviso.turmaId)))
+    .map((aviso) => ({ ...aviso, novo: avisoNovo(aviso) }));
 }

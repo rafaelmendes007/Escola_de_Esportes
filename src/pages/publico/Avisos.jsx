@@ -1,4 +1,8 @@
 import HeaderPublico from '../../components/HeaderPublico';
+import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
+import { useCarregar } from '../../hooks/useCarregar';
+import { avisoNovo, listarAvisos } from '../../services/avisos';
+import { formatarData } from '../../utils/datas';
 
 // Cores do protótipo
 const AZUL = '#0047B8';
@@ -8,36 +12,20 @@ const CINZA_TEXTO = '#6B7280';
 const VERMELHO_BADGE = '#EF4444';
 
 function Avisos() {
-  // Array com os avisos
-  const avisos = [
-    {
-      id: 1,
-      titulo: 'Treino cancelado por chuva',
-      descricao: 'Os treinos de futebol de hoje (16h) estão cancelados devido à chuva. As atividades serão repostas na próxima semana.',
-      data: 'Hoje',
-      hora: '10:32',
-      novo: true,
+  // Avisos que a administração publicou para os responsáveis
+  const { dados, carregando, erro, recarregar } = useCarregar(listarAvisos);
+  const avisos = (dados || [])
+    .filter((aviso) => aviso.paraResponsaveis)
+    .map((aviso) => ({
+      id: aviso.id,
+      titulo: aviso.titulo,
+      descricao: aviso.mensagem,
+      turma: aviso.turmaNome,
+      data: formatarData(aviso.criadoEm),
+      hora: aviso.criadoEm?.toDate().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) || '',
+      novo: avisoNovo(aviso),
       remetente: 'Administração',
-    },
-    {
-      id: 3,
-      titulo: 'Feriado – sem aulas',
-      descricao: 'Não haverá aulas no dia 21/04 (Tiradentes). As aulas retornam normalmente no dia 22/04.',
-      data: '08/04/2026',
-      hora: '11:20',
-      novo: false,
-      remetente: 'Administração',
-    },
-    {
-      id: 4,
-      titulo: 'Entrega de uniformes',
-      descricao: 'Os uniformes estarão disponíveis para retirada na secretaria a partir de segunda feira.',
-      data: '10/04/2026',
-      hora: '16:45',
-      novo: false,
-      remetente: 'Administração',
-    },
-  ];
+    }));
 
   return (
     <div
@@ -205,6 +193,9 @@ function Avisos() {
           </p>
 
           {/* Lista de Avisos */}
+          {carregando && <Carregando />}
+          {erro && <ErroCarga onTentarDeNovo={recarregar} />}
+          {dados && avisos.length === 0 && <Vazio texto="Nenhum aviso no momento." />}
           <div className="lista-avisos">
             {avisos.map((aviso) => (
               <div key={aviso.id} className="card-aviso">
@@ -237,7 +228,7 @@ function Avisos() {
 
                   {/* Remetente */}
                   <p className="remetente-aviso">
-                    Enviado por {aviso.remetente}
+                    Enviado por {aviso.remetente}{aviso.turma ? ` · ${aviso.turma}` : ''}
                   </p>
                 </div>
               </div>

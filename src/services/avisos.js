@@ -18,3 +18,10 @@ export function publicoDoAviso(aviso) {
   if (aviso.paraProfessores && aviso.paraResponsaveis) return 'Responsáveis e Professores';
   return aviso.paraProfessores ? 'Professores' : 'Responsáveis';
 }
+
+// Aviso publicado nos últimos 3 dias aparece como "Novo"
+const TRES_DIAS = 3 * 24 * 60 * 60 * 1000;
+export const avisoNovo = (aviso) => {
+  const data = aviso.criadoEm?.toDate?.();
+  return Boolean(data) && Date.now() - data.getTime() < TRES_DIAS;
+};

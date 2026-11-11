@@ -1,14 +1,20 @@
 import { useState } from 'react';
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { TEXTO, CINZA_TEXTO, AZUL, AZUL_CLARO, BORDA, VERMELHO } from '../../components/cores';
-import { avisos } from './dados';
+import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
+import { useAuth } from '../../context/AuthContext';
+import { useCarregar } from '../../hooks/useCarregar';
+import { formatarDataHora } from '../../utils/datas';
+import { carregarAvisosDoProfessor } from './dadosProfessor';
 
 function Avisos() {
-  // 'todos' ou 'naoLidos'
+  const { usuario } = useAuth();
+  const { dados: avisos, carregando, erro, recarregar } = useCarregar(() => carregarAvisosDoProfessor(usuario.uid), [usuario.uid]);
+  // 'todos' ou 'novos' (publicados nos últimos 3 dias)
   const [filtro, setFiltro] = useState('todos');
 
-  const naoLidos = avisos.filter((aviso) => aviso.novo);
-  const avisosVisiveis = filtro === 'todos' ? avisos : naoLidos;
+  const novos = (avisos || []).filter((aviso) => aviso.novo);
+  const avisosVisiveis = filtro === 'todos' ? avisos || [] : novos;
 
   // Estilo do botão de filtro (selecionado ou não)
   const estiloFiltro = (ativo) => ({
@@ -30,11 +36,17 @@ function Avisos() {
           <button type="button" className="btn btn-sm rounded-pill" style={estiloFiltro(filtro === 'todos')} onClick={() => setFiltro('todos')}>
             {filtro === 'todos' && <i className="bi bi-check-circle-fill me-1"></i>}Todos
           </button>
-          <button type="button" className="btn btn-sm rounded-pill" style={estiloFiltro(filtro === 'naoLidos')} onClick={() => setFiltro('naoLidos')}>
-            {filtro === 'naoLidos' && <i className="bi bi-check-circle-fill me-1"></i>}Não lidos ({naoLidos.length})
+          <button type="button" className="btn btn-sm rounded-pill" style={estiloFiltro(filtro === 'novos')} onClick={() => setFiltro('novos')}>
+            {filtro === 'novos' && <i className="bi bi-check-circle-fill me-1"></i>}Novos ({novos.length})
           </button>
         </div>
       </div>
+
+      {carregando && <Carregando />}
+      {erro && <ErroCarga onTentarDeNovo={recarregar} />}
+      {avisos && avisosVisiveis.length === 0 && (
+        <div className="painel-card"><Vazio texto={filtro === 'novos' ? 'Nenhum aviso novo.' : 'Nenhum aviso por enquanto.'} /></div>
+      )}
 
       <div className="d-flex flex-column gap-2">
         {avisosVisiveis.map((aviso) => (
@@ -61,14 +73,14 @@ function Avisos() {
                     </span>
                   )}
                 </div>
-                <span style={{ color: CINZA_TEXTO, fontSize: '0.7rem' }}>{aviso.dataHora}</span>
+                <span style={{ color: CINZA_TEXTO, fontSize: '0.7rem' }}>{formatarDataHora(aviso.criadoEm)}</span>
               </div>
 
-              <p className="mb-2 mt-1" style={{ color: TEXTO, fontSize: '0.75rem' }}>{aviso.descricao}</p>
+              <p className="mb-2 mt-1" style={{ color: TEXTO, fontSize: '0.75rem', whiteSpace: 'pre-line' }}>{aviso.mensagem}</p>
 
               <div className="d-flex align-items-center gap-2" style={{ fontSize: '0.65rem' }}>
-                <span style={{ color: CINZA_TEXTO }}>Enviado por Administração</span>
-                <span className="rounded px-2 py-1" style={{ backgroundColor: '#F3F4F6', color: TEXTO, fontWeight: 500 }}>{aviso.destino}</span>
+                <span style={{ color: CINZA_TEXTO }}>Enviado por {aviso.autor || 'Administração'}</span>
+                <span className="rounded px-2 py-1" style={{ backgroundColor: '#F3F4F6', color: TEXTO, fontWeight: 500 }}>{aviso.turmaNome}</span>
               </div>
             </div>
           </div>

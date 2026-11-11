@@ -9,7 +9,7 @@ import { matricularDaInscricao } from '../../services/alunos';
 import { listarTurmas, nomeDaTurma } from '../../services/turmas';
 import { calcularIdade, formatarData, formatarDataHora } from '../../utils/datas';
 import { Etiqueta, Modal } from './componentes';
-import { linkWhatsApp } from './dados';
+import { linkWhatsApp } from '../../utils/texto';
 
 // Cartão com ícone e título
 function CardSecao({ icone, titulo, children }) {

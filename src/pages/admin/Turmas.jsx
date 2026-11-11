@@ -6,7 +6,7 @@ import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
 import { useCarregar } from '../../hooks/useCarregar';
 import { MODALIDADES, faixaEtaria } from '../../services/turmas';
 import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
-import { normalizar } from './dados';
+import { normalizar } from '../../utils/texto';
 import { carregarTurmasComContagens } from './dadosTurmas';
 import ModalNovaTurma from './ModalNovaTurma';
 import { usePaginacao } from './usePaginacao';

@@ -3,7 +3,7 @@ import { AZUL_TITULO, BORDA } from '../../components/cores';
 import { Vazio } from '../../components/EstadoDados';
 import { calcularIdade, formatarData } from '../../utils/datas';
 import DetalhesTurmaLayout from './DetalhesTurmaLayout';
-import { linkWhatsApp } from './dados';
+import { linkWhatsApp } from '../../utils/texto';
 
 // Inscrições que aguardam vaga nesta modalidade e na faixa de idade da turma, em ordem de chegada
 function DetalhesTurmaListaEspera() {

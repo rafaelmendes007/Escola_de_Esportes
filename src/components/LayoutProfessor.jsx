@@ -1,10 +1,16 @@
 import { useLocation } from 'react-router-dom';
 import LayoutPainel from './LayoutPainel';
-import { avisos } from '../pages/professor/dados';
+import { useAuth } from '../context/AuthContext';
+import { useCarregar } from '../hooks/useCarregar';
+import { carregarAvisosDoProfessor } from '../pages/professor/dadosProfessor';
 
 // Telas do professor: menu com Painel e Turmas
 function LayoutProfessor({ children }) {
   const { pathname } = useLocation();
+  const { usuario } = useAuth();
+  // Bolinha vermelha no sino quando há aviso dos últimos 3 dias
+  const { dados: avisos } = useCarregar(() => carregarAvisosDoProfessor(usuario.uid), [usuario.uid]);
+
   // Avisos ficam "dentro" do Painel no protótipo
   const emTurmas = pathname.startsWith('/professor/turmas');
 
@@ -19,7 +25,7 @@ function LayoutProfessor({ children }) {
       menu={menu}
       perfil="Professor"
       linkAvisos="/professor/avisos"
-      temAvisoNovo={avisos.some((aviso) => aviso.novo)}
+      temAvisoNovo={Boolean(avisos?.some((aviso) => aviso.novo))}
     >
       {children}
     </LayoutPainel>

@@ -9,7 +9,7 @@ import { MODALIDADES } from '../../services/turmas';
 import { calcularIdade, formatarData } from '../../utils/datas';
 import { somenteDigitos } from '../../utils/validacao';
 import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
-import { normalizar } from './dados';
+import { normalizar } from '../../utils/texto';
 import { usePaginacao } from './usePaginacao';
 
 const filtrosVazios = { busca: '', modalidade: 'Todas', status: 'Ativo' };

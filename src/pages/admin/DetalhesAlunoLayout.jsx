@@ -9,7 +9,7 @@ import { listarChamadasDaTurma, resumoDoAluno } from '../../services/frequencias
 import { buscarTurma } from '../../services/turmas';
 import { calcularIdade, formatarData } from '../../utils/datas';
 import { Etiqueta, Informacao, Modal } from './componentes';
-import { linkWhatsApp } from './dados';
+import { linkWhatsApp } from '../../utils/texto';
 
 // Estilos dos botões do painel "Ações e acompanhamento"
 const estilosAcao = {
