@@ -7,6 +7,7 @@ import HomePage from './pages/publico/HomePage';
 import Modalidades from './pages/publico/Modalidades';
 import Avisos from './pages/publico/Avisos';
 import SelecaoModalidades from './pages/publico/SelecaoModalidades';
+import ConsentimentoInscricao from './pages/publico/ConsentimentoInscricao';
 import PreenchimentoDados from './pages/publico/PreenchimentoDados';
 import ConfirmacaoInscricao from './pages/publico/ConfirmacaoInscricao';
 import AcompanhamentoInscricao from './pages/publico/AcompanhamentoInscricao';
@@ -53,6 +54,7 @@ function App() {
 
           {/* Inscrição na lista de espera: modalidade -> dados -> confirmação */}
           <Route path="/inscricao" element={<SelecaoModalidades />} />
+          <Route path="/inscricao/consentimento" element={<ConsentimentoInscricao />} />
           <Route path="/inscricao/dados" element={<PreenchimentoDados />} />
           <Route path="/inscricao/confirmacao" element={<ConfirmacaoInscricao />} />
 

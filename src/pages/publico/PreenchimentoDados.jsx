@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
+import { temConsentimento } from '../../utils/consentimento';
 import { CampoSelect, CampoSimNao, CampoTexto } from './CamposInscricao';
 import {
   DEFICIENCIAS, ESCOLARIDADES, FAIXAS_RENDA, FATORES_SANGUINEOS, PARENTESCOS, PESSOAS_RESIDENCIA, PLANOS_ODONTO,
@@ -96,6 +97,11 @@ function PreenchimentoDados() {
     // Aqui você faria a chamada da API
     navigate('/inscricao');
   };
+
+  // Sem o aceite dos termos, volta para a tela de consentimento
+  if (!temConsentimento()) {
+    return <Navigate to="/inscricao/consentimento" replace />;
+  }
 
   // Props repetidas em todos os campos
   const campo = { dados: formData, onChange: handleInputChange };
