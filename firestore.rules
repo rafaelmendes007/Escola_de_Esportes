@@ -9,10 +9,24 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function perfil() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.perfil;
+    }
+
     function ehAdmin() {
       return logado()
         && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
-        && get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.perfil == 'admin';
+        && perfil() == 'admin';
+    }
+
+    function ehProfessor() {
+      return logado()
+        && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid))
+        && perfil() == 'professor';
+    }
+
+    function ehEquipe() {
+      return ehAdmin() || ehProfessor();
     }
 
     // usuarios/{uid}: { nome, email, perfil: 'admin' | 'professor', criadoEm }
@@ -23,6 +37,62 @@ service cloud.firestore {
       allow create, update: if ehAdmin()
         && request.resource.data.perfil in ['admin', 'professor'];
       allow delete: if ehAdmin();
+    }
+
+    // inscricoes/{id}: inscrição completa da lista de espera (dados pessoais e de saúde).
+    // Qualquer pessoa pode criar a própria inscrição, mas só o admin lê, altera ou apaga.
+    match /inscricoes/{id} {
+      allow create: if inscricaoNovaValida(request.resource.data);
+      allow read, update, delete: if ehAdmin();
+    }
+
+    function inscricaoNovaValida(dados) {
+      return dados.status == 'Aguardando vaga'
+        && dados.nomeAluno is string && dados.nomeAluno.size() > 0 && dados.nomeAluno.size() <= 120
+        && dados.nomeResponsavel is string && dados.nomeResponsavel.size() > 0 && dados.nomeResponsavel.size() <= 120
+        && dados.cpfResponsavel is string && dados.cpfResponsavel.size() == 14
+        && dados.modalidade is string && dados.modalidade.size() > 0
+        && dados.protocolo is string && dados.protocolo.matches('^ESP-[A-Z0-9]{4}-[A-Z0-9]{4}$')
+        && dados.consentimento.politicaPrivacidade == true
+        && dados.consentimento.termosDeUso == true
+        && dados.consentimento.aceitoEm is timestamp
+        && dados.criadoEm == request.time;
+    }
+
+    // consultasInscricao/{protocolo}: resumo para o responsável acompanhar a inscrição.
+    // Só abre quem sabe o protocolo (get); ninguém de fora consegue listar os protocolos.
+    match /consultasInscricao/{protocolo} {
+      allow get: if true;
+      allow list: if ehAdmin();
+      // Só pode ser criada junto com a inscrição de mesmo protocolo (no mesmo envio)
+      allow create: if request.resource.data.status == 'Aguardando vaga'
+        && request.resource.data.posicao == null
+        && getAfter(/databases/$(database)/documents/inscricoes/$(request.resource.data.inscricaoId)).data.protocolo == protocolo;
+      allow update, delete: if ehAdmin();
+    }
+
+    // turmas/{id}: todos da equipe veem; só o admin cria e altera
+    match /turmas/{id} {
+      allow read: if ehEquipe();
+      allow write: if ehAdmin();
+    }
+
+    // alunos/{id}: alunos matriculados
+    match /alunos/{id} {
+      allow read: if ehEquipe();
+      allow write: if ehAdmin();
+    }
+
+    // frequencias/{id}: chamada de uma turma em um dia. Professor registra; admin corrige e justifica.
+    match /frequencias/{id} {
+      allow read, create, update: if ehEquipe();
+      allow delete: if ehAdmin();
+    }
+
+    // avisos/{id}: comunicados. A página pública de avisos lê sem login; só o admin publica.
+    match /avisos/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
     }
   }
 }

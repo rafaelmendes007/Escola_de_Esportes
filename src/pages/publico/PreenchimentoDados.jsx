@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
 import { temConsentimento } from '../../utils/consentimento';
+import { lerRascunho, salvarRascunho } from '../../utils/rascunhoInscricao';
+import { mascaraCpf, mascaraTelefone } from '../../utils/validacao';
+import { validarInscricao } from './validarInscricao';
 import { CampoSelect, CampoSimNao, CampoTexto } from './CamposInscricao';
 import {
   DEFICIENCIAS, ESCOLARIDADES, FAIXAS_RENDA, FATORES_SANGUINEOS, PARENTESCOS, PESSOAS_RESIDENCIA, PLANOS_ODONTO,
@@ -32,7 +35,7 @@ function Secao({ numero, titulo, descricao, children }) {
 function PreenchimentoDados() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     // Responsável
     nomeResponsavel: '',
     cpfResponsavel: '',
@@ -54,6 +57,7 @@ function PreenchimentoDados() {
     nomeAluno: '',
     nascimento: '',
     genero: '',
+    generoOutro: '',
     cpfAluno: '',
     endereco: '',
     bairro: '',
@@ -83,20 +87,40 @@ function PreenchimentoDados() {
     deficienciaOutro: '',
     atencaoEspecial: '',
     atencaoEspecialQual: '',
-  });
+    // Se a pessoa voltou da tela de modalidade, recupera o que já tinha preenchido
+    ...lerRascunho(),
+  }));
+  // { nomeDoCampo: 'mensagem' } dos campos com problema
+  const [erros, setErros] = useState({});
 
   // Manipular mudanças de input
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Some com o erro do campo assim que a pessoa mexe nele
+    if (erros[name]) setErros((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleEnviar = (e) => {
     e.preventDefault();
-    console.log('Dados para envio:', formData);
-    // Aqui você faria a chamada da API
+    const encontrados = validarInscricao(formData);
+    setErros(encontrados);
+
+    const primeiro = Object.keys(encontrados)[0];
+    if (primeiro) {
+      // Leva a pessoa até o primeiro campo com problema
+      const campo = document.querySelector(`[name="${primeiro}"]`);
+      campo?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      campo?.focus({ preventScroll: true });
+      return;
+    }
+
+    // Os dados seguem para a tela de modalidade; o envio acontece lá
+    salvarRascunho(formData);
     navigate('/inscricao');
   };
+
+  const totalErros = Object.values(erros).filter(Boolean).length;
 
   // Sem o aceite dos termos, volta para a tela de consentimento
   if (!temConsentimento()) {
@@ -104,7 +128,7 @@ function PreenchimentoDados() {
   }
 
   // Props repetidas em todos os campos
-  const campo = { dados: formData, onChange: handleInputChange };
+  const campo = { dados: formData, onChange: handleInputChange, erros };
 
   return (
     <div className="min-vh-100 d-flex flex-column" style={{ fontFamily: "'Inter', sans-serif", backgroundColor: '#F7F8FA' }}>
@@ -219,6 +243,28 @@ function PreenchimentoDados() {
           box-shadow: 0 0 0 3px rgba(0, 71, 184, 0.1);
         }
 
+        .campo-com-erro,
+        .campo-com-erro:focus {
+          border-color: #DC2626;
+          box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+        .erro-campo {
+          color: #DC2626;
+          font-size: 0.75rem;
+          margin-top: 0.35rem;
+        }
+        .aviso-erros {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          background-color: #FEF2F2;
+          border: 1px solid #FECACA;
+          color: #B91C1C;
+          border-radius: 8px;
+          padding: 0.75rem 1rem;
+          font-size: 0.9rem;
+        }
+
         .botao-enviar {
           background-color: ${AZUL};
           color: white;
@@ -237,7 +283,7 @@ function PreenchimentoDados() {
       <HeaderPublico />
 
       <main className="flex-grow-1 w-100 py-4 px-3">
-        <form className="mx-auto" style={{ maxWidth: '920px' }} onSubmit={handleEnviar}>
+        <form className="mx-auto" style={{ maxWidth: '920px' }} onSubmit={handleEnviar} noValidate>
           <button type="button" onClick={() => navigate('/')} className="botao-voltar mb-4">
             <span>←</span>
             Voltar
@@ -254,8 +300,8 @@ function PreenchimentoDados() {
 
           <Secao numero={1} titulo="Dados do responsável">
             <CampoTexto rotulo="Nome completo" obrigatorio nome="nomeResponsavel" placeholder="Ex.: Maria Silva" {...campo} />
-            <CampoTexto rotulo="CPF do responsável" obrigatorio nome="cpfResponsavel" placeholder="000.000.000-00" dica="Usado para acompanhar a inscrição." {...campo} />
-            <CampoTexto rotulo="Telefone (WhatsApp)" obrigatorio nome="telefone" tipo="tel" placeholder="(85) 99999-9999" {...campo} />
+            <CampoTexto rotulo="CPF do responsável" obrigatorio nome="cpfResponsavel" placeholder="000.000.000-00" mascara={mascaraCpf} dica="Usado para acompanhar a inscrição." {...campo} />
+            <CampoTexto rotulo="Telefone (WhatsApp)" obrigatorio nome="telefone" tipo="tel" placeholder="(85) 99999-9999" mascara={mascaraTelefone} {...campo} />
             <CampoTexto rotulo="E-mail" nome="email" tipo="email" placeholder="Ex.: maria@email.com" {...campo} />
             <CampoSelect rotulo="Parentesco com o aluno" obrigatorio nome="parentesco" opcoes={PARENTESCOS} {...campo} />
             <CampoSelect rotulo="Escolaridade do responsável" obrigatorio nome="escolaridade" opcoes={ESCOLARIDADES} {...campo} />
@@ -265,7 +311,7 @@ function PreenchimentoDados() {
 
           <Secao numero={2} titulo="Contato de emergência" descricao="Em caso de emergência, ligar para:">
             <CampoTexto rotulo="Nome" obrigatorio nome="emergenciaNome" placeholder="Ex.: José Silva" inteiro {...campo} />
-            <CampoTexto rotulo="Telefone" obrigatorio nome="emergenciaTelefone" tipo="tel" placeholder="(85) 99999-9999" {...campo} />
+            <CampoTexto rotulo="Telefone" obrigatorio nome="emergenciaTelefone" tipo="tel" placeholder="(85) 99999-9999" mascara={mascaraTelefone} {...campo} />
             <CampoSelect rotulo="Grau de parentesco" obrigatorio nome="emergenciaParentesco" opcoes={PARENTESCOS} {...campo} />
           </Secao>
 
@@ -299,6 +345,13 @@ function PreenchimentoDados() {
             <CampoSelect rotulo="Apresenta algum problema de saúde?" obrigatorio nome="problemaSaude" opcoes={PROBLEMAS_SAUDE} placeholderOutro="Descreva" {...campo} />
             <CampoSelect rotulo="Apresenta algum tipo de deficiência?" obrigatorio nome="deficiencia" opcoes={DEFICIENCIAS} placeholderOutro="Descreva" {...campo} />
           </Secao>
+
+          {totalErros > 0 && (
+            <div className="aviso-erros" role="alert">
+              <i className="bi bi-exclamation-circle"></i>
+              {totalErros === 1 ? '1 campo precisa ser corrigido.' : `${totalErros} campos precisam ser corrigidos.`} Eles estão marcados em vermelho.
+            </div>
+          )}
 
           <div className="d-flex justify-content-end mt-4 mb-5">
             <button type="submit" className="botao-enviar">

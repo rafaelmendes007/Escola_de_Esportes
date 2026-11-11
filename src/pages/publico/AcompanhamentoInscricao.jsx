@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
+import { consultarInscricao } from '../../services/inscricoes';
+import { cpfValido, mascaraCpf } from '../../utils/validacao';
 import ilustracaoLupa from '../../assets/ilustracao-lupa.png';
 
 // Cores do protótipo
@@ -15,22 +17,46 @@ function AcompanhamentoInscricao() {
   // Estado do formulário
   const [formData, setFormData] = useState({
     cpf: '',
-    dataNascimento: '',
+    protocolo: '',
   });
+  const [consultando, setConsultando] = useState(false);
+  const [erro, setErro] = useState('');
 
-  // Manipular mudanças de input
+  // Manipular mudanças de input (CPF com máscara, protocolo em maiúsculas)
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    const valor = name === 'cpf' ? mascaraCpf(value) : value.toUpperCase();
+    setFormData((prev) => ({ ...prev, [name]: valor }));
+    setErro('');
   };
 
-  // Manipular submit do formulário
-  const handleConsultar = () => {
-    // Aqui você implementaria a lógica de consulta
-    navigate('/acompanhar-inscricao/resultado', { state: formData });
+  // Busca o resumo da inscrição pelo protocolo + CPF do responsável
+  const handleConsultar = async (e) => {
+    e.preventDefault();
+    if (!cpfValido(formData.cpf)) {
+      setErro('Digite um CPF válido.');
+      return;
+    }
+    if (formData.protocolo.replace(/[^A-Z0-9]/gi, '').length < 8) {
+      setErro('Digite o protocolo completo (ex.: ESP-7KQ2-M9XA).');
+      return;
+    }
+
+    setConsultando(true);
+    try {
+      const inscricao = await consultarInscricao(formData.protocolo, formData.cpf);
+      if (!inscricao) {
+        // Mesma mensagem nos dois casos para não revelar se o protocolo existe
+        setErro('Não encontramos uma inscrição com este protocolo e CPF. Confira os dados.');
+        return;
+      }
+      navigate('/acompanhar-inscricao/resultado', { state: { inscricao } });
+    } catch (error) {
+      console.error('Erro ao consultar inscrição:', error);
+      setErro('Não foi possível consultar agora. Verifique sua internet e tente de novo.');
+    } finally {
+      setConsultando(false);
+    }
   };
 
   return (
@@ -188,14 +214,14 @@ function AcompanhamentoInscricao() {
               Acompanhar inscrição
             </h1>
             <p className="descricao-pagina">
-              Digite o CPF e a data de nascimento do responsável para consultar o status da inscrição.
+              Digite o CPF do responsável e o protocolo recebido ao final da inscrição.
             </p>
           </div>
 
           {/* Container com duas colunas */}
           <div className="container-conteudo">
             {/* Coluna do Formulário */}
-            <div className="coluna-formulario">
+            <form className="coluna-formulario" onSubmit={handleConsultar} noValidate>
               {/* CPF do Responsável */}
               <div className="caixa-grupo-campos">
                 <label className="label-campo label-obrigatorio">CPF do responsável</label>
@@ -205,32 +231,40 @@ function AcompanhamentoInscricao() {
                   value={formData.cpf}
                   onChange={handleInputChange}
                   placeholder="000.000.000-00"
+                  inputMode="numeric"
                   className="campo-input"
                 />
               </div>
 
-              {/* Data de Nascimento do Responsável */}
+              {/* Protocolo da inscrição */}
               <div className="caixa-grupo-campos">
-                <label className="label-campo label-obrigatorio">Data de nascimento do responsável</label>
+                <label className="label-campo label-obrigatorio">Protocolo da inscrição</label>
                 <input
                   type="text"
-                  name="dataNascimento"
-                  value={formData.dataNascimento}
+                  name="protocolo"
+                  value={formData.protocolo}
                   onChange={handleInputChange}
-                  placeholder="dd/mm/aaaa"
+                  placeholder="ESP-XXXX-XXXX"
+                  autoComplete="off"
                   className="campo-input"
                 />
               </div>
+
+              {erro && (
+                <div role="alert" className="mb-3" style={{ color: '#B91C1C', backgroundColor: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '0.6rem 1rem', fontSize: '0.9rem' }}>
+                  {erro}
+                </div>
+              )}
 
               {/* Botão Consultar */}
               <button
-                type="button"
-                onClick={handleConsultar}
+                type="submit"
                 className="botao-consultar"
+                disabled={consultando}
               >
-                Consultar
+                {consultando ? 'Consultando...' : 'Consultar'}
               </button>
-            </div>
+            </form>
 
             {/* Coluna da Ilustração */}
             <div className="coluna-ilustracao">

@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
+import { enviarInscricao } from '../../services/inscricoes';
+import { apagarConsentimento, lerConsentimento } from '../../utils/consentimento';
+import { apagarRascunho, lerRascunho } from '../../utils/rascunhoInscricao';
 
 // Ícones das modalidades
 import iconeAtletismo from '../../assets/modalidades/icone-atletismo.png';
@@ -23,6 +26,10 @@ function SelecaoModalidades() {
   
   // Estado para armazenar modalidade selecionada
   const [modalidadeSelecionada, setModalidadeSelecionada] = useState(null);
+  const [enviando, setEnviando] = useState(false);
+  const [erroEnvio, setErroEnvio] = useState('');
+  // Dados preenchidos na tela anterior
+  const [rascunho] = useState(lerRascunho);
 
   // Array com todas as modalidades
   const modalidades = [
@@ -79,14 +86,33 @@ function SelecaoModalidades() {
   };
 
   // Manipular clique no botão Continuar
-  const handleContinuar = () => {
-    if (modalidadeSelecionada) {
-      const modalidade = modalidades.find(m => m.id === modalidadeSelecionada);
-      console.log('Modalidade selecionada:', modalidade);
-      // Aqui você pode navegar para a próxima tela passando a modalidade selecionada
-      navigate('/inscricao/confirmacao', { state: { modalidade } });
+  // Envia a inscrição completa (dados + modalidade + aceite dos termos) para o Firestore
+  const handleContinuar = async () => {
+    if (!modalidadeSelecionada || enviando) return;
+    const modalidade = modalidades.find((m) => m.id === modalidadeSelecionada);
+
+    setErroEnvio('');
+    setEnviando(true);
+    try {
+      const protocolo = await enviarInscricao({
+        dados: rascunho,
+        modalidade: modalidade.nome,
+        consentimento: lerConsentimento(),
+      });
+      apagarRascunho();
+      apagarConsentimento();
+      navigate('/inscricao/confirmacao', { replace: true, state: { protocolo, modalidade: modalidade.nome } });
+    } catch (error) {
+      console.error('Erro ao enviar inscrição:', error);
+      setErroEnvio('Não foi possível enviar a inscrição. Verifique sua internet e tente de novo.');
+      setEnviando(false);
     }
   };
+
+  // Sem os dados da tela anterior (ou sem o aceite dos termos), volta para o começo
+  if (!rascunho || !lerConsentimento()) {
+    return <Navigate to="/inscricao/consentimento" replace />;
+  }
 
   return (
     <div
@@ -335,14 +361,19 @@ function SelecaoModalidades() {
           </div>
 
           {/* Botão Continuar */}
-          <div className="d-flex justify-content-end" style={{ marginTop: 'auto', paddingTop: '1rem' }}>
+          <div className="d-flex flex-column align-items-end gap-2" style={{ marginTop: 'auto', paddingTop: '1rem' }}>
+            {erroEnvio && (
+              <div role="alert" style={{ color: '#B91C1C', backgroundColor: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '0.6rem 1rem', fontSize: '0.9rem' }}>
+                {erroEnvio}
+              </div>
+            )}
             <button
               type="button"
               onClick={handleContinuar}
-              disabled={!modalidadeSelecionada}
+              disabled={!modalidadeSelecionada || enviando}
               className="botao-continuar"
             >
-              Continuar
+              {enviando ? 'Enviando inscrição...' : 'Enviar inscrição'}
             </button>
           </div>
         </div>

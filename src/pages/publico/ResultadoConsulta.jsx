@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
 
 // Cores do protótipo
@@ -6,25 +6,11 @@ const AZUL = '#0047B8';
 const AZUL_ESCURO = '#1F2A44';
 const CINZA_TEXTO = '#6B7280';
 
-// Dados de exemplo até existir a API de consulta
-const inscricao = {
-  aluno: 'Carolina Lima',
-  cpf: '123.456.789-00',
-  modalidade: 'Futebol',
-  turma: 'Futebol – Turma F01',
-  dataInscricao: '15/04/2026',
-  posicao: 12,
-  status: 'Aguardando vaga',
-  documentos: 'Em análise',
-};
-
-// Etapas da inscrição; "feita" marca as que já aconteceram
-const etapas = [
-  { titulo: 'Inscrição realizada', descricao: '15/04/2026', feita: true },
-  { titulo: 'Aguardando vaga', descricao: 'Você está na lista de espera. Avisaremos quando surgir uma vaga.', feita: true },
-  { titulo: 'Convocado para realizar matrícula', feita: false },
-  { titulo: 'Matrícula realizada', feita: false },
-  { titulo: 'Matrícula confirmada', feita: false },
+// Ordem das etapas da inscrição. A etapa atual e as anteriores aparecem como feitas.
+const ETAPAS = [
+  { status: 'Aguardando vaga', titulo: 'Inscrição na lista de espera', descricao: 'Avisaremos quando surgir uma vaga.' },
+  { status: 'Convocado', titulo: 'Convocado para realizar matrícula', descricao: 'Compareça à secretaria com os documentos.' },
+  { status: 'Matriculado', titulo: 'Matrícula realizada' },
 ];
 
 function Linha({ rotulo, children }) {
@@ -36,6 +22,17 @@ function Linha({ rotulo, children }) {
 }
 
 function ResultadoConsulta() {
+  // Resumo vindo da tela de consulta (protocolo + CPF já conferidos)
+  const inscricao = useLocation().state?.inscricao;
+  if (!inscricao) {
+    return <Navigate to="/acompanhar-inscricao" replace />;
+  }
+
+  const cancelada = inscricao.status === 'Cancelada';
+  const etapaAtual = ETAPAS.findIndex((etapa) => etapa.status === inscricao.status);
+  const etapas = ETAPAS.map((etapa, indice) => ({ ...etapa, feita: !cancelada && indice <= etapaAtual }));
+  const corStatus = cancelada ? '#DC2626' : '#16A34A';
+
   return (
     <div className="min-vh-100 d-flex flex-column bg-white" style={{ fontFamily: "'Inter', sans-serif" }}>
       <HeaderPublico />
@@ -50,21 +47,21 @@ function ResultadoConsulta() {
           <div className="rounded overflow-hidden" style={{ border: '1px solid #E5E7EB' }}>
             <div className="row g-0">
               {/* Dados da inscrição */}
-              <div className="col-12 col-md-6 p-4" style={{ backgroundColor: '#ECF8EF' }}>
+              <div className="col-12 col-md-6 p-4" style={{ backgroundColor: cancelada ? '#FEF2F2' : '#ECF8EF' }}>
                 <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                  <h2 className="m-0 fw-bold" style={{ color: AZUL_ESCURO, fontSize: '1.3rem' }}>{inscricao.aluno}</h2>
-                  <span className="rounded px-2 py-1 text-white" style={{ backgroundColor: '#16A34A', fontSize: '0.75rem' }}>{inscricao.status}</span>
+                  <h2 className="m-0 fw-bold" style={{ color: AZUL_ESCURO, fontSize: '1.3rem' }}>{inscricao.nomeAluno}</h2>
+                  <span className="rounded px-2 py-1 text-white" style={{ backgroundColor: corStatus, fontSize: '0.75rem' }}>{inscricao.status}</span>
                 </div>
-                <Linha rotulo="CPF do responsável">{inscricao.cpf}</Linha>
+                <Linha rotulo="Protocolo">{inscricao.protocolo}</Linha>
                 <Linha rotulo="Modalidade">{inscricao.modalidade}</Linha>
-                <Linha rotulo="Turma">{inscricao.turma}</Linha>
                 <Linha rotulo="Data da inscrição">{inscricao.dataInscricao}</Linha>
-                <Linha rotulo="Posição na fila">
-                  <span className="rounded px-2" style={{ border: `1px solid ${AZUL}`, color: AZUL, backgroundColor: '#EFF6FF' }}>{inscricao.posicao}º</span>
-                </Linha>
-                <Linha rotulo="Documentos">
-                  <span className="rounded px-2" style={{ color: '#B45309', backgroundColor: '#FEF3C7' }}>{inscricao.documentos}</span>
-                </Linha>
+                {inscricao.status === 'Aguardando vaga' && (
+                  <Linha rotulo="Posição na fila">
+                    {inscricao.posicao
+                      ? <span className="rounded px-2" style={{ border: `1px solid ${AZUL}`, color: AZUL, backgroundColor: '#EFF6FF' }}>{inscricao.posicao}º</span>
+                      : 'em definição pela administração'}
+                  </Linha>
+                )}
               </div>
 
               {/* Linha do tempo */}
@@ -88,7 +85,9 @@ function ResultadoConsulta() {
 
             <div className="d-flex align-items-center gap-2 px-4 py-3" style={{ backgroundColor: '#EFF6FF', borderTop: '1px solid #E5E7EB', color: AZUL_ESCURO, fontSize: '0.85rem' }}>
               <i className="bi bi-info-circle" style={{ color: AZUL }}></i>
-              Fique atento ao seu e-mail e telefone. Entraremos em contato quando houver uma vaga disponível.
+              {cancelada
+                ? 'Esta inscrição foi cancelada. Em caso de dúvida, fale com a secretaria da Escola de Esportes.'
+                : 'Fique atento ao seu e-mail e telefone. Entraremos em contato quando houver uma vaga disponível.'}
             </div>
           </div>
         </div>

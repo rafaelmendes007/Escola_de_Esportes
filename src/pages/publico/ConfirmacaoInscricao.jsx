@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
 
 // Cores do protótipo
@@ -9,6 +10,24 @@ const CINZA_TEXTO = '#6B7280';
 const VERDE_SUCESSO = '#10B981';
 
 function ConfirmacaoInscricao() {
+  // Protocolo gerado no envio da inscrição (tela de modalidade)
+  const { protocolo, modalidade } = useLocation().state || {};
+  const [copiado, setCopiado] = useState(false);
+
+  // Sem inscrição enviada, não há o que confirmar
+  if (!protocolo) {
+    return <Navigate to="/" replace />;
+  }
+
+  const copiarProtocolo = async () => {
+    try {
+      await navigator.clipboard.writeText(protocolo);
+      setCopiado(true);
+    } catch {
+      // Sem permissão para copiar: a pessoa ainda pode anotar o código
+    }
+  };
+
   return (
     <div
       className="min-vh-100 d-flex flex-column bg-white"
@@ -68,6 +87,37 @@ function ConfirmacaoInscricao() {
           line-height: 1.6;
           margin: 0;
           max-width: 600px;
+        }
+
+        .caixa-protocolo {
+          border: 2px dashed ${AZUL};
+          background-color: ${AZUL_CLARO};
+          border-radius: 10px;
+          padding: 1rem 1.5rem;
+          margin-bottom: 1.5rem;
+          text-align: center;
+        }
+        .rotulo-protocolo {
+          color: ${CINZA_TEXTO};
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .codigo-protocolo {
+          color: ${AZUL_ESCURO};
+          font-size: 1.6rem;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          margin: 0.25rem 0 0.5rem;
+          font-family: ui-monospace, 'Consolas', monospace;
+        }
+        .botao-copiar {
+          border: 1px solid ${AZUL};
+          background-color: #FFFFFF;
+          color: ${AZUL};
+          border-radius: 6px;
+          padding: 4px 12px;
+          font-size: 0.85rem;
         }
 
         .aviso-info {
@@ -203,14 +253,24 @@ function ConfirmacaoInscricao() {
 
           {/* Descrição */}
           <p className="descricao-confirmacao">
-            A inscrição foi enviada e os documentos serão analisados pela administração.
+            A inscrição em <strong>{modalidade}</strong> entrou na lista de espera. Avisaremos pelo telefone ou e-mail quando surgir uma vaga.
           </p>
+
+          {/* Protocolo para acompanhar a inscrição */}
+          <div className="caixa-protocolo">
+            <div className="rotulo-protocolo">Seu protocolo</div>
+            <div className="codigo-protocolo">{protocolo}</div>
+            <button type="button" className="botao-copiar" onClick={copiarProtocolo}>
+              <i className={`bi ${copiado ? 'bi-check2' : 'bi-copy'} me-1`}></i>
+              {copiado ? 'Copiado' : 'Copiar código'}
+            </button>
+          </div>
 
           {/* Aviso Informativo */}
           <div className="aviso-info">
             <div className="aviso-icone">i</div>
             <p className="aviso-texto">
-              Para acompanhar a inscrição, use o CPF e a data de nascimento do responsável na opção "Acompanhar inscrição".
+              Guarde este código. Para acompanhar a inscrição, use o protocolo e o CPF do responsável na opção "Acompanhar inscrição".
             </p>
           </div>
 
