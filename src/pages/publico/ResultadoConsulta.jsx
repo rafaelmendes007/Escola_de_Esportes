@@ -55,7 +55,7 @@ function ResultadoConsulta() {
                   <h2 className="m-0 fw-bold" style={{ color: AZUL_ESCURO, fontSize: '1.3rem' }}>{inscricao.aluno}</h2>
                   <span className="rounded px-2 py-1 text-white" style={{ backgroundColor: '#16A34A', fontSize: '0.75rem' }}>{inscricao.status}</span>
                 </div>
-                <Linha rotulo="CPF do aluno">{inscricao.cpf}</Linha>
+                <Linha rotulo="CPF do responsável">{inscricao.cpf}</Linha>
                 <Linha rotulo="Modalidade">{inscricao.modalidade}</Linha>
                 <Linha rotulo="Turma">{inscricao.turma}</Linha>
                 <Linha rotulo="Data da inscrição">{inscricao.dataInscricao}</Linha>

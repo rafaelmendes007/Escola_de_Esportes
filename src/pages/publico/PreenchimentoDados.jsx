@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
 
 // Cores do protótipo
@@ -8,10 +8,18 @@ const AZUL_ESCURO = '#1F2A44';
 const CINZA_CLARO = '#F3F4F6';
 const CINZA_BORDA = '#D1D5DB';
 
+// Opções dos novos campos do responsável
+const PARENTESCOS = ['Mãe', 'Pai', 'Avó/Avô', 'Tia/Tio', 'Irmã/Irmão', 'Outro'];
+const FAIXAS_RENDA = [
+  'Até 01 salário mínimo',
+  'Entre 01 e 02 salários',
+  'Entre 02 e 04 salários',
+  'Entre 04 e 06 salários',
+  'Acima de 06 salários',
+];
+
 function PreenchimentoDados() {
   const navigate = useNavigate();
-  // Modalidade escolhida na tela anterior (vazio se a página foi aberta direto)
-  const modalidadeEscolhida = useLocation().state?.modalidade;
   const [documentos, setDocumentos] = useState([
     {
       id: 1,
@@ -40,11 +48,17 @@ function PreenchimentoDados() {
     nomeAluno: '',
     nascimento: '',
     genero: '',
-    cpfAluno: '',
     escola: '',
     nomeResponsavel: '',
+    cpfResponsavel: '',
     telefone: '',
     email: '',
+    parentesco: '',
+    parentescoOutro: '',
+    rendaFamiliar: '',
+    emergenciaNome: '',
+    emergenciaTelefone: '',
+    emergenciaParentesco: '',
   });
 
   const [dragActive, setDragActive] = useState(false);
@@ -204,6 +218,35 @@ function PreenchimentoDados() {
 
         .caixa-grupo-campos {
           margin-bottom: 1.5rem;
+        }
+
+        .grupo-opcoes {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem 1rem;
+        }
+
+        .opcao {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          font-size: 0.85rem;
+          color: ${AZUL_ESCURO};
+          cursor: pointer;
+        }
+
+        .opcao input {
+          width: 16px;
+          height: 16px;
+          accent-color: ${AZUL};
+          cursor: pointer;
+        }
+
+        .subsecao-titulo {
+          font-size: 0.9rem;
+          font-weight: 600;
+          color: ${AZUL_ESCURO};
+          margin: 1.5rem 0 0.75rem;
         }
 
         .aviso-info {
@@ -436,11 +479,6 @@ function PreenchimentoDados() {
             >
               Preencha as informações abaixo e anexe os documentos para entrar na lista de espera.
             </p>
-            {/* Modalidade escolhida, com atalho para trocar */}
-            <p className="mt-2 mb-0" style={{ color: AZUL_ESCURO, fontSize: '0.9rem' }}>
-              Modalidade: <strong>{modalidadeEscolhida ? modalidadeEscolhida.nome : 'não escolhida'}</strong>{' '}
-              <Link to="/inscricao" style={{ color: AZUL }}>{modalidadeEscolhida ? 'Trocar' : 'Escolher'}</Link>
-            </p>
           </div>
 
           {/* Container com 3 colunas */}
@@ -491,18 +529,6 @@ function PreenchimentoDados() {
                 </div>
               </div>
 
-              {/* CPF do Aluno */}
-              <div className="caixa-grupo-campos">
-                <label className="label-campo label-obrigatorio">CPF do aluno</label>
-                <input
-                  type="text"
-                  name="cpfAluno"
-                  value={formData.cpfAluno}
-                  onChange={handleInputChange}
-                  placeholder="000.000.000-00"
-                  className="campo-input"
-                />
-              </div>
 
               {/* Escola em que estuda */}
               <div className="caixa-grupo-campos">
@@ -535,6 +561,19 @@ function PreenchimentoDados() {
                 />
               </div>
 
+              {/* CPF do Responsável (usado para acompanhar a inscrição) */}
+              <div className="caixa-grupo-campos">
+                <label className="label-campo label-obrigatorio">CPF do responsável</label>
+                <input
+                  type="text"
+                  name="cpfResponsavel"
+                  value={formData.cpfResponsavel}
+                  onChange={handleInputChange}
+                  placeholder="000.000.000-00"
+                  className="campo-input"
+                />
+              </div>
+
               {/* Telefone */}
               <div className="caixa-grupo-campos">
                 <label className="label-campo label-obrigatorio">Telefone</label>
@@ -559,6 +598,95 @@ function PreenchimentoDados() {
                   placeholder="Ex.: maria@email.com"
                   className="campo-input"
                 />
+              </div>
+
+              {/* Grau de parentesco do responsável com o aluno */}
+              <div className="caixa-grupo-campos">
+                <label className="label-campo label-obrigatorio">Grau de parentesco com o aluno</label>
+                <div className="grupo-opcoes">
+                  {PARENTESCOS.map((parentesco) => (
+                    <label key={parentesco} className="opcao">
+                      <input
+                        type="radio"
+                        name="parentesco"
+                        value={parentesco}
+                        checked={formData.parentesco === parentesco}
+                        onChange={handleInputChange}
+                      />
+                      {parentesco}
+                    </label>
+                  ))}
+                </div>
+                {formData.parentesco === 'Outro' && (
+                  <input
+                    type="text"
+                    name="parentescoOutro"
+                    value={formData.parentescoOutro}
+                    onChange={handleInputChange}
+                    placeholder="Qual?"
+                    className="campo-input mt-2"
+                  />
+                )}
+              </div>
+
+              {/* Renda familiar */}
+              <div className="caixa-grupo-campos">
+                <label className="label-campo label-obrigatorio">Aproximadamente qual o total da renda familiar da residência?</label>
+                <div className="d-flex flex-column gap-2">
+                  {FAIXAS_RENDA.map((faixa) => (
+                    <label key={faixa} className="opcao">
+                      <input
+                        type="radio"
+                        name="rendaFamiliar"
+                        value={faixa}
+                        checked={formData.rendaFamiliar === faixa}
+                        onChange={handleInputChange}
+                      />
+                      {faixa}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Contato de emergência */}
+              <div className="subsecao-titulo">Em caso de emergência, ligar para:</div>
+              <div className="caixa-grupo-campos">
+                <label className="label-campo label-obrigatorio">Nome</label>
+                <input
+                  type="text"
+                  name="emergenciaNome"
+                  value={formData.emergenciaNome}
+                  onChange={handleInputChange}
+                  placeholder="Ex.: José Silva"
+                  className="campo-input"
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div style={{ flex: 1 }}>
+                  <label className="label-campo label-obrigatorio">Telefone</label>
+                  <input
+                    type="tel"
+                    name="emergenciaTelefone"
+                    value={formData.emergenciaTelefone}
+                    onChange={handleInputChange}
+                    placeholder="(85) 99999-9999"
+                    className="campo-input"
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label className="label-campo label-obrigatorio">Grau de parentesco</label>
+                  <select
+                    name="emergenciaParentesco"
+                    value={formData.emergenciaParentesco}
+                    onChange={handleInputChange}
+                    className="campo-select"
+                  >
+                    <option value="">Selecione</option>
+                    {PARENTESCOS.map((parentesco) => (
+                      <option key={parentesco} value={parentesco}>{parentesco}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Aviso CPF */}
