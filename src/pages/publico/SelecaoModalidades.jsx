@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
+import BotaoVoltar from '../../components/BotaoVoltar';
 import { enviarInscricao } from '../../services/inscricoes';
 import { apagarConsentimento, lerConsentimento } from '../../utils/consentimento';
 import { apagarRascunho, lerRascunho } from '../../utils/rascunhoInscricao';
@@ -120,24 +121,6 @@ function SelecaoModalidades() {
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
       <style>{`
-        .botao-voltar {
-          background: none;
-          border: none;
-          color: ${AZUL_ESCURO};
-          font-size: 1rem;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 0;
-          text-decoration: none;
-          transition: color 0.3s ease;
-        }
-
-        .botao-voltar:hover {
-          color: ${AZUL};
-        }
-
         /* Usando Flexbox para centralizar os itens da última linha */
         .grid-modalidades {
           display: flex;
@@ -312,13 +295,7 @@ function SelecaoModalidades() {
       <main className="flex-grow-1 w-100" style={{ maxWidth: '100%', padding: '1.5rem 1.5rem', display: 'flex', flexDirection: 'column' }}>
         <div className="container-fluid" style={{ maxWidth: '100%', margin: '0 auto', padding: '0', flex: 1, display: 'flex', flexDirection: 'column' }}>
           {/* Botão Voltar */}
-          <button
-            onClick={() => navigate('/inscricao/dados')}
-            className="botao-voltar mb-4"
-          >
-            <span>←</span>
-            Voltar
-          </button>
+          <BotaoVoltar para="/inscricao/dados" />
 
           {/* Título e Descrição */}
           <div style={{ marginBottom: '1rem' }}>

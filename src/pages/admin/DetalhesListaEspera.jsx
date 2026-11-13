@@ -1,44 +1,21 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import LayoutAdmin from '../../components/LayoutAdmin';
-import { AZUL_TITULO } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
 import { useCarregar } from '../../hooks/useCarregar';
 import { atualizarStatusInscricao, buscarInscricao, listarInscricoes } from '../../services/inscricoes';
 import { matricularDaInscricao } from '../../services/alunos';
 import { listarTurmas, nomeDaTurma } from '../../services/turmas';
 import { calcularIdade, formatarData, formatarDataHora } from '../../utils/datas';
-import { Etiqueta, Modal } from './componentes';
+import { CardSecao, Etiqueta, LinhaInfo, Modal } from './componentes';
 import { linkWhatsApp } from '../../utils/texto';
 
-// Cartão com ícone e título
-function CardSecao({ icone, titulo, children }) {
-  return (
-    <div className="painel-card p-3 h-100">
-      <div className="d-flex align-items-center gap-2 mb-3">
-        <i className={`bi ${icone} fs-5`} style={{ color: AZUL_TITULO }}></i>
-        <h2 className="fw-semibold m-0" style={{ color: AZUL_TITULO, fontSize: '0.9rem' }}>{titulo}</h2>
-      </div>
-      {children}
-    </div>
-  );
-}
 
-// Linha "rótulo  valor"; campos vazios aparecem como "—"
-function Linha({ rotulo, children }) {
-  return (
-    <div className="row mb-1" style={{ fontSize: '0.75rem' }}>
-      <div className="col-5" style={{ color: '#4B5563' }}>{rotulo}</div>
-      <div className="col-7" style={{ color: '#111827' }}>{children || '—'}</div>
-    </div>
-  );
-}
 
 // Junta a resposta com o detalhe ("Outro: avó paterna", "Sim: dipirona")
 const comDetalhe = (valor, detalhe) => (detalhe ? `${valor}: ${detalhe}` : valor);
 
 const ETAPAS = ['Aguardando vaga', 'Convocado', 'Matriculado'];
-const corDoStatus = { 'Aguardando vaga': 'amarelo', Convocado: 'verde', Matriculado: 'azul', Cancelada: 'vermelho' };
 
 // Busca a inscrição e a posição dela na fila
 async function carregarInscricao(id) {
@@ -102,7 +79,7 @@ function DetalhesListaEspera() {
         </div>
 
         <div className="d-flex flex-wrap align-items-center gap-2">
-          <Etiqueta texto={inscricao.status} cor={corDoStatus[inscricao.status]} />
+          <Etiqueta texto={inscricao.status} />
           {inscricao.status === 'Aguardando vaga' && (
             <span style={{ fontSize: '0.8rem', color: '#374151' }}>Posição na fila: <strong>{inscricao.posicaoCalculada}</strong></span>
           )}
@@ -124,55 +101,55 @@ function DetalhesListaEspera() {
       <div className="row g-3 mb-3">
         <div className="col-12 col-lg-6">
           <CardSecao icone="bi-person" titulo="Dados do responsável">
-            <Linha rotulo="Nome completo">{inscricao.nomeResponsavel}</Linha>
-            <Linha rotulo="CPF">{inscricao.cpfResponsavel}</Linha>
-            <Linha rotulo="Telefone (WhatsApp)">{inscricao.telefone}</Linha>
-            <Linha rotulo="E-mail">{inscricao.email}</Linha>
-            <Linha rotulo="Parentesco">{comDetalhe(inscricao.parentesco, inscricao.parentescoOutro)}</Linha>
-            <Linha rotulo="Escolaridade">{comDetalhe(inscricao.escolaridade, inscricao.escolaridadeOutro)}</Linha>
-            <Linha rotulo="Pessoas na residência">{comDetalhe(inscricao.pessoasResidencia, inscricao.pessoasResidenciaOutro)}</Linha>
-            <Linha rotulo="Renda familiar">{inscricao.rendaFamiliar}</Linha>
+            <LinhaInfo rotulo="Nome completo">{inscricao.nomeResponsavel}</LinhaInfo>
+            <LinhaInfo rotulo="CPF">{inscricao.cpfResponsavel}</LinhaInfo>
+            <LinhaInfo rotulo="Telefone (WhatsApp)">{inscricao.telefone}</LinhaInfo>
+            <LinhaInfo rotulo="E-mail">{inscricao.email}</LinhaInfo>
+            <LinhaInfo rotulo="Parentesco">{comDetalhe(inscricao.parentesco, inscricao.parentescoOutro)}</LinhaInfo>
+            <LinhaInfo rotulo="Escolaridade">{comDetalhe(inscricao.escolaridade, inscricao.escolaridadeOutro)}</LinhaInfo>
+            <LinhaInfo rotulo="Pessoas na residência">{comDetalhe(inscricao.pessoasResidencia, inscricao.pessoasResidenciaOutro)}</LinhaInfo>
+            <LinhaInfo rotulo="Renda familiar">{inscricao.rendaFamiliar}</LinhaInfo>
           </CardSecao>
         </div>
         <div className="col-12 col-lg-6">
           <CardSecao icone="bi-person-vcard" titulo="Dados do aluno">
-            <Linha rotulo="Nome completo">{inscricao.nomeAluno}</Linha>
-            <Linha rotulo="Nascimento">{`${formatarData(inscricao.nascimento)} (${calcularIdade(inscricao.nascimento)} anos)`}</Linha>
-            <Linha rotulo="Gênero">{comDetalhe(inscricao.genero, inscricao.generoOutro)}</Linha>
-            <Linha rotulo="CPF ou RG">{inscricao.cpfAluno}</Linha>
-            <Linha rotulo="Endereço">{inscricao.endereco}</Linha>
-            <Linha rotulo="Bairro">{inscricao.bairro}</Linha>
-            <Linha rotulo="Escola">{inscricao.escola && `${inscricao.escola} (${inscricao.tipoEscola})`}</Linha>
-            <Linha rotulo="Série">{inscricao.serie}</Linha>
-            <Linha rotulo="Altura / Peso">{[inscricao.altura, inscricao.peso].filter(Boolean).join(' / ')}</Linha>
-            <Linha rotulo="Uniforme">{inscricao.tamanhoUniforme}</Linha>
+            <LinhaInfo rotulo="Nome completo">{inscricao.nomeAluno}</LinhaInfo>
+            <LinhaInfo rotulo="Nascimento">{`${formatarData(inscricao.nascimento)} (${calcularIdade(inscricao.nascimento)} anos)`}</LinhaInfo>
+            <LinhaInfo rotulo="Gênero">{comDetalhe(inscricao.genero, inscricao.generoOutro)}</LinhaInfo>
+            <LinhaInfo rotulo="CPF ou RG">{inscricao.cpfAluno}</LinhaInfo>
+            <LinhaInfo rotulo="Endereço">{inscricao.endereco}</LinhaInfo>
+            <LinhaInfo rotulo="Bairro">{inscricao.bairro}</LinhaInfo>
+            <LinhaInfo rotulo="Escola">{inscricao.escola && `${inscricao.escola} (${inscricao.tipoEscola})`}</LinhaInfo>
+            <LinhaInfo rotulo="Série">{inscricao.serie}</LinhaInfo>
+            <LinhaInfo rotulo="Altura / Peso">{[inscricao.altura, inscricao.peso].filter(Boolean).join(' / ')}</LinhaInfo>
+            <LinhaInfo rotulo="Uniforme">{inscricao.tamanhoUniforme}</LinhaInfo>
           </CardSecao>
         </div>
         <div className="col-12 col-lg-6">
           <CardSecao icone="bi-heart-pulse" titulo="Saúde do aluno">
-            <Linha rotulo="Plano de saúde">{comDetalhe(inscricao.planoSaude, inscricao.planoSaudeOutro)}</Linha>
-            <Linha rotulo="Plano odontológico">{comDetalhe(inscricao.planoOdonto, inscricao.planoOdontoOutro)}</Linha>
-            <Linha rotulo="Tipo sanguíneo">{[inscricao.tipoSanguineo, inscricao.fatorSanguineo].filter(Boolean).join(' ')}</Linha>
-            <Linha rotulo="Alergia a medicamento">{comDetalhe(inscricao.alergiaMedicamento, inscricao.alergiaMedicamentoQual)}</Linha>
-            <Linha rotulo="Medicamento controlado">{comDetalhe(inscricao.medicamentoControlado, inscricao.medicamentoControladoQual)}</Linha>
-            <Linha rotulo="Alergia a alimento">{comDetalhe(inscricao.alergiaAlimento, inscricao.alergiaAlimentoQual)}</Linha>
-            <Linha rotulo="Problema de saúde">{comDetalhe(inscricao.problemaSaude, inscricao.problemaSaudeOutro)}</Linha>
-            <Linha rotulo="Deficiência">{comDetalhe(inscricao.deficiencia, inscricao.deficienciaOutro)}</Linha>
-            <Linha rotulo="Atenção especial">{comDetalhe(inscricao.atencaoEspecial, inscricao.atencaoEspecialQual)}</Linha>
+            <LinhaInfo rotulo="Plano de saúde">{comDetalhe(inscricao.planoSaude, inscricao.planoSaudeOutro)}</LinhaInfo>
+            <LinhaInfo rotulo="Plano odontológico">{comDetalhe(inscricao.planoOdonto, inscricao.planoOdontoOutro)}</LinhaInfo>
+            <LinhaInfo rotulo="Tipo sanguíneo">{[inscricao.tipoSanguineo, inscricao.fatorSanguineo].filter(Boolean).join(' ')}</LinhaInfo>
+            <LinhaInfo rotulo="Alergia a medicamento">{comDetalhe(inscricao.alergiaMedicamento, inscricao.alergiaMedicamentoQual)}</LinhaInfo>
+            <LinhaInfo rotulo="Medicamento controlado">{comDetalhe(inscricao.medicamentoControlado, inscricao.medicamentoControladoQual)}</LinhaInfo>
+            <LinhaInfo rotulo="Alergia a alimento">{comDetalhe(inscricao.alergiaAlimento, inscricao.alergiaAlimentoQual)}</LinhaInfo>
+            <LinhaInfo rotulo="Problema de saúde">{comDetalhe(inscricao.problemaSaude, inscricao.problemaSaudeOutro)}</LinhaInfo>
+            <LinhaInfo rotulo="Deficiência">{comDetalhe(inscricao.deficiencia, inscricao.deficienciaOutro)}</LinhaInfo>
+            <LinhaInfo rotulo="Atenção especial">{comDetalhe(inscricao.atencaoEspecial, inscricao.atencaoEspecialQual)}</LinhaInfo>
           </CardSecao>
         </div>
         <div className="col-12 col-lg-6 d-flex flex-column gap-3">
           <CardSecao icone="bi-telephone" titulo="Contato de emergência">
-            <Linha rotulo="Nome">{inscricao.emergenciaNome}</Linha>
-            <Linha rotulo="Telefone">{inscricao.emergenciaTelefone}</Linha>
-            <Linha rotulo="Parentesco">{comDetalhe(inscricao.emergenciaParentesco, inscricao.emergenciaParentescoOutro)}</Linha>
+            <LinhaInfo rotulo="Nome">{inscricao.emergenciaNome}</LinhaInfo>
+            <LinhaInfo rotulo="Telefone">{inscricao.emergenciaTelefone}</LinhaInfo>
+            <LinhaInfo rotulo="Parentesco">{comDetalhe(inscricao.emergenciaParentesco, inscricao.emergenciaParentescoOutro)}</LinhaInfo>
           </CardSecao>
           <CardSecao icone="bi-file-earmark-text" titulo="Informações da inscrição">
-            <Linha rotulo="Modalidade">{inscricao.modalidade}</Linha>
-            <Linha rotulo="Data da inscrição">{formatarDataHora(inscricao.criadoEm)}</Linha>
-            <Linha rotulo="Termos aceitos em">
+            <LinhaInfo rotulo="Modalidade">{inscricao.modalidade}</LinhaInfo>
+            <LinhaInfo rotulo="Data da inscrição">{formatarDataHora(inscricao.criadoEm)}</LinhaInfo>
+            <LinhaInfo rotulo="Termos aceitos em">
               {inscricao.consentimento && `${formatarDataHora(inscricao.consentimento.aceitoEm)} (versão ${inscricao.consentimento.versaoTermos})`}
-            </Linha>
+            </LinhaInfo>
             {/* Linha do tempo */}
             <div className="d-flex gap-3 mt-3">
               {ETAPAS.map((etapa, indice) => (

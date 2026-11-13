@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
@@ -8,7 +7,7 @@ import { listarAlunos } from '../../services/alunos';
 import { MODALIDADES } from '../../services/turmas';
 import { calcularIdade, formatarData } from '../../utils/datas';
 import { somenteDigitos } from '../../utils/validacao';
-import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
+import { CabecalhoPagina, CampoBusca, Etiqueta, LinkDetalhes, RodapeTabela } from './componentes';
 import { normalizar } from '../../utils/texto';
 import { usePaginacao } from './usePaginacao';
 
@@ -43,11 +42,7 @@ function Alunos() {
         onSubmit={(e) => { e.preventDefault(); setAplicados(filtros); paginacao.setPagina(1); }}
       >
         <div className="col-12 col-md-4">
-          <label className="admin-rotulo">Buscar por nome, matrícula ou CPF</label>
-          <div className="input-group input-group-sm">
-            <span className="input-group-text bg-light"><i className="bi bi-search"></i></span>
-            <input name="busca" className="form-control admin-campo bg-light" placeholder="Digite o nome, matrícula ou CPF..." value={filtros.busca} onChange={alterar} />
-          </div>
+          <CampoBusca rotulo="Buscar por nome, matrícula ou CPF" placeholder="Digite o nome, matrícula ou CPF..." valor={filtros.busca} onChange={alterar} />
         </div>
         <div className="col-6 col-md-3">
           <label className="admin-rotulo">Modalidade</label>
@@ -103,9 +98,7 @@ function Alunos() {
                         <td>{formatarData(aluno.dataMatricula)}</td>
                         <td><Etiqueta texto={aluno.status} cor={aluno.status === 'Ativo' ? 'verde' : 'vermelho'} /></td>
                         <td>
-                          <Link to={`/admin/alunos/${aluno.id}`} className="admin-link">
-                            Ver detalhes <i className="bi bi-chevron-right"></i>
-                          </Link>
+                          <LinkDetalhes to={`/admin/alunos/${aluno.id}`} />
                         </td>
                       </tr>
                     ))}

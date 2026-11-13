@@ -8,7 +8,7 @@ import { atualizarAluno, buscarAluno, eventoHistorico } from '../../services/alu
 import { listarChamadasDaTurma, resumoDoAluno } from '../../services/frequencias';
 import { buscarTurma } from '../../services/turmas';
 import { calcularIdade, formatarData } from '../../utils/datas';
-import { Etiqueta, Informacao, Modal } from './componentes';
+import { Etiqueta, InfoLateral, Informacao, Modal } from './componentes';
 import { linkWhatsApp } from '../../utils/texto';
 
 // Estilos dos botões do painel "Ações e acompanhamento"
@@ -34,20 +34,6 @@ function BotaoAcao({ texto, icone, estilo, onClick, href }) {
   return <button type="button" onClick={onClick} {...props}>{conteudo}</button>;
 }
 
-// Linha com ícone de calendário, legenda e data
-function LinhaData({ rotulo, valor }) {
-  return (
-    <div className="d-flex align-items-center gap-2">
-      <span className="rounded-circle d-inline-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '30px', height: '30px', backgroundColor: '#C9DDF0', color: AZUL_TITULO }}>
-        <i className="bi bi-calendar3"></i>
-      </span>
-      <div>
-        <div style={{ fontSize: '0.6rem', color: '#4B5563' }}>{rotulo}</div>
-        <div className="fw-medium" style={{ fontSize: '0.8rem', color: AZUL_TITULO }}>{valor}</div>
-      </div>
-    </div>
-  );
-}
 
 const ABAS = [
   ['', 'Visão Geral'],
@@ -157,8 +143,8 @@ function DetalhesAlunoLayout({ aba, acoes, informacao, children }) {
             {acoes(contexto).filter(Boolean).map((acao) => <BotaoAcao key={acao.texto} {...acao} />)}
 
             <div className="d-flex flex-column gap-3 mt-auto pt-4">
-              <LinhaData rotulo="Matriculado em:" valor={formatarData(aluno.dataMatricula)} />
-              <LinhaData rotulo="Última atualização:" valor={formatarData(aluno.atualizadoEm || aluno.dataMatricula)} />
+              <InfoLateral icone="bi-calendar3" rotulo="Matriculado em:" valor={formatarData(aluno.dataMatricula)} />
+              <InfoLateral icone="bi-calendar3" rotulo="Última atualização:" valor={formatarData(aluno.atualizadoEm || aluno.dataMatricula)} />
               <Informacao>{informacao}</Informacao>
             </div>
           </div>

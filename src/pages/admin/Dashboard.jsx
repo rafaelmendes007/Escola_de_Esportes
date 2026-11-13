@@ -5,7 +5,7 @@ import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
 import { useAuth } from '../../context/AuthContext';
 import { useCarregar } from '../../hooks/useCarregar';
 import { faixaEtaria } from '../../services/turmas';
-import { Etiqueta } from './componentes';
+import { Etiqueta, LinkDetalhes } from './componentes';
 import { carregarTurmasComContagens } from './dadosTurmas';
 
 // Cartão de resumo com link no rodapé
@@ -35,7 +35,6 @@ function CardResumo({ icone, cor, fundoIcone, rotulo, valor, link, textoLink }) 
   );
 }
 
-const corDoStatus = { Ativa: 'verde', Lotada: 'vermelho', Encerrada: 'azul' };
 
 function Dashboard() {
   const { usuario } = useAuth();
@@ -100,11 +99,9 @@ function Dashboard() {
                         <td className="text-center">{turma.ocupadas}</td>
                         <td className="text-center">{turma.disponiveis}</td>
                         <td className="text-center">{turma.listaEspera}</td>
-                        <td><Etiqueta texto={turma.status} cor={corDoStatus[turma.status]} /></td>
+                        <td><Etiqueta texto={turma.status} /></td>
                         <td>
-                          <Link to={`/admin/turmas/${turma.id}`} className="admin-link">
-                            Ver detalhes <i className="bi bi-chevron-right"></i>
-                          </Link>
+                          <LinkDetalhes to={`/admin/turmas/${turma.id}`} />
                         </td>
                       </tr>
                     ))}

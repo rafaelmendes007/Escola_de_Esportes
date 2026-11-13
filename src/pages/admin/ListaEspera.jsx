@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
@@ -7,7 +6,7 @@ import { useCarregar } from '../../hooks/useCarregar';
 import { listarInscricoes, sincronizarPosicoes } from '../../services/inscricoes';
 import { MODALIDADES } from '../../services/turmas';
 import { calcularIdade, formatarData } from '../../utils/datas';
-import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
+import { CabecalhoPagina, CampoBusca, Etiqueta, LinkDetalhes, RodapeTabela } from './componentes';
 import { normalizar } from '../../utils/texto';
 import { usePaginacao } from './usePaginacao';
 
@@ -17,7 +16,6 @@ const filtrosVazios = { busca: '', modalidade: 'Todas', faixa: 'Todas', status: 
 const FAIXAS = [['6 a 9 anos', 6, 9], ['10 a 13 anos', 10, 13], ['14 a 17 anos', 14, 17]];
 const STATUS = ['Aguardando vaga', 'Convocado', 'Matriculado', 'Cancelada'];
 
-const corDoStatus = { 'Aguardando vaga': 'amarelo', Convocado: 'verde', Matriculado: 'azul', Cancelada: 'vermelho' };
 
 function ListaEspera() {
   const [filtros, setFiltros] = useState(filtrosVazios);
@@ -53,11 +51,7 @@ function ListaEspera() {
         onSubmit={(e) => { e.preventDefault(); setAplicados(filtros); paginacao.setPagina(1); }}
       >
         <div className="col-12 col-md-3">
-          <label className="admin-rotulo">Nome do aluno</label>
-          <div className="input-group input-group-sm">
-            <span className="input-group-text bg-light"><i className="bi bi-search"></i></span>
-            <input name="busca" className="form-control admin-campo bg-light" placeholder="Buscar por nome..." value={filtros.busca} onChange={alterar} />
-          </div>
+          <CampoBusca rotulo="Nome do aluno" placeholder="Buscar por nome..." valor={filtros.busca} onChange={alterar} />
         </div>
         <div className="col-6 col-md-2">
           <label className="admin-rotulo">Modalidade</label>
@@ -119,11 +113,9 @@ function ListaEspera() {
                         <td>{inscricao.nomeResponsavel}</td>
                         <td>{formatarData(inscricao.criadoEm)}</td>
                         <td className="text-center">{inscricao.posicaoCalculada ?? '—'}</td>
-                        <td><Etiqueta texto={inscricao.status} cor={corDoStatus[inscricao.status]} /></td>
+                        <td><Etiqueta texto={inscricao.status} /></td>
                         <td>
-                          <Link to={`/admin/lista-espera/${inscricao.id}`} className="admin-link">
-                            Ver detalhes <i className="bi bi-chevron-right"></i>
-                          </Link>
+                          <LinkDetalhes to={`/admin/lista-espera/${inscricao.id}`} />
                         </td>
                       </tr>
                     ))}

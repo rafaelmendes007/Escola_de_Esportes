@@ -28,3 +28,18 @@ body {
   font-family: 'Inter', sans-serif;
   color: var(--texto);
 }
+
+/* Botão "← Voltar" das telas públicas (componente BotaoVoltar) */
+.botao-voltar {
+  background: none;
+  border: none;
+  color: var(--texto);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  transition: color 0.3s ease;
+}
+.botao-voltar:hover { color: var(--azul); }

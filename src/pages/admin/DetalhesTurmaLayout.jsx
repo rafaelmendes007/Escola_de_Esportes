@@ -5,7 +5,7 @@ import { AZUL_TITULO } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
 import { useCarregar } from '../../hooks/useCarregar';
 import { faixaEtaria } from '../../services/turmas';
-import { CardIndicador, Etiqueta, Informacao } from './componentes';
+import { CardIndicador, Etiqueta, InfoLateral, Informacao } from './componentes';
 import { carregarDetalhesTurma } from './dadosTurmas';
 import ModalNovaTurma from './ModalNovaTurma';
 
@@ -22,20 +22,6 @@ function InfoCabecalho({ icone, rotulo, valor }) {
   );
 }
 
-// Linha do painel lateral (próxima aula, horário, local)
-function InfoLateral({ icone, rotulo, valor }) {
-  return (
-    <div className="d-flex align-items-center gap-2">
-      <span className="rounded-circle d-inline-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '30px', height: '30px', backgroundColor: '#C9DDF0', color: AZUL_TITULO }}>
-        <i className={`bi ${icone}`}></i>
-      </span>
-      <div>
-        <div style={{ fontSize: '0.6rem', color: '#4B5563' }}>{rotulo}</div>
-        <div className="fw-medium" style={{ fontSize: '0.8rem', color: AZUL_TITULO }}>{valor}</div>
-      </div>
-    </div>
-  );
-}
 
 const ABAS = [
   ['', 'Alunos matriculados'],
@@ -43,7 +29,6 @@ const ABAS = [
   ['/historico', 'Histórico'],
 ];
 
-const corDoStatus = { Ativa: 'verde', Lotada: 'vermelho', Encerrada: 'azul' };
 
 // Estrutura comum das 3 abas de "Detalhes da turma".
 // "children" é uma função que recebe os dados carregados e desenha o conteúdo da aba.
@@ -82,7 +67,7 @@ function DetalhesTurmaLayout({ aba, children }) {
           <div>
             <div className="fw-semibold" style={{ color: AZUL_TITULO, fontSize: '1.1rem' }}>{turma.modalidade} – {turma.nome}</div>
             <div className="mb-1" style={{ color: '#4B5563', fontSize: '0.7rem' }}>{faixaEtaria(turma)} anos · {turma.sexo}</div>
-            <Etiqueta texto={turma.status} cor={corDoStatus[turma.status]} />
+            <Etiqueta texto={turma.status} />
           </div>
         </div>
         <InfoCabecalho icone="bi-person" rotulo="Professor" valor={turma.professorNome || '—'} />

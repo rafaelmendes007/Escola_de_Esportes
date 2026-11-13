@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
+import BotaoVoltar from '../../components/BotaoVoltar';
 import { registrarConsentimento } from '../../utils/consentimento';
 
 // Cores do protótipo
@@ -27,20 +28,6 @@ function ConsentimentoInscricao() {
   return (
     <div className="min-vh-100 d-flex flex-column" style={{ fontFamily: "'Inter', sans-serif", backgroundColor: '#F7F8FA' }}>
       <style>{`
-        .botao-voltar {
-          background: none;
-          border: none;
-          color: ${AZUL_ESCURO};
-          font-size: 1rem;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 0;
-          transition: color 0.3s ease;
-        }
-        .botao-voltar:hover { color: ${AZUL}; }
-
         .caixa-aceite {
           display: flex;
           align-items: flex-start;
@@ -84,10 +71,7 @@ function ConsentimentoInscricao() {
 
       <main className="flex-grow-1 w-100 py-4 px-3">
         <form className="mx-auto" style={{ maxWidth: '760px' }} onSubmit={handleContinuar}>
-          <button type="button" onClick={() => navigate('/')} className="botao-voltar mb-4">
-            <span>←</span>
-            Voltar
-          </button>
+          <BotaoVoltar para="/" />
 
           <h1 style={{ color: AZUL_ESCURO, fontSize: '2rem', fontWeight: 600, lineHeight: 1.2, marginBottom: '0.3rem' }}>
             Antes de começar

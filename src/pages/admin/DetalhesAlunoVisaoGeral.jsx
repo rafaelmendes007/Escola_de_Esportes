@@ -1,36 +1,12 @@
 import { useState } from 'react';
-import { AZUL_TITULO } from '../../components/cores';
 import { atualizarAluno, eventoHistorico } from '../../services/alunos';
 import { diasEHorario } from '../../services/turmas';
 import { calcularIdade, formatarData } from '../../utils/datas';
 import { mascaraTelefone, telefoneValido } from '../../utils/validacao';
 import DetalhesAlunoLayout from './DetalhesAlunoLayout';
-import { Etiqueta, Modal } from './componentes';
+import { CardSecao, Etiqueta, LinhaInfo, Modal } from './componentes';
 
-// Cartão com ícone redondo e título
-function CardSecao({ icone, titulo, children }) {
-  return (
-    <div className="painel-card p-3 h-100">
-      <div className="d-flex align-items-center gap-2 mb-3">
-        <span className="rounded-circle d-inline-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px', backgroundColor: '#C9DDF0', color: AZUL_TITULO }}>
-          <i className={`bi ${icone}`}></i>
-        </span>
-        <h2 className="fw-semibold m-0" style={{ color: AZUL_TITULO, fontSize: '0.95rem' }}>{titulo}</h2>
-      </div>
-      {children}
-    </div>
-  );
-}
 
-// Linha "rótulo  valor"; campos vazios aparecem como "—"
-function Linha({ rotulo, children }) {
-  return (
-    <div className="row mb-1" style={{ fontSize: '0.75rem' }}>
-      <div className="col-5" style={{ color: '#4B5563', fontSize: '0.65rem' }}>{rotulo}</div>
-      <div className="col-7" style={{ color: AZUL_TITULO }}>{children || '—'}</div>
-    </div>
-  );
-}
 
 const comDetalhe = (valor, detalhe) => (detalhe ? `${valor}: ${detalhe}` : valor);
 
@@ -65,58 +41,58 @@ function DetalhesAlunoVisaoGeral() {
           <div className="row g-3">
             <div className="col-12 col-md-6">
               <CardSecao icone="bi-person" titulo="Dados do aluno">
-                <Linha rotulo="Nome completo">{aluno.nome}</Linha>
-                <Linha rotulo="Nascimento">{`${formatarData(aluno.nascimento)} (${calcularIdade(aluno.nascimento)} anos)`}</Linha>
-                <Linha rotulo="Gênero">{comDetalhe(aluno.genero, aluno.generoOutro)}</Linha>
-                <Linha rotulo="CPF ou RG">{aluno.cpfAluno}</Linha>
-                <Linha rotulo="Endereço">{[aluno.endereco, aluno.bairro].filter(Boolean).join(' – ')}</Linha>
-                <Linha rotulo="Escola">{aluno.escola && `${aluno.escola} (${aluno.tipoEscola})`}</Linha>
-                <Linha rotulo="Série">{aluno.serie}</Linha>
-                <Linha rotulo="Uniforme">{aluno.tamanhoUniforme}</Linha>
+                <LinhaInfo rotulo="Nome completo">{aluno.nome}</LinhaInfo>
+                <LinhaInfo rotulo="Nascimento">{`${formatarData(aluno.nascimento)} (${calcularIdade(aluno.nascimento)} anos)`}</LinhaInfo>
+                <LinhaInfo rotulo="Gênero">{comDetalhe(aluno.genero, aluno.generoOutro)}</LinhaInfo>
+                <LinhaInfo rotulo="CPF ou RG">{aluno.cpfAluno}</LinhaInfo>
+                <LinhaInfo rotulo="Endereço">{[aluno.endereco, aluno.bairro].filter(Boolean).join(' – ')}</LinhaInfo>
+                <LinhaInfo rotulo="Escola">{aluno.escola && `${aluno.escola} (${aluno.tipoEscola})`}</LinhaInfo>
+                <LinhaInfo rotulo="Série">{aluno.serie}</LinhaInfo>
+                <LinhaInfo rotulo="Uniforme">{aluno.tamanhoUniforme}</LinhaInfo>
               </CardSecao>
             </div>
 
             <div className="col-12 col-md-6">
               <CardSecao icone="bi-person" titulo="Responsável">
-                <Linha rotulo="Nome">{aluno.nomeResponsavel}</Linha>
-                <Linha rotulo="Parentesco">{comDetalhe(aluno.parentesco, aluno.parentescoOutro)}</Linha>
-                <Linha rotulo="CPF">{aluno.cpfResponsavel}</Linha>
-                <Linha rotulo="Telefone (WhatsApp)">{aluno.telefone}</Linha>
-                <Linha rotulo="E-mail">{aluno.email}</Linha>
-                <Linha rotulo="Emergência">{aluno.emergenciaNome && `${aluno.emergenciaNome} · ${aluno.emergenciaTelefone}`}</Linha>
+                <LinhaInfo rotulo="Nome">{aluno.nomeResponsavel}</LinhaInfo>
+                <LinhaInfo rotulo="Parentesco">{comDetalhe(aluno.parentesco, aluno.parentescoOutro)}</LinhaInfo>
+                <LinhaInfo rotulo="CPF">{aluno.cpfResponsavel}</LinhaInfo>
+                <LinhaInfo rotulo="Telefone (WhatsApp)">{aluno.telefone}</LinhaInfo>
+                <LinhaInfo rotulo="E-mail">{aluno.email}</LinhaInfo>
+                <LinhaInfo rotulo="Emergência">{aluno.emergenciaNome && `${aluno.emergenciaNome} · ${aluno.emergenciaTelefone}`}</LinhaInfo>
               </CardSecao>
             </div>
 
             <div className="col-12 col-md-6">
               <CardSecao icone="bi-people" titulo="Informações da turma">
-                <Linha rotulo="Turma">{aluno.turmaNome}</Linha>
-                <Linha rotulo="Professor(a)">{turma?.professorNome}</Linha>
-                <Linha rotulo="Dias e horários">{turma && diasEHorario(turma)}</Linha>
-                <Linha rotulo="Local">{turma?.local}</Linha>
+                <LinhaInfo rotulo="Turma">{aluno.turmaNome}</LinhaInfo>
+                <LinhaInfo rotulo="Professor(a)">{turma?.professorNome}</LinhaInfo>
+                <LinhaInfo rotulo="Dias e horários">{turma && diasEHorario(turma)}</LinhaInfo>
+                <LinhaInfo rotulo="Local">{turma?.local}</LinhaInfo>
               </CardSecao>
             </div>
 
             <div className="col-12 col-md-6">
               <CardSecao icone="bi-heart-pulse" titulo="Saúde">
-                <Linha rotulo="Plano de saúde">{comDetalhe(aluno.planoSaude, aluno.planoSaudeOutro)}</Linha>
-                <Linha rotulo="Alergias">
+                <LinhaInfo rotulo="Plano de saúde">{comDetalhe(aluno.planoSaude, aluno.planoSaudeOutro)}</LinhaInfo>
+                <LinhaInfo rotulo="Alergias">
                   {[
                     aluno.alergiaMedicamento === 'Sim' && `Medicamento: ${aluno.alergiaMedicamentoQual}`,
                     aluno.alergiaAlimento === 'Sim' && `Alimento: ${aluno.alergiaAlimentoQual}`,
                   ].filter(Boolean).join(' · ') || 'Nenhuma'}
-                </Linha>
-                <Linha rotulo="Medicamento controlado">{comDetalhe(aluno.medicamentoControlado, aluno.medicamentoControladoQual)}</Linha>
-                <Linha rotulo="Problema de saúde">{comDetalhe(aluno.problemaSaude, aluno.problemaSaudeOutro)}</Linha>
-                <Linha rotulo="Deficiência">{comDetalhe(aluno.deficiencia, aluno.deficienciaOutro)}</Linha>
-                <Linha rotulo="Atenção especial">{comDetalhe(aluno.atencaoEspecial, aluno.atencaoEspecialQual)}</Linha>
+                </LinhaInfo>
+                <LinhaInfo rotulo="Medicamento controlado">{comDetalhe(aluno.medicamentoControlado, aluno.medicamentoControladoQual)}</LinhaInfo>
+                <LinhaInfo rotulo="Problema de saúde">{comDetalhe(aluno.problemaSaude, aluno.problemaSaudeOutro)}</LinhaInfo>
+                <LinhaInfo rotulo="Deficiência">{comDetalhe(aluno.deficiencia, aluno.deficienciaOutro)}</LinhaInfo>
+                <LinhaInfo rotulo="Atenção especial">{comDetalhe(aluno.atencaoEspecial, aluno.atencaoEspecialQual)}</LinhaInfo>
               </CardSecao>
             </div>
 
             <div className="col-12 col-md-6">
               <CardSecao icone="bi-bar-chart-fill" titulo="Situação no projeto">
-                <Linha rotulo="Data de matrícula">{formatarData(aluno.dataMatricula)}</Linha>
-                <Linha rotulo="Tempo no projeto">{tempoNoProjeto(aluno.dataMatricula)}</Linha>
-                <Linha rotulo="Situação"><Etiqueta texto={aluno.status} cor={aluno.status === 'Ativo' ? 'verde' : 'vermelho'} /></Linha>
+                <LinhaInfo rotulo="Data de matrícula">{formatarData(aluno.dataMatricula)}</LinhaInfo>
+                <LinhaInfo rotulo="Tempo no projeto">{tempoNoProjeto(aluno.dataMatricula)}</LinhaInfo>
+                <LinhaInfo rotulo="Situação"><Etiqueta texto={aluno.status} cor={aluno.status === 'Ativo' ? 'verde' : 'vermelho'} /></LinhaInfo>
               </CardSecao>
             </div>
 

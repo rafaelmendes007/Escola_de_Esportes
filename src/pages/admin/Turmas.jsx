@@ -1,18 +1,16 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
 import { useCarregar } from '../../hooks/useCarregar';
 import { MODALIDADES, faixaEtaria } from '../../services/turmas';
-import { CabecalhoPagina, Etiqueta, RodapeTabela } from './componentes';
+import { CabecalhoPagina, CampoBusca, Etiqueta, LinkDetalhes, RodapeTabela } from './componentes';
 import { normalizar } from '../../utils/texto';
 import { carregarTurmasComContagens } from './dadosTurmas';
 import ModalNovaTurma from './ModalNovaTurma';
 import { usePaginacao } from './usePaginacao';
 
 const filtrosVazios = { busca: '', modalidade: 'Todas', status: 'Todos' };
-const corDoStatus = { Ativa: 'verde', Lotada: 'vermelho', Encerrada: 'azul' };
 
 function Turmas() {
   const [modalAberto, setModalAberto] = useState(false);
@@ -45,11 +43,7 @@ function Turmas() {
         onSubmit={(e) => { e.preventDefault(); setAplicados(filtros); paginacao.setPagina(1); }}
       >
         <div className="col-12 col-md-4">
-          <label className="admin-rotulo">Nome da turma</label>
-          <div className="input-group input-group-sm">
-            <span className="input-group-text bg-light"><i className="bi bi-search"></i></span>
-            <input name="busca" className="form-control admin-campo bg-light" placeholder="Buscar por nome..." value={filtros.busca} onChange={alterar} />
-          </div>
+          <CampoBusca rotulo="Nome da turma" placeholder="Buscar por nome..." valor={filtros.busca} onChange={alterar} />
         </div>
         <div className="col-6 col-md-3">
           <label className="admin-rotulo">Modalidade</label>
@@ -112,11 +106,9 @@ function Turmas() {
                         <td className="text-center">{turma.ocupadas}</td>
                         <td className="text-center">{turma.disponiveis}</td>
                         <td className="text-center">{turma.listaEspera}</td>
-                        <td><Etiqueta texto={turma.status} cor={corDoStatus[turma.status]} /></td>
+                        <td><Etiqueta texto={turma.status} /></td>
                         <td>
-                          <Link to={`/admin/turmas/${turma.id}`} className="admin-link">
-                            Ver detalhes <i className="bi bi-chevron-right"></i>
-                          </Link>
+                          <LinkDetalhes to={`/admin/turmas/${turma.id}`} />
                         </td>
                       </tr>
                     ))}

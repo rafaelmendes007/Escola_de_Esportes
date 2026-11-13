@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 // Peças visuais repetidas nas telas do administrador
 
@@ -11,6 +12,7 @@ const coresEtiqueta = {
   roxo: { cor: '#7E22CE', fundo: '#F3E8FF', borda: '#D8B4FE' },
 };
 
+// Cor de cada status usado no sistema (turmas, inscrições, alunos e usuários)
 const corPorStatus = {
   Ativa: 'verde',
   Ativo: 'verde',
@@ -18,8 +20,13 @@ const corPorStatus = {
   Convocado: 'verde',
   Lotada: 'vermelho',
   Desistente: 'vermelho',
+  Desligado: 'vermelho',
+  Desativado: 'vermelho',
+  Cancelada: 'vermelho',
   'Aguardando vaga': 'amarelo',
   Atenção: 'amarelo',
+  Matriculado: 'azul',
+  Encerrada: 'azul',
 };
 
 export function Etiqueta({ texto, cor }) {
@@ -206,5 +213,67 @@ export function Informacao({ children }) {
       <i className="bi bi-info-circle"></i>
       <span>{children}</span>
     </div>
+  );
+}
+
+// Cartão com ícone redondo e título (seções das telas de detalhes)
+export function CardSecao({ icone, titulo, children }) {
+  return (
+    <div className="painel-card p-3 h-100">
+      <div className="d-flex align-items-center gap-2 mb-3">
+        <span className="rounded-circle d-inline-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px', backgroundColor: '#C9DDF0', color: '#1B3A6B' }}>
+          <i className={`bi ${icone}`}></i>
+        </span>
+        <h2 className="fw-semibold m-0" style={{ color: '#1B3A6B', fontSize: '0.95rem' }}>{titulo}</h2>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// Linha "rótulo  valor" dos cartões; valor vazio aparece como "—"
+export function LinhaInfo({ rotulo, children }) {
+  return (
+    <div className="row mb-1" style={{ fontSize: '0.75rem' }}>
+      <div className="col-5" style={{ color: '#4B5563', fontSize: '0.7rem' }}>{rotulo}</div>
+      <div className="col-7" style={{ color: '#111827' }}>{children || '—'}</div>
+    </div>
+  );
+}
+
+// Ícone redondo + legenda + valor do painel lateral (datas, horário, local)
+export function InfoLateral({ icone, rotulo, valor }) {
+  return (
+    <div className="d-flex align-items-center gap-2">
+      <span className="rounded-circle d-inline-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '30px', height: '30px', backgroundColor: '#C9DDF0', color: '#1B3A6B' }}>
+        <i className={`bi ${icone}`}></i>
+      </span>
+      <div>
+        <div style={{ fontSize: '0.6rem', color: '#4B5563' }}>{rotulo}</div>
+        <div className="fw-medium" style={{ fontSize: '0.8rem', color: '#1B3A6B' }}>{valor}</div>
+      </div>
+    </div>
+  );
+}
+
+// "Ver detalhes ›" das tabelas
+export function LinkDetalhes({ to }) {
+  return (
+    <Link to={to} className="admin-link">
+      Ver detalhes <i className="bi bi-chevron-right"></i>
+    </Link>
+  );
+}
+
+// Campo de busca com lupa dos filtros das listagens
+export function CampoBusca({ rotulo, nome = 'busca', valor, onChange, placeholder = 'Buscar por nome...' }) {
+  return (
+    <>
+      <label className="admin-rotulo" htmlFor={`filtro-${nome}`}>{rotulo}</label>
+      <div className="input-group input-group-sm">
+        <span className="input-group-text bg-light"><i className="bi bi-search"></i></span>
+        <input id={`filtro-${nome}`} name={nome} className="form-control admin-campo bg-light" placeholder={placeholder} value={valor} onChange={onChange} />
+      </div>
+    </>
   );
 }
