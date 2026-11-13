@@ -25,8 +25,10 @@ export async function listarAlunos() {
   return resultado.docs.map(paraObjeto);
 }
 
-export async function listarAlunosDaTurma(turmaId) {
-  const resultado = await getDocs(query(collection(db, 'alunos'), where('turmaId', '==', turmaId)));
+// "professorId": o professor só tem permissão de ler os alunos dele, então a busca precisa filtrar por ele
+export async function listarAlunosDaTurma(turmaId, professorId) {
+  const filtros = [where('turmaId', '==', turmaId), ...(professorId ? [where('professorId', '==', professorId)] : [])];
+  const resultado = await getDocs(query(collection(db, 'alunos'), ...filtros));
   return resultado.docs.map(paraObjeto).sort((a, b) => a.nome.localeCompare(b.nome));
 }
 
@@ -61,6 +63,8 @@ export async function matricularDaInscricao(inscricao, turma) {
     modalidade,
     turmaId: turma.id,
     turmaNome: `${turma.modalidade} – ${turma.nome}`,
+    // Professor da turma: define quem pode ver os dados do aluno
+    professorId: turma.professorId || '',
     matricula,
     status: 'Ativo',
     inscricaoId,

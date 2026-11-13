@@ -1,7 +1,7 @@
 import { listarAlunos, listarAlunosDaTurma } from '../../services/alunos';
 import { listarChamadasDaTurma, resumoDoAluno } from '../../services/frequencias';
 import { listarInscricoes } from '../../services/inscricoes';
-import { buscarTurma, listarTurmas } from '../../services/turmas';
+import { buscarTurma, listarTurmas, sincronizarProfessorDosAlunos } from '../../services/turmas';
 import { calcularIdade } from '../../utils/datas';
 
 // Inscrição que serve para a turma: mesma modalidade e idade dentro da faixa
@@ -22,6 +22,13 @@ function comContagens(turma, alunosDaTurma, inscricoes) {
 // Todas as turmas com as contagens (tela Turmas e Dashboard)
 export async function carregarTurmasComContagens() {
   const [turmas, alunos, inscricoes] = await Promise.all([listarTurmas(), listarAlunos(), listarInscricoes()]);
+
+  // Alunos antigos (ou de turma que trocou de professor) recebem o professor atual da turma
+  const turmasDesatualizadas = turmas.filter((turma) =>
+    alunos.some((aluno) => aluno.turmaId === turma.id && aluno.professorId !== (turma.professorId || '')),
+  );
+  await Promise.all(turmasDesatualizadas.map((turma) => sincronizarProfessorDosAlunos(turma.id, turma.professorId || '')));
+
   return {
     turmas: turmas.map((turma) => comContagens(turma, alunos.filter((aluno) => aluno.turmaId === turma.id), inscricoes)),
     alunos,

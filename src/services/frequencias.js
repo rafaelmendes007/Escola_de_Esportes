@@ -2,31 +2,44 @@ import { doc, getDoc, getDocs, collection, query, serverTimestamp, setDoc, updat
 import { db } from '../config/firebase';
 
 // frequencias/{turmaId_AAAA-MM-DD}: chamada de uma turma em um dia
-// { turmaId, data: 'AAAA-MM-DD', registros: { alunoId: { presente: true|false, justificativa?: '...' } },
-//   registradoPor, atualizadoEm }
+// { turmaId, data: 'AAAA-MM-DD', registros: { alunoId: { presente: true|false } },
+//   justificativas: { alunoId: 'texto' }, registradoPor, atualizadoEm }
+// As justificativas ficam separadas porque só o admin pode gravá-las (regras do Firestore).
+// Ao ler, juntamos de volta em registros[alunoId].justificativa para as telas.
 
 const idDaChamada = (turmaId, data) => `${turmaId}_${data}`;
 
+function juntarJustificativas(chamada) {
+  const registros = Object.fromEntries(
+    Object.entries(chamada.registros || {}).map(([alunoId, registro]) => [
+      alunoId,
+      { presente: Boolean(registro?.presente), justificativa: chamada.justificativas?.[alunoId] || '' },
+    ]),
+  );
+  return { ...chamada, registros };
+}
+
 export async function buscarChamada(turmaId, data) {
   const documento = await getDoc(doc(db, 'frequencias', idDaChamada(turmaId, data)));
-  return documento.exists() ? documento.data() : null;
+  return documento.exists() ? juntarJustificativas(documento.data()) : null;
 }
 
-// Salva a chamada inteira do dia (substitui a anterior do mesmo dia)
+// Salva presença/falta do dia. Não mexe nas justificativas já registradas pelo admin.
 export async function salvarChamada(turmaId, data, registros, registradoPor) {
-  await setDoc(doc(db, 'frequencias', idDaChamada(turmaId, data)), {
-    turmaId,
-    data,
-    registros,
-    registradoPor,
-    atualizadoEm: serverTimestamp(),
-  });
+  const somentePresenca = Object.fromEntries(
+    Object.entries(registros).map(([alunoId, registro]) => [alunoId, { presente: Boolean(registro?.presente) }]),
+  );
+  await setDoc(
+    doc(db, 'frequencias', idDaChamada(turmaId, data)),
+    { turmaId, data, registros: somentePresenca, registradoPor, atualizadoEm: serverTimestamp() },
+    { merge: true },
+  );
 }
 
-// Grava a justificativa de uma falta já registrada na chamada
+// Grava a justificativa de uma falta já registrada na chamada (só o admin)
 export async function justificarFalta(turmaId, data, alunoId, justificativa) {
   await updateDoc(doc(db, 'frequencias', idDaChamada(turmaId, data)), {
-    [`registros.${alunoId}.justificativa`]: justificativa,
+    [`justificativas.${alunoId}`]: justificativa,
     atualizadoEm: serverTimestamp(),
   });
 }
@@ -34,7 +47,7 @@ export async function justificarFalta(turmaId, data, alunoId, justificativa) {
 // Todas as chamadas de uma turma, da mais recente para a mais antiga
 export async function listarChamadasDaTurma(turmaId) {
   const resultado = await getDocs(query(collection(db, 'frequencias'), where('turmaId', '==', turmaId)));
-  return resultado.docs.map((documento) => documento.data()).sort((a, b) => b.data.localeCompare(a.data));
+  return resultado.docs.map((documento) => juntarJustificativas(documento.data())).sort((a, b) => b.data.localeCompare(a.data));
 }
 
 // Resumo de um aluno a partir das chamadas da turma (mais recente primeiro)

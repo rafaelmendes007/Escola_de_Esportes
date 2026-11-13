@@ -42,13 +42,13 @@ export function paraTela(turma, alunos = []) {
 // Turmas do professor logado, com a quantidade de alunos ativos
 export async function carregarTurmasDoProfessor(professorId) {
   const turmas = await listarTurmasDoProfessor(professorId);
-  const alunosPorTurma = await Promise.all(turmas.map((turma) => listarAlunosDaTurma(turma.id)));
+  const alunosPorTurma = await Promise.all(turmas.map((turma) => listarAlunosDaTurma(turma.id, professorId)));
   return turmas.map((turma, indice) => paraTela(turma, alunosPorTurma[indice]));
 }
 
 // Uma turma com os alunos ativos (chamada, lista de alunos)
-export async function carregarTurmaComAlunos(turmaId) {
-  const [turma, alunos] = await Promise.all([buscarTurma(turmaId), listarAlunosDaTurma(turmaId)]);
+export async function carregarTurmaComAlunos(turmaId, professorId) {
+  const [turma, alunos] = await Promise.all([buscarTurma(turmaId), listarAlunosDaTurma(turmaId, professorId)]);
   if (!turma) return null;
   const ativos = alunos.filter((aluno) => aluno.status === 'Ativo');
   return { turma: paraTela(turma, alunos), alunos: ativos };

@@ -39,7 +39,7 @@ function ChamadaFrequencia() {
   const { turmaId } = useParams();
   const navigate = useNavigate();
   const { usuario } = useAutenticacao();
-  const { dados, carregando, erro, recarregar } = useCarregar(() => carregarTurmaComAlunos(turmaId), [turmaId]);
+  const { dados, carregando, erro, recarregar } = useCarregar(() => carregarTurmaComAlunos(turmaId, usuario.uid), [turmaId, usuario.uid]);
 
   const [data, setData] = useState(ultimoDiaDeAula());
   // { idDoAluno: { presente: true|false, justificativa? } }

@@ -32,7 +32,7 @@ function FormularioRematricula({ aluno, onFechar, onSalvo }) {
       const mudouDeTurma = turma.id !== aluno.turmaId;
       await atualizarAluno(
         aluno.id,
-        { status: 'Ativo', turmaId: turma.id, turmaNome: nomeDaTurma(turma), modalidade: turma.modalidade },
+        { status: 'Ativo', turmaId: turma.id, turmaNome: nomeDaTurma(turma), modalidade: turma.modalidade, professorId: turma.professorId || '' },
         eventoHistorico(
           'Rematrícula confirmada',
           mudouDeTurma ? `Rematriculado na turma ${nomeDaTurma(turma)} (antes: ${aluno.turmaNome || '—'}).` : `Rematriculado na turma ${nomeDaTurma(turma)}.`,

@@ -48,17 +48,59 @@ service cloud.firestore {
       allow read, update, delete: if ehAdmin();
     }
 
+    // Campos que o formulário de inscrição envia; qualquer outro é recusado
+    function camposDoFormulario() {
+      return [
+        'nomeResponsavel', 'cpfResponsavel', 'telefone', 'email', 'parentesco', 'parentescoOutro',
+        'escolaridade', 'escolaridadeOutro', 'pessoasResidencia', 'pessoasResidenciaOutro', 'rendaFamiliar', 'emergenciaNome',
+        'emergenciaTelefone', 'emergenciaParentesco', 'emergenciaParentescoOutro', 'nomeAluno', 'nascimento', 'genero',
+        'generoOutro', 'cpfAluno', 'endereco', 'bairro', 'tipoEscola', 'escola',
+        'serie', 'altura', 'peso', 'tamanhoUniforme', 'planoSaude', 'planoSaudeOutro',
+        'planoOdonto', 'planoOdontoOutro', 'tipoSanguineo', 'fatorSanguineo', 'alergiaMedicamento', 'alergiaMedicamentoQual',
+        'medicamentoControlado', 'medicamentoControladoQual', 'alergiaAlimento', 'alergiaAlimentoQual', 'problemaSaude', 'problemaSaudeOutro',
+        'deficiencia', 'deficienciaOutro', 'atencaoEspecial', 'atencaoEspecialQual'
+      ];
+    }
+
+    // Texto de um campo: no máximo 300 caracteres (campo ausente conta como vazio)
+    function tam(dados, campo) {
+      return dados.get(campo, '') is string && dados.get(campo, '').size() <= 300;
+    }
+
+    // Todos os campos do formulário são texto curto (evita documentos enormes)
+    function textosCurtos(dados) {
+      return tam(dados, 'nomeResponsavel') && tam(dados, 'cpfResponsavel') && tam(dados, 'telefone')
+        && tam(dados, 'email') && tam(dados, 'parentesco') && tam(dados, 'parentescoOutro')
+        && tam(dados, 'escolaridade') && tam(dados, 'escolaridadeOutro') && tam(dados, 'pessoasResidencia')
+        && tam(dados, 'pessoasResidenciaOutro') && tam(dados, 'rendaFamiliar') && tam(dados, 'emergenciaNome')
+        && tam(dados, 'emergenciaTelefone') && tam(dados, 'emergenciaParentesco') && tam(dados, 'emergenciaParentescoOutro')
+        && tam(dados, 'nomeAluno') && tam(dados, 'nascimento') && tam(dados, 'genero')
+        && tam(dados, 'generoOutro') && tam(dados, 'cpfAluno') && tam(dados, 'endereco')
+        && tam(dados, 'bairro') && tam(dados, 'tipoEscola') && tam(dados, 'escola')
+        && tam(dados, 'serie') && tam(dados, 'altura') && tam(dados, 'peso')
+        && tam(dados, 'tamanhoUniforme') && tam(dados, 'planoSaude') && tam(dados, 'planoSaudeOutro')
+        && tam(dados, 'planoOdonto') && tam(dados, 'planoOdontoOutro') && tam(dados, 'tipoSanguineo')
+        && tam(dados, 'fatorSanguineo') && tam(dados, 'alergiaMedicamento') && tam(dados, 'alergiaMedicamentoQual')
+        && tam(dados, 'medicamentoControlado') && tam(dados, 'medicamentoControladoQual') && tam(dados, 'alergiaAlimento')
+        && tam(dados, 'alergiaAlimentoQual') && tam(dados, 'problemaSaude') && tam(dados, 'problemaSaudeOutro')
+        && tam(dados, 'deficiencia') && tam(dados, 'deficienciaOutro') && tam(dados, 'atencaoEspecial')
+        && tam(dados, 'atencaoEspecialQual');
+    }
+
     function inscricaoNovaValida(dados) {
-      return dados.status == 'Aguardando vaga'
+      return dados.keys().hasOnly(camposDoFormulario().concat(['modalidade', 'status', 'protocolo', 'consentimento', 'criadoEm']))
+        && dados.status == 'Aguardando vaga'
         && dados.nomeAluno is string && dados.nomeAluno.size() > 0 && dados.nomeAluno.size() <= 120
         && dados.nomeResponsavel is string && dados.nomeResponsavel.size() > 0 && dados.nomeResponsavel.size() <= 120
         && dados.cpfResponsavel is string && dados.cpfResponsavel.size() == 14
-        && dados.modalidade is string && dados.modalidade.size() > 0
+        && dados.modalidade is string && dados.modalidade.size() > 0 && dados.modalidade.size() <= 50
         && dados.protocolo is string && dados.protocolo.matches('^ESP-[A-Z0-9]{4}-[A-Z0-9]{4}$')
+        && dados.consentimento.keys().hasOnly(['aceitoEm', 'versaoTermos', 'politicaPrivacidade', 'termosDeUso'])
         && dados.consentimento.politicaPrivacidade == true
         && dados.consentimento.termosDeUso == true
         && dados.consentimento.aceitoEm is timestamp
-        && dados.criadoEm == request.time;
+        && dados.criadoEm == request.time
+        && textosCurtos(dados);
     }
 
     // consultasInscricao/{protocolo}: resumo para o responsável acompanhar a inscrição.
@@ -67,8 +109,10 @@ service cloud.firestore {
       allow get: if true;
       allow list: if ehAdmin();
       // Só pode ser criada junto com a inscrição de mesmo protocolo (no mesmo envio)
-      allow create: if request.resource.data.status == 'Aguardando vaga'
+      allow create: if request.resource.data.keys().hasOnly(['inscricaoId', 'cpfHash', 'nomeAluno', 'modalidade', 'status', 'posicao', 'criadoEm'])
+        && request.resource.data.status == 'Aguardando vaga'
         && request.resource.data.posicao == null
+        && request.resource.data.cpfHash is string && request.resource.data.cpfHash.size() == 64
         && getAfter(/databases/$(database)/documents/inscricoes/$(request.resource.data.inscricaoId)).data.protocolo == protocolo;
       allow update, delete: if ehAdmin();
     }
@@ -79,15 +123,30 @@ service cloud.firestore {
       allow write: if ehAdmin();
     }
 
-    // alunos/{id}: alunos matriculados
+    // O professor logado é o responsável por esta turma?
+    function professorDaTurma(turmaId) {
+      return ehProfessor()
+        && get(/databases/$(database)/documents/turmas/$(turmaId)).data.professorId == request.auth.uid;
+    }
+
+    // alunos/{id}: alunos matriculados (dados pessoais e de saúde).
+    // O admin vê todos; o professor só os alunos das turmas dele (campo professorId do aluno).
     match /alunos/{id} {
-      allow read: if ehEquipe();
+      allow read: if ehAdmin() || (ehProfessor() && resource.data.professorId == request.auth.uid);
       allow write: if ehAdmin();
     }
 
-    // frequencias/{id}: chamada de uma turma em um dia. Professor registra; admin corrige e justifica.
+    // frequencias/{turmaId_AAAA-MM-DD}: chamada de uma turma em um dia.
+    // O professor registra só a chamada das turmas dele e não mexe nas justificativas (só o admin justifica).
     match /frequencias/{id} {
-      allow read, create, update: if ehEquipe();
+      allow read: if ehEquipe();
+      allow create: if ehAdmin()
+        || (professorDaTurma(request.resource.data.turmaId)
+          && id == request.resource.data.turmaId + '_' + request.resource.data.data
+          && !('justificativas' in request.resource.data));
+      allow update: if ehAdmin()
+        || (professorDaTurma(resource.data.turmaId)
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['turmaId', 'data', 'justificativas']));
       allow delete: if ehAdmin();
     }
 

@@ -2,13 +2,15 @@ import { Link, useParams } from 'react-router-dom';
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { TEXTO } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
+import { useAutenticacao } from '../../hooks/useAutenticacao';
 import { useCarregar } from '../../hooks/useCarregar';
 import { calcularIdade } from '../../utils/datas';
 import { carregarTurmaComAlunos, iniciais } from './dadosProfessor';
 
 function AlunosTurma() {
   const { turmaId } = useParams();
-  const { dados, carregando, erro, recarregar } = useCarregar(() => carregarTurmaComAlunos(turmaId), [turmaId]);
+  const { usuario } = useAutenticacao();
+  const { dados, carregando, erro, recarregar } = useCarregar(() => carregarTurmaComAlunos(turmaId, usuario.uid), [turmaId, usuario.uid]);
 
   if (carregando) return <LayoutProfessor><Carregando /></LayoutProfessor>;
   if (erro) return <LayoutProfessor><ErroCarga onTentarDeNovo={recarregar} /></LayoutProfessor>;

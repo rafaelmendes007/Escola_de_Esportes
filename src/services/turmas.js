@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 // turmas/{id}: { modalidade, nome, sexo, capacidade, idadeMinima, idadeMaxima, professorId, professorNome,
@@ -31,10 +31,23 @@ export async function buscarTurma(id) {
 export async function salvarTurma(dados, id) {
   if (id) {
     await updateDoc(doc(db, 'turmas', id), { ...dados, atualizadoEm: serverTimestamp() });
+    // Se o professor mudou, os alunos passam a ser visíveis para o novo professor
+    await sincronizarProfessorDosAlunos(id, dados.professorId || '');
     return id;
   }
   const novo = await addDoc(collection(db, 'turmas'), { ...dados, criadoEm: serverTimestamp() });
   return novo.id;
+}
+
+// Copia o professor da turma para os alunos dela (é por esse campo que o professor ganha acesso aos dados)
+export async function sincronizarProfessorDosAlunos(turmaId, professorId) {
+  const resultado = await getDocs(query(collection(db, 'alunos'), where('turmaId', '==', turmaId)));
+  const desatualizados = resultado.docs.filter((documento) => documento.data().professorId !== professorId);
+  for (let i = 0; i < desatualizados.length; i += 400) {
+    const lote = writeBatch(db);
+    desatualizados.slice(i, i + 400).forEach((documento) => lote.update(documento.ref, { professorId }));
+    await lote.commit();
+  }
 }
 
 // "Futsal – Turma 1"
