@@ -37,6 +37,14 @@ Abra http://localhost:5173.
 
 Sem o `.env.local`, o app mostra a tela "Configuração do Firebase faltando".
 
+### Proteção contra robôs (App Check, opcional)
+
+1. Crie uma chave **reCAPTCHA v3** em https://www.google.com/recaptcha/admin com o domínio do site (e `localhost`).
+2. No Firebase, em **App Check**, registre o app da Web com o provedor reCAPTCHA v3 e a **chave secreta**.
+3. Coloque a **chave do site** em `VITE_RECAPTCHA_SITE_KEY` no `.env.local` e reinicie o `npm run dev`.
+4. Confira em **App Check > APIs** que as requisições chegam verificadas e só então ative a **aplicação obrigatória**
+   no Firestore e no Authentication (antes disso, nada é bloqueado).
+
 ### Primeiro administrador
 
 Sem nenhum admin, ninguém consegue cadastrar os outros. Crie o primeiro à mão:
