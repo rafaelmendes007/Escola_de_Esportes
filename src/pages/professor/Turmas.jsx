@@ -1,12 +1,12 @@
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
-import { useAuth } from '../../context/AuthContext';
+import { useAutenticacao } from '../../hooks/useAutenticacao';
 import { useCarregar } from '../../hooks/useCarregar';
 import CardTurma from './CardTurma';
 import { carregarTurmasDoProfessor } from './dadosProfessor';
 
 function Turmas() {
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacao();
   const { dados: turmas, carregando, erro, recarregar } = useCarregar(() => carregarTurmasDoProfessor(usuario.uid), [usuario.uid]);
 
   return (

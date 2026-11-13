@@ -1,13 +1,13 @@
 import { useLocation } from 'react-router-dom';
 import LayoutPainel from './LayoutPainel';
-import { useAuth } from '../context/AuthContext';
+import { useAutenticacao } from '../hooks/useAutenticacao';
 import { useCarregar } from '../hooks/useCarregar';
 import { carregarAvisosDoProfessor } from '../pages/professor/dadosProfessor';
 
 // Telas do professor: menu com Painel e Turmas
 function LayoutProfessor({ children }) {
   const { pathname } = useLocation();
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacao();
   // Bolinha vermelha no sino quando há aviso dos últimos 3 dias
   const { dados: avisos } = useCarregar(() => carregarAvisosDoProfessor(usuario.uid), [usuario.uid]);
 

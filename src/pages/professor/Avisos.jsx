@@ -2,13 +2,13 @@ import { useState } from 'react';
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { TEXTO, CINZA_TEXTO, AZUL, AZUL_CLARO, BORDA, VERMELHO } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
-import { useAuth } from '../../context/AuthContext';
+import { useAutenticacao } from '../../hooks/useAutenticacao';
 import { useCarregar } from '../../hooks/useCarregar';
 import { formatarDataHora } from '../../utils/datas';
 import { carregarAvisosDoProfessor } from './dadosProfessor';
 
 function Avisos() {
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacao();
   const { dados: avisos, carregando, erro, recarregar } = useCarregar(() => carregarAvisosDoProfessor(usuario.uid), [usuario.uid]);
   // 'todos' ou 'novos' (publicados nos últimos 3 dias)
   const [filtro, setFiltro] = useState('todos');

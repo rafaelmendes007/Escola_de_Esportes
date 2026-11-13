@@ -52,9 +52,9 @@ em **Admin > Usuários**. A pessoa recebe um e-mail para criar a própria senha.
 
 ```
 src/
-  components/   Layouts (público, professor, admin), rota protegida, telas de erro e carregamento
-  context/      AuthContext: usuário logado e perfil
-  hooks/        useCarregar: busca dados com estados de carregando/erro
+  components/   Layouts (público, professor, admin), RotaProtegida, BotaoVoltar, telas de erro e carregamento
+  context/      ProvedorAutenticacao: usuário logado e perfil (use o hook useAutenticacao)
+  hooks/        useAutenticacao (quem está logado) e useCarregar (busca dados com carregando/erro)
   services/     Acesso ao Firestore (inscrições, turmas, alunos, frequências, avisos, usuários)
   utils/        Validações, máscaras, datas, dias de aula, termos e rascunho da inscrição
   pages/

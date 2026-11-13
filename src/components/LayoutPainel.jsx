@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAutenticacao } from '../hooks/useAutenticacao';
 import { AZUL, AZUL_ESCURO, AZUL_MENU_ATIVO, AZUL_CLARO, FUNDO, TEXTO, CINZA_TEXTO, BORDA, VERMELHO } from './cores';
 
 // Estrutura comum das telas logadas: menu lateral + barra superior.
 // menu: [{ to, texto, icone, ativo }]
 function LayoutPainel({ titulo, menu, perfil, linkAvisos, temAvisoNovo, children }) {
-  const { usuario, logout } = useAuth();
+  const { usuario, logout } = useAutenticacao();
   const navigate = useNavigate();
   // Nome de quem está logado (ou o perfil, enquanto não houver nome)
   const nome = usuario?.nome || perfil;

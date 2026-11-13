@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { TEXTO, BORDA, VERDE, VERMELHO } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
-import { useAuth } from '../../context/AuthContext';
+import { useAutenticacao } from '../../hooks/useAutenticacao';
 import { useCarregar } from '../../hooks/useCarregar';
 import { buscarChamada, salvarChamada } from '../../services/frequencias';
 import { ehDiaDeAula, ultimoDiaDeAula } from '../../utils/diasAula';
@@ -38,7 +38,7 @@ function BotaoChamada({ tipo, marcado, onClick }) {
 function ChamadaFrequencia() {
   const { turmaId } = useParams();
   const navigate = useNavigate();
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacao();
   const { dados, carregando, erro, recarregar } = useCarregar(() => carregarTurmaComAlunos(turmaId), [turmaId]);
 
   const [data, setData] = useState(ultimoDiaDeAula());

@@ -4,7 +4,7 @@ import Login from './pages/login/Login';
 import EsqueciSenha from './pages/login/EsqueciSenha';
 
 // Área pública (fluxo do responsável)
-import HomePage from './pages/publico/HomePage';
+import PaginaInicial from './pages/publico/PaginaInicial';
 import Modalidades from './pages/publico/Modalidades';
 import Avisos from './pages/publico/Avisos';
 import SelecaoModalidades from './pages/publico/SelecaoModalidades';
@@ -39,19 +39,19 @@ const DetalhesTurmaHistorico = lazy(() => import('./pages/admin/DetalhesTurmaHis
 const Frequencia = lazy(() => import('./pages/admin/Frequencia'));
 const AvisosAdmin = lazy(() => import('./pages/admin/Avisos'));
 const Usuarios = lazy(() => import('./pages/admin/Usuarios'));
-import { AuthProvider } from './context/AuthContext';
-import PrivateRoute from './components/PrivateRoute';
+import ProvedorAutenticacao from './context/ProvedorAutenticacao';
+import RotaProtegida from './components/RotaProtegida';
 import { Carregando } from './components/EstadoDados';
 
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
+      <ProvedorAutenticacao>
         <Suspense fallback={<Carregando />}>
         <Routes>
           {/* Área pública */}
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<PaginaInicial />} />
           <Route path="/modalidades" element={<Modalidades />} />
           <Route path="/avisos" element={<Avisos />} />
 
@@ -71,123 +71,123 @@ function App() {
 
           {/* ========== ÁREA DO PROFESSOR (PROTEGIDA) ========== */}
           <Route path="/professor" element={
-            <PrivateRoute perfil="professor">
+            <RotaProtegida perfil="professor">
               <Painel />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/professor/turmas" element={
-            <PrivateRoute perfil="professor">
+            <RotaProtegida perfil="professor">
               <Turmas />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/professor/turmas/:turmaId/alunos" element={
-            <PrivateRoute perfil="professor">
+            <RotaProtegida perfil="professor">
               <AlunosTurma />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/professor/turmas/:turmaId/alunos/:alunoId/historico" element={
-            <PrivateRoute perfil="professor">
+            <RotaProtegida perfil="professor">
               <HistoricoFrequencia />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/professor/turmas/:turmaId/chamada" element={
-            <PrivateRoute perfil="professor">
+            <RotaProtegida perfil="professor">
               <ChamadaFrequencia />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/professor/turmas/:turmaId/frequencia-registrada" element={
-            <PrivateRoute perfil="professor">
+            <RotaProtegida perfil="professor">
               <FrequenciaRegistrada />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/professor/avisos" element={
-            <PrivateRoute perfil="professor">
+            <RotaProtegida perfil="professor">
               <AvisosProfessor />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
 
           {/* ========== ÁREA DO ADMINISTRADOR (PROTEGIDA) ========== */}
           <Route path="/admin" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <Dashboard />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/lista-espera" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <ListaEspera />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/lista-espera/:inscricaoId" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <DetalhesListaEspera />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/alunos" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <Alunos />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/alunos/:alunoId" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <DetalhesAlunoVisaoGeral />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/alunos/:alunoId/frequencia" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <DetalhesAlunoFrequencia />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/alunos/:alunoId/documentos" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <DetalhesAlunoDocumentos />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/alunos/:alunoId/historico" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <DetalhesAlunoHistorico />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/turmas" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <TurmasAdmin />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/turmas/:turmaId" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <DetalhesTurmaAlunos />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/turmas/:turmaId/lista-espera" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <DetalhesTurmaListaEspera />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/turmas/:turmaId/historico" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <DetalhesTurmaHistorico />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/frequencia" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <Frequencia />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/avisos" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <AvisosAdmin />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
           <Route path="/admin/usuarios" element={
-            <PrivateRoute perfil="admin">
+            <RotaProtegida perfil="admin">
               <Usuarios />
-            </PrivateRoute>
+            </RotaProtegida>
           } />
 
           {/* Qualquer URL desconhecida volta para a página inicial */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         </Suspense>
-      </AuthProvider>
+      </ProvedorAutenticacao>
     </BrowserRouter>
   );
 }

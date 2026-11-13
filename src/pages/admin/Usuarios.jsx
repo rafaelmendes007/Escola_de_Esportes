@@ -2,7 +2,7 @@ import { useState } from 'react';
 import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
-import { useAuth } from '../../context/AuthContext';
+import { useAutenticacao } from '../../hooks/useAutenticacao';
 import { useCarregar } from '../../hooks/useCarregar';
 import {
   atualizarUsuario, enviarEmailDeSenha, listarUsuarios, mensagemDeErro, PERFIS, removerAcesso,
@@ -12,7 +12,7 @@ import ModalNovoUsuario from './ModalNovoUsuario';
 
 // Professores e administradores com acesso ao sistema (coleção "usuarios" do Firestore)
 function Usuarios() {
-  const { usuario: logado } = useAuth();
+  const { usuario: logado } = useAutenticacao();
   const { dados: usuarios, carregando, erro, recarregar } = useCarregar(listarUsuarios);
   const [filtro, setFiltro] = useState('todos');
   const [modalAberto, setModalAberto] = useState(false);

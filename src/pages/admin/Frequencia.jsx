@@ -2,7 +2,7 @@ import { useState } from 'react';
 import LayoutAdmin from '../../components/LayoutAdmin';
 import { BORDA } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
-import { useAuth } from '../../context/AuthContext';
+import { useAutenticacao } from '../../hooks/useAutenticacao';
 import { useCarregar } from '../../hooks/useCarregar';
 import { listarAlunosDaTurma } from '../../services/alunos';
 import { justificarFalta, listarChamadasDaTurma, resumoDoAluno, salvarChamada } from '../../services/frequencias';
@@ -19,7 +19,7 @@ async function carregarFrequenciaDaTurma(turmaId) {
 }
 
 function Frequencia() {
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacao();
   const { dados: turmas, carregando: carregandoTurmas } = useCarregar(listarTurmas);
   const [turmaEscolhida, setTurmaEscolhida] = useState('');
   const [data, setData] = useState(ultimoDiaDeAula());

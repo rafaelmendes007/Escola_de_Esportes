@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import LayoutAdmin from '../../components/LayoutAdmin';
 import { AZUL_ADMIN, BORDA } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
-import { useAuth } from '../../context/AuthContext';
+import { useAutenticacao } from '../../hooks/useAutenticacao';
 import { useCarregar } from '../../hooks/useCarregar';
 import { faixaEtaria } from '../../services/turmas';
 import { Etiqueta, LinkDetalhes } from './componentes';
@@ -37,7 +37,7 @@ function CardResumo({ icone, cor, fundoIcone, rotulo, valor, link, textoLink }) 
 
 
 function Dashboard() {
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacao();
   const { dados, carregando, erro, recarregar } = useCarregar(carregarTurmasComContagens);
 
   const emAndamento = (dados?.turmas || []).filter((turma) => turma.status !== 'Encerrada');

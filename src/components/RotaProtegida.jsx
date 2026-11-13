@@ -1,11 +1,11 @@
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAutenticacao } from '../hooks/useAutenticacao';
 import { AREA_DO_PERFIL } from '../services/usuarios';
 
 // Protege rotas que precisam de login.
 // perfil: 'admin' ou 'professor'. Quem tem outro perfil vai para a própria área.
-function PrivateRoute({ perfil, children }) {
-  const { usuario, carregando } = useAuth();
+function RotaProtegida({ perfil, children }) {
+  const { usuario, carregando } = useAutenticacao();
 
   // Se está carregando, mostrar um loader
   if (carregando) {
@@ -31,4 +31,4 @@ function PrivateRoute({ perfil, children }) {
   return children;
 }
 
-export default PrivateRoute;
+export default RotaProtegida;

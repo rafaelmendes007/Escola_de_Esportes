@@ -5,7 +5,7 @@ import imagemEsportes from '../../assets/esportes_tela_responsavel.png';
 // Cor principal do protótipo
 const AZUL = 'var(--azul)';
 
-function HomePage() {
+function PaginaInicial() {
   return (
     // Fundo branco com altura mínima de 100vh (tela inteira)
     <div
@@ -75,4 +75,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default PaginaInicial;

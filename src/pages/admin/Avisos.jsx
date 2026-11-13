@@ -2,7 +2,7 @@ import { useState } from 'react';
 import LayoutAdmin from '../../components/LayoutAdmin';
 import { AZUL_ADMIN } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
-import { useAuth } from '../../context/AuthContext';
+import { useAutenticacao } from '../../hooks/useAutenticacao';
 import { useCarregar } from '../../hooks/useCarregar';
 import { listarAvisos, publicarAviso, publicoDoAviso } from '../../services/avisos';
 import { listarTurmas, nomeDaTurma } from '../../services/turmas';
@@ -19,7 +19,7 @@ const coresPublico = {
 const formularioVazio = { titulo: '', paraProfessores: true, paraResponsaveis: true, turmaId: '', mensagem: '' };
 
 function Avisos() {
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacao();
   const { dados: avisos, carregando, erro, recarregar } = useCarregar(listarAvisos);
   const { dados: turmas } = useCarregar(listarTurmas);
   const [formulario, setFormulario] = useState(formularioVazio);

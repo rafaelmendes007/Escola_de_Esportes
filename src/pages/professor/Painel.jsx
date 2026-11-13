@@ -2,13 +2,13 @@ import { Link } from 'react-router-dom';
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { TEXTO } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
-import { useAuth } from '../../context/AuthContext';
+import { useAutenticacao } from '../../hooks/useAutenticacao';
 import { useCarregar } from '../../hooks/useCarregar';
 import CardTurma from './CardTurma';
 import { carregarTurmasDoProfessor, diaDeHoje } from './dadosProfessor';
 
 function Painel() {
-  const { usuario } = useAuth();
+  const { usuario } = useAutenticacao();
   const { dados: turmas, carregando, erro, recarregar } = useCarregar(() => carregarTurmasDoProfessor(usuario.uid), [usuario.uid]);
 
   const hoje = diaDeHoje();
