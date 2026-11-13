@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Modal } from './componentes';
 import { criarUsuario, mensagemDeErro } from '../../services/usuarios';
 
-const formularioVazio = { nome: '', email: '', senha: '', perfil: 'professor' };
+const formularioVazio = { nome: '', email: '', perfil: 'professor' };
 
-// Cadastro de professor ou administrador no Firebase (conta + perfil)
+// Cadastro de professor ou administrador. A pessoa recebe um e-mail para criar a própria senha.
 function ModalNovoUsuario({ aberto, onFechar, onCriado }) {
   const [formulario, setFormulario] = useState(formularioVazio);
   const [salvando, setSalvando] = useState(false);
@@ -23,8 +23,9 @@ function ModalNovoUsuario({ aberto, onFechar, onCriado }) {
     setErro('');
     setSalvando(true);
     try {
-      await criarUsuario({ ...formulario, nome: formulario.nome.trim(), email: formulario.email.trim() });
-      onCriado();
+      const email = formulario.email.trim();
+      await criarUsuario({ ...formulario, nome: formulario.nome.trim(), email });
+      onCriado(email);
       fechar();
     } catch (error) {
       console.error('Erro ao cadastrar usuário:', error);
@@ -47,19 +48,16 @@ function ModalNovoUsuario({ aberto, onFechar, onCriado }) {
         </select>
 
         <label className="admin-rotulo" htmlFor="usuario-nome" style={{ fontSize: '0.75rem' }}>Nome completo <span style={{ color: '#DC2626' }}>*</span></label>
-        <input id="usuario-nome" name="nome" className="form-control form-control-sm admin-campo mb-3" value={formulario.nome} onChange={alterar} required />
+        <input id="usuario-nome" name="nome" className="form-control form-control-sm admin-campo mb-3" value={formulario.nome} onChange={alterar} required maxLength={120} />
 
         <label className="admin-rotulo" htmlFor="usuario-email" style={{ fontSize: '0.75rem' }}>E-mail <span style={{ color: '#DC2626' }}>*</span></label>
-        <input id="usuario-email" name="email" type="email" className="form-control form-control-sm admin-campo mb-3" placeholder="Ex.: colaborador@unifor.br" value={formulario.email} onChange={alterar} required />
-
-        <label className="admin-rotulo" htmlFor="usuario-senha" style={{ fontSize: '0.75rem' }}>Senha provisória <span style={{ color: '#DC2626' }}>*</span></label>
-        <input id="usuario-senha" name="senha" type="text" minLength={6} className="form-control form-control-sm admin-campo" value={formulario.senha} onChange={alterar} required />
-        <div className="mb-3" style={{ fontSize: '0.7rem', color: '#6B7280' }}>
-          Mínimo de 6 caracteres. A pessoa pode trocar depois em "Esqueceu sua senha?" na tela de login.
+        <input id="usuario-email" name="email" type="email" className="form-control form-control-sm admin-campo" placeholder="Ex.: colaborador@unifor.br" value={formulario.email} onChange={alterar} required />
+        <div className="mb-3 mt-1" style={{ fontSize: '0.7rem', color: '#6B7280' }}>
+          A pessoa recebe neste e-mail um link para criar a própria senha. Use um e-mail que ela acessa.
         </div>
 
         {erro && (
-          <div className="rounded px-3 py-2 mb-3" style={{ backgroundColor: '#FEE2E2', color: '#B91C1C', fontSize: '0.8rem' }}>
+          <div className="rounded px-3 py-2 mb-3" role="alert" style={{ backgroundColor: '#FEE2E2', color: '#B91C1C', fontSize: '0.8rem' }}>
             <i className="bi bi-exclamation-circle me-1"></i>{erro}
           </div>
         )}
@@ -67,7 +65,7 @@ function ModalNovoUsuario({ aberto, onFechar, onCriado }) {
         <div className="d-flex justify-content-end gap-3">
           <button type="button" className="admin-botao-contorno" onClick={fechar} disabled={salvando}>Cancelar</button>
           <button type="submit" className="admin-botao" disabled={salvando}>
-            {salvando ? 'Cadastrando...' : 'Cadastrar'}
+            {salvando ? 'Cadastrando...' : 'Cadastrar e enviar convite'}
           </button>
         </div>
       </form>

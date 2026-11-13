@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '../../config/firebase';
-import { AREA_DO_PERFIL, buscarUsuario, mensagemDeErro } from '../../services/usuarios';
+import { AREA_DO_PERFIL, buscarUsuario, mensagemDeErro, podeEntrar } from '../../services/usuarios';
 import HeaderPublico from '../../components/HeaderPublico';
 import imagemApito from '../../assets/apito.png';
 import background_login from '../../assets/background_login.png';
@@ -33,9 +33,11 @@ function Login() {
 
       // O perfil (admin ou professor) fica no Firestore, em usuarios/{uid}
       const dados = await buscarUsuario(user.uid);
-      if (!dados?.perfil) {
+      if (!podeEntrar(dados)) {
         await signOut(auth);
-        setErro('Seu usuário ainda não tem perfil cadastrado. Fale com a administração.');
+        setErro(dados?.ativo === false
+          ? 'Seu acesso está desativado. Fale com a administração.'
+          : 'Seu usuário ainda não tem perfil cadastrado. Fale com a administração.');
         return;
       }
 

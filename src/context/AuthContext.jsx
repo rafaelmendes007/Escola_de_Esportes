@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '../config/firebase';
-import { buscarUsuario } from '../services/usuarios';
+import { buscarUsuario, podeEntrar } from '../services/usuarios';
 
 // Criar o contexto de autenticação
 const AuthContext = createContext();
@@ -28,7 +28,8 @@ export function AuthProvider({ children }) {
           uid: user.uid,
           email: user.email,
           nome: dados?.nome || user.email,
-          perfil: dados?.perfil || null,
+          // Desativado fica sem perfil: as rotas protegidas mandam para o login
+          perfil: podeEntrar(dados) ? dados.perfil : null,
         });
       } else {
         setUsuario(null);
