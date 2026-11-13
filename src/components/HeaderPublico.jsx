@@ -1,12 +1,18 @@
 import { Link, NavLink } from 'react-router-dom';
 import logoEscolaDeEsportes from '../assets/Escola_de_Esportes.png';
 import imagemSino from '../assets/sino.png';
+import { useAutenticacao } from '../hooks/useAutenticacao';
+import { AREA_DO_PERFIL } from '../services/usuarios';
 
 const AZUL = 'var(--azul)';
 const TEXTO = '#1F2A44';
 
 // Barra de navegação das telas públicas. Fica presa no topo ao rolar a página.
 function HeaderPublico() {
+  // Colaborador já logado vai direto para a própria área
+  const { usuario } = useAutenticacao();
+  const areaDoUsuario = usuario?.perfil ? AREA_DO_PERFIL[usuario.perfil] : null;
+
   return (
     <header
       className="bg-white py-2 px-3 px-lg-5 d-flex justify-content-between align-items-center sticky-top"
@@ -48,12 +54,12 @@ function HeaderPublico() {
           <img src={imagemSino} alt="" style={{ height: '26px' }} />
         </NavLink>
         <Link
-          to="/login"
+          to={areaDoUsuario || '/login'}
           className="btn btn-sm d-flex align-items-center gap-1"
           style={{ border: `1px solid ${AZUL}`, color: AZUL, fontSize: '0.8rem' }}
         >
           <i className="bi bi-box-arrow-in-right"></i>
-          <span className="d-none d-md-inline">Área do colaborador</span>
+          <span className="d-none d-md-inline">{areaDoUsuario ? 'Minha área' : 'Área do colaborador'}</span>
         </Link>
       </nav>
     </header>

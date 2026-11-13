@@ -1,6 +1,6 @@
 // Opções das perguntas da inscrição, iguais às do formulário da Unifor
 
-export const PARENTESCOS = ['Mãe', 'Pai', 'Avó/Avô', 'Tia/Tio', 'Irmã/Irmão', 'Outro'];
+export const PARENTESCOS = ['Pai/Mãe', 'Irmã(o)', 'Tio(a)', 'Avô(ó)', 'Primo(a)', 'Outro'];
 
 export const FAIXAS_RENDA = [
   'Até 01 salário mínimo',
