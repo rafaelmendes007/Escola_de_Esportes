@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Peças visuais repetidas nas telas do administrador
 
@@ -142,8 +142,41 @@ export function RodapeTabela({ paginacao }) {
   );
 }
 
-// Janela por cima da tela (fecha clicando fora ou no Cancelar)
+// Janela por cima da tela. Fecha clicando fora, no Cancelar ou com a tecla Esc.
+// Ao abrir, o foco vai para o primeiro campo; Tab circula só dentro da janela; ao fechar, o foco volta.
 export function Modal({ aberto, onFechar, largura = '480px', children }) {
+  const caixa = useRef(null);
+  const fecharRef = useRef(onFechar);
+  // Sempre a função de fechar mais recente, sem reiniciar o efeito do teclado
+  useEffect(() => {
+    fecharRef.current = onFechar;
+  }, [onFechar]);
+
+  useEffect(() => {
+    if (!aberto) return undefined;
+    const focoAnterior = document.activeElement;
+    const focaveis = () => caixa.current?.querySelectorAll('input, select, textarea, button, a[href]') || [];
+
+    // Primeiro campo do formulário (ou o primeiro botão)
+    const primeiro = caixa.current?.querySelector('input, select, textarea') || focaveis()[0];
+    primeiro?.focus();
+
+    const aoTeclar = (e) => {
+      if (e.key === 'Escape') fecharRef.current();
+      if (e.key !== 'Tab') return;
+      const lista = [...focaveis()].filter((el) => !el.disabled);
+      if (!lista.length) return;
+      const [inicio, fim] = [lista[0], lista[lista.length - 1]];
+      if (e.shiftKey && document.activeElement === inicio) { e.preventDefault(); fim.focus(); }
+      else if (!e.shiftKey && document.activeElement === fim) { e.preventDefault(); inicio.focus(); }
+    };
+    document.addEventListener('keydown', aoTeclar);
+    return () => {
+      document.removeEventListener('keydown', aoTeclar);
+      focoAnterior?.focus?.();
+    };
+  }, [aberto]);
+
   if (!aberto) return null;
 
   return (
@@ -153,6 +186,7 @@ export function Modal({ aberto, onFechar, largura = '480px', children }) {
       onClick={onFechar}
     >
       <div
+        ref={caixa}
         className="bg-white rounded-3 shadow p-4 w-100"
         style={{ maxWidth: largura, maxHeight: '100%', overflowY: 'auto' }}
         onClick={(e) => e.stopPropagation()}
