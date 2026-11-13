@@ -94,7 +94,7 @@ function DetalhesListaEspera() {
     <LayoutAdmin titulo="Lista de espera">
       <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
         <div>
-          <Link to="/admin/lista-espera" className="text-decoration-none" style={{ color: '#0B6BC2', fontSize: '0.7rem' }}>
+          <Link to="/admin/lista-espera" className="text-decoration-none" style={{ color: 'var(--azul)', fontSize: '0.7rem' }}>
             <i className="bi bi-arrow-left me-1"></i>Voltar para a lista de espera
           </Link>
           <h1 className="admin-titulo" style={{ fontSize: '1.5rem' }}>Detalhes da inscrição</h1>
@@ -176,7 +176,7 @@ function DetalhesListaEspera() {
             {/* Linha do tempo */}
             <div className="d-flex gap-3 mt-3">
               {ETAPAS.map((etapa, indice) => (
-                <div key={etapa} className="d-flex align-items-center gap-1" style={{ fontSize: '0.7rem', color: indice <= etapaAtual ? '#0B6BC2' : '#9CA3AF' }}>
+                <div key={etapa} className="d-flex align-items-center gap-1" style={{ fontSize: '0.7rem', color: indice <= etapaAtual ? 'var(--azul)' : '#9CA3AF' }}>
                   <i className={`bi ${indice <= etapaAtual ? 'bi-check-circle-fill' : 'bi-circle'}`}></i>{etapa}
                 </div>
               ))}

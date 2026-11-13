@@ -2,7 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import logoEscolaDeEsportes from '../assets/Escola_de_Esportes.png';
 import imagemSino from '../assets/sino.png';
 
-const AZUL = '#0047B8';
+const AZUL = 'var(--azul)';
 const TEXTO = '#1F2A44';
 
 // Barra de navegação das telas públicas. Fica presa no topo ao rolar a página.

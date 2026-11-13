@@ -4,7 +4,7 @@ import HeaderPublico from '../../components/HeaderPublico';
 import { registrarConsentimento } from '../../utils/consentimento';
 
 // Cores do protótipo
-const AZUL = '#0047B8';
+const AZUL = 'var(--azul)';
 const AZUL_ESCURO = '#1F2A44';
 
 const LINK_POLITICA = 'https://www.unifor.br/politica-de-privacidade';
@@ -76,7 +76,7 @@ function ConsentimentoInscricao() {
           min-width: 220px;
           transition: background-color 0.3s ease, opacity 0.3s ease;
         }
-        .botao-continuar:hover:not(:disabled) { background-color: #0039A0; }
+        .botao-continuar:hover:not(:disabled) { background-color: var(--azul-escuro); }
         .botao-continuar:disabled { opacity: 0.45; cursor: not-allowed; }
       `}</style>
 

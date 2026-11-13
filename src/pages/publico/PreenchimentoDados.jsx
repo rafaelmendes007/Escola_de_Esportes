@@ -12,7 +12,7 @@ import {
 } from './opcoesInscricao';
 
 // Cores do protótipo
-const AZUL = '#0047B8';
+const AZUL = 'var(--azul)';
 const AZUL_ESCURO = '#1F2A44';
 const CINZA_BORDA = '#D1D5DB';
 
@@ -277,7 +277,7 @@ function PreenchimentoDados() {
           transition: background-color 0.3s ease;
           min-width: 220px;
         }
-        .botao-enviar:hover { background-color: #0039A0; }
+        .botao-enviar:hover { background-color: var(--azul-escuro); }
       `}</style>
 
       <HeaderPublico />

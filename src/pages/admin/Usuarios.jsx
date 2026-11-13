@@ -42,8 +42,8 @@ function Usuarios() {
 
   const estiloFiltro = (ativo) => ({
     fontSize: '0.75rem',
-    border: `1px solid ${ativo ? '#0B6BC2' : '#D1D5DB'}`,
-    color: ativo ? '#0B6BC2' : '#374151',
+    border: `1px solid ${ativo ? 'var(--azul)' : '#D1D5DB'}`,
+    color: ativo ? 'var(--azul)' : '#374151',
     backgroundColor: ativo ? '#DBEAFE' : '#FFFFFF',
   });
 

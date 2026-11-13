@@ -2,7 +2,7 @@ import { Link, Navigate, useLocation } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
 
 // Cores do protótipo
-const AZUL = '#0047B8';
+const AZUL = 'var(--azul)';
 const AZUL_ESCURO = '#1F2A44';
 const CINZA_TEXTO = '#6B7280';
 

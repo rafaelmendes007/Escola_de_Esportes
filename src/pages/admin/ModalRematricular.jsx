@@ -85,7 +85,7 @@ function FormularioRematricula({ aluno, onFechar, onSalvo }) {
       )}
 
       <div className="d-flex gap-3 rounded p-3 mb-4" style={{ backgroundColor: '#C9DDF0' }}>
-        <i className="bi bi-file-earmark fs-4" style={{ color: '#0B6BC2' }}></i>
+        <i className="bi bi-file-earmark fs-4" style={{ color: 'var(--azul)' }}></i>
         <div style={{ fontSize: '0.7rem', color: '#374151' }}>Os documentos já entregues continuam valendo para a nova matrícula.</div>
       </div>
 

@@ -41,7 +41,7 @@ function DetalhesTurmaAlunos() {
                         <td className="text-center">{aluno.frequencia.percentual === null ? '—' : `${aluno.frequencia.percentual}%`}</td>
                         <td><Etiqueta texto={situacao} cor={situacao === 'Ativo' ? 'verde' : 'vermelho'} /></td>
                         <td>
-                          <Link to={`/admin/alunos/${aluno.id}`} className="btn btn-sm py-0 px-2" style={{ fontSize: '0.65rem', color: '#0B6BC2', backgroundColor: '#DBEAFE', border: '1px solid #93C5FD' }}>
+                          <Link to={`/admin/alunos/${aluno.id}`} className="btn btn-sm py-0 px-2" style={{ fontSize: '0.65rem', color: 'var(--azul)', backgroundColor: '#DBEAFE', border: '1px solid #93C5FD' }}>
                             <i className="bi bi-eye me-1"></i>Ver
                           </Link>
                         </td>

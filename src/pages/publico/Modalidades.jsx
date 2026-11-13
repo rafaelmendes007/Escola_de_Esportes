@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import HeaderPublico from '../../components/HeaderPublico';
 
 // Cores do protótipo
-const AZUL = '#0047B8';
+const AZUL = 'var(--azul)';
 const AZUL_ESCURO = '#1F2A44';
 const LARANJA_RODAPE = '#C5652E';
 
@@ -301,7 +301,7 @@ function Modalidades() {
 
           {/* Atalho para a inscrição na lista de espera */}
           <div className="d-flex justify-content-end mt-4 mb-3">
-            <Link to="/inscricao/consentimento" className="btn text-white fw-semibold px-4" style={{ backgroundColor: '#0047B8' }}>
+            <Link to="/inscricao/consentimento" className="btn text-white fw-semibold px-4" style={{ backgroundColor: 'var(--azul)' }}>
               Fazer inscrição na lista de espera
             </Link>
           </div>

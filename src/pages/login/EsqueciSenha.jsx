@@ -7,7 +7,7 @@ import imagemApito from '../../assets/apito.png';
 import background_login from '../../assets/background_login.png';
 
 // Cor principal do protótipo
-const AZUL = '#1E5DB5';
+const AZUL = 'var(--azul)';
 const AZUL_CLARO = '#DCE8FA';
 
 function EsqueciSenha() {

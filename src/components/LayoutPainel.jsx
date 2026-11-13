@@ -105,7 +105,7 @@ function LayoutPainel({ titulo, menu, perfil, linkAvisos, temAvisoNovo, children
           justify-content: center;
           gap: 6px;
         }
-        .painel-botao:hover { background-color: #184E9A; color: #FFFFFF; }
+        .painel-botao:hover { background-color: var(--azul-escuro); color: #FFFFFF; }
         .painel-botao:disabled { opacity: 0.5; cursor: not-allowed; }
         .painel-tabela { width: 100%; font-size: 0.8rem; color: ${TEXTO}; border-collapse: collapse; }
         .painel-tabela th {

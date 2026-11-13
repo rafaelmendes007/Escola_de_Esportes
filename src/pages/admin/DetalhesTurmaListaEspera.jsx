@@ -38,7 +38,7 @@ function DetalhesTurmaListaEspera() {
                       <td>{inscricao.nomeResponsavel}</td>
                       <td>{formatarData(inscricao.criadoEm)}</td>
                       <td className="d-flex gap-1">
-                        <Link to={`/admin/lista-espera/${inscricao.id}`} className="btn btn-sm py-0 px-2" style={{ fontSize: '0.65rem', color: '#0B6BC2', backgroundColor: '#DBEAFE', border: '1px solid #93C5FD' }}>
+                        <Link to={`/admin/lista-espera/${inscricao.id}`} className="btn btn-sm py-0 px-2" style={{ fontSize: '0.65rem', color: 'var(--azul)', backgroundColor: '#DBEAFE', border: '1px solid #93C5FD' }}>
                           <i className="bi bi-eye me-1"></i>Ver
                         </Link>
                         {inscricao.telefone && (

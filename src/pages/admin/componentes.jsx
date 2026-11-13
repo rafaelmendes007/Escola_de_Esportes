@@ -7,7 +7,7 @@ const coresEtiqueta = {
   verde: { cor: '#15803D', fundo: '#DCFCE7', borda: '#86EFAC' },
   vermelho: { cor: '#B91C1C', fundo: '#FCA5A5', borda: '#F87171' },
   amarelo: { cor: '#A16207', fundo: '#FEF9C3', borda: '#FDE047' },
-  azul: { cor: '#0B6BC2', fundo: '#DBEAFE', borda: '#93C5FD' },
+  azul: { cor: 'var(--azul)', fundo: '#DBEAFE', borda: '#93C5FD' },
   roxo: { cor: '#7E22CE', fundo: '#F3E8FF', borda: '#D8B4FE' },
 };
 
@@ -44,7 +44,7 @@ export function Etiqueta({ texto, cor }) {
 
 // Cores pastel dos cartões de indicador
 const coresIndicador = {
-  azul: { fundo: '#C9DDF0', icone: '#0B6BC2', circulo: '#A9C9EA' },
+  azul: { fundo: '#C9DDF0', icone: 'var(--azul)', circulo: '#A9C9EA' },
   verde: { fundo: '#D7F5D7', icone: '#16A34A', circulo: '#B6EBB6' },
   amarelo: { fundo: '#FBF6C4', icone: '#CA8A04', circulo: '#F5EB8C' },
   vermelho: { fundo: '#F8D0D0', icone: '#DC2626', circulo: '#F4A9A9' },
@@ -96,7 +96,7 @@ export function Paginacao({ total = 1, pagina: paginaControlada, onMudar }) {
     border: '1px solid #D1D5DB',
     borderRadius: '4px',
     color: ativo ? '#FFFFFF' : '#374151',
-    backgroundColor: ativo ? '#0B6BC2' : '#FFFFFF',
+    backgroundColor: ativo ? 'var(--azul)' : '#FFFFFF',
     opacity: desativado ? 0.4 : 1,
   });
 

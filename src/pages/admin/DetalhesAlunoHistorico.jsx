@@ -43,7 +43,7 @@ function DetalhesAlunoHistorico() {
                   <div style={{ width: '70px', fontSize: '0.65rem', color: AZUL_TITULO }} className="flex-shrink-0">
                     {formatarData(data)}<br />{data?.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </div>
-                  <span className="rounded d-inline-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '28px', height: '28px', backgroundColor: '#E0EEFA', color: '#0B6BC2' }}>
+                  <span className="rounded d-inline-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '28px', height: '28px', backgroundColor: '#E0EEFA', color: 'var(--azul)' }}>
                     <i className={`bi ${tipo.icone}`}></i>
                   </span>
                   <div className="flex-grow-1">

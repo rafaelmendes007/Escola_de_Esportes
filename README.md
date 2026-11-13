@@ -83,3 +83,5 @@ src/
 - Cada inscrição gera um **protocolo** (`ESP-XXXX-XXXX`) usado para acompanhar a inscrição.
 - A posição na fila é a ordem de chegada entre as inscrições que aguardam vaga na mesma modalidade.
 - Três faltas seguidas sem justificativa geram alerta para a administração.
+- O sistema não recebe arquivos (fotos, atestados, documentos): o projeto usa o plano gratuito do Firebase,
+  sem o Storage. Documentos são entregues na secretaria e o admin marca como recebidos.

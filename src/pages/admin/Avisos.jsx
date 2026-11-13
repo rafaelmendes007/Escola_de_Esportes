@@ -12,7 +12,7 @@ import { CabecalhoPagina } from './componentes';
 // Cor da etiqueta de público de cada aviso
 const coresPublico = {
   'Responsáveis e Professores': { cor: '#15803D', fundo: '#DCFCE7' },
-  Professores: { cor: '#0B6BC2', fundo: '#DBEAFE' },
+  Professores: { cor: 'var(--azul)', fundo: '#DBEAFE' },
   Responsáveis: { cor: '#A16207', fundo: '#FEF3C7' },
 };
 

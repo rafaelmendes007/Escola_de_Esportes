@@ -10,7 +10,7 @@ import ModalJustificar from './ModalJustificar';
 const situacoes = {
   Ausente: { icone: 'bi-x-circle-fill', cor: '#DC2626' },
   Presente: { icone: 'bi-check-circle-fill', cor: '#16A34A' },
-  Justificado: { icone: 'bi-file-earmark-text', cor: '#0B6BC2' },
+  Justificado: { icone: 'bi-file-earmark-text', cor: 'var(--azul)' },
 };
 
 function DetalhesAlunoFrequencia() {

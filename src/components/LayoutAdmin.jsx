@@ -39,7 +39,7 @@ function LayoutAdmin({ titulo = 'Painel Administrativo', children }) {
           gap: 8px;
           text-decoration: none;
         }
-        .admin-botao:hover { background-color: #095AA3; color: #FFFFFF; }
+        .admin-botao:hover { background-color: var(--azul-escuro); color: #FFFFFF; }
         .admin-botao:disabled { opacity: 0.5; }
         .admin-botao-contorno {
           border: 1px solid ${AZUL_ADMIN};

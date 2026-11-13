@@ -3,7 +3,7 @@ import HeaderPublico from '../../components/HeaderPublico';
 import imagemEsportes from '../../assets/esportes_tela_responsavel.png';
 
 // Cor principal do protótipo
-const AZUL = '#0047B8';
+const AZUL = 'var(--azul)';
 
 function HomePage() {
   return (

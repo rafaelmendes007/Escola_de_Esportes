@@ -6,7 +6,7 @@ import { cpfValido, mascaraCpf } from '../../utils/validacao';
 import ilustracaoLupa from '../../assets/ilustracao-lupa.png';
 
 // Cores do protótipo
-const AZUL = '#0047B8';
+const AZUL = 'var(--azul)';
 const AZUL_ESCURO = '#1F2A44';
 const CINZA_BORDA = '#D1D5DB';
 const CINZA_TEXTO = '#6B7280';
@@ -122,7 +122,7 @@ function AcompanhamentoInscricao() {
         }
 
         .botao-consultar:hover {
-          background-color: #0039A0;
+          background-color: var(--azul-escuro);
         }
 
         .container-conteudo {

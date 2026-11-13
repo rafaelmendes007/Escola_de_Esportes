@@ -1,0 +1,30 @@
+/*
+ * Tema do app. As cores principais ficam aqui, em um só lugar.
+ * Para mudar o azul do sistema inteiro, altere só --azul e --azul-escuro.
+ */
+:root {
+  --azul: #0047B8;          /* azul principal: botões, links, destaques */
+  --azul-escuro: #003A96;   /* azul ao passar o mouse */
+  --azul-claro: #EAF1FB;    /* fundos suaves com azul */
+  --azul-menu: #0B2A5B;     /* menu lateral do professor e do admin */
+  --azul-menu-ativo: #1E4A9C;
+  --texto: #1F2A44;
+  --texto-suave: #6B7280;
+  --borda: #E5E7EB;
+  --fundo: #EEF0F4;
+  --verde: #16A34A;
+  --vermelho: #DC2626;
+
+  /* Bootstrap usa o mesmo azul (botões btn-primary, links, foco) */
+  --bs-primary: #0047B8;
+  --bs-primary-rgb: 0, 71, 184;
+  --bs-link-color: #0047B8;
+  --bs-link-color-rgb: 0, 71, 184;
+  --bs-link-hover-color: #003A96;
+  --bs-link-hover-color-rgb: 0, 58, 150;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--texto);
+}

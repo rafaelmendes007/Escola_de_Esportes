@@ -17,7 +17,7 @@ import iconeFlag from '../../assets/modalidades/icone-flag.png';
 import iconeVolei4x4 from '../../assets/modalidades/icone-volei4x4.png';
 
 // Cores do protótipo
-const AZUL = '#0047B8';
+const AZUL = 'var(--azul)';
 const AZUL_ESCURO = '#1F2A44';
 const CINZA_BORDA = '#D1D5DB';
 
@@ -212,7 +212,7 @@ function SelecaoModalidades() {
         }
 
         .botao-continuar:hover:not(:disabled) {
-          background-color: #0039A0;
+          background-color: var(--azul-escuro);
         }
 
         .botao-continuar:disabled {

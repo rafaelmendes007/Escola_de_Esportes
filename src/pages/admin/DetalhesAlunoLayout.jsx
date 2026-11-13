@@ -14,10 +14,10 @@ import { linkWhatsApp } from '../../utils/texto';
 // Estilos dos botões do painel "Ações e acompanhamento"
 const estilosAcao = {
   whatsapp: { backgroundColor: '#4CD964', color: '#FFFFFF', border: 'none' },
-  primario: { backgroundColor: '#0B6BC2', color: '#FFFFFF', border: 'none' },
-  secundario: { backgroundColor: '#BFDDF3', color: '#0B6BC2', border: 'none' },
+  primario: { backgroundColor: 'var(--azul)', color: '#FFFFFF', border: 'none' },
+  secundario: { backgroundColor: '#BFDDF3', color: 'var(--azul)', border: 'none' },
   perigo: { backgroundColor: '#FCA5A5', color: '#DC2626', border: 'none' },
-  contorno: { backgroundColor: '#FFFFFF', color: '#0B6BC2', border: '1px solid #0B6BC2' },
+  contorno: { backgroundColor: '#FFFFFF', color: 'var(--azul)', border: '1px solid var(--azul)' },
 };
 
 // Botão do painel lateral de ações
