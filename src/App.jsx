@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/login/Login';
 import EsqueciSenha from './pages/login/EsqueciSenha';
@@ -13,39 +14,41 @@ import ConfirmacaoInscricao from './pages/publico/ConfirmacaoInscricao';
 import AcompanhamentoInscricao from './pages/publico/AcompanhamentoInscricao';
 import ResultadoConsulta from './pages/publico/ResultadoConsulta';
 
-// Área do professor
-import Painel from './pages/professor/Painel';
-import Turmas from './pages/professor/Turmas';
-import ChamadaFrequencia from './pages/professor/ChamadaFrequencia';
-import FrequenciaRegistrada from './pages/professor/FrequenciaRegistrada';
-import HistoricoFrequencia from './pages/professor/HistoricoFrequencia';
-import AvisosProfessor from './pages/professor/Avisos';
-import AlunosTurma from './pages/professor/AlunosTurma';
+// Áreas do professor e do administrador: o código só é baixado quando alguém entra nelas
+const Painel = lazy(() => import('./pages/professor/Painel'));
+const Turmas = lazy(() => import('./pages/professor/Turmas'));
+const ChamadaFrequencia = lazy(() => import('./pages/professor/ChamadaFrequencia'));
+const FrequenciaRegistrada = lazy(() => import('./pages/professor/FrequenciaRegistrada'));
+const HistoricoFrequencia = lazy(() => import('./pages/professor/HistoricoFrequencia'));
+const AvisosProfessor = lazy(() => import('./pages/professor/Avisos'));
+const AlunosTurma = lazy(() => import('./pages/professor/AlunosTurma'));
 
 // Área do administrador
-import Dashboard from './pages/admin/Dashboard';
-import ListaEspera from './pages/admin/ListaEspera';
-import DetalhesListaEspera from './pages/admin/DetalhesListaEspera';
-import Alunos from './pages/admin/Alunos';
-import DetalhesAlunoVisaoGeral from './pages/admin/DetalhesAlunoVisaoGeral';
-import DetalhesAlunoFrequencia from './pages/admin/DetalhesAlunoFrequencia';
-import DetalhesAlunoDocumentos from './pages/admin/DetalhesAlunoDocumentos';
-import DetalhesAlunoHistorico from './pages/admin/DetalhesAlunoHistorico';
-import TurmasAdmin from './pages/admin/Turmas';
-import DetalhesTurmaAlunos from './pages/admin/DetalhesTurmaAlunos';
-import DetalhesTurmaListaEspera from './pages/admin/DetalhesTurmaListaEspera';
-import DetalhesTurmaHistorico from './pages/admin/DetalhesTurmaHistorico';
-import Frequencia from './pages/admin/Frequencia';
-import AvisosAdmin from './pages/admin/Avisos';
-import Usuarios from './pages/admin/Usuarios';
+const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
+const ListaEspera = lazy(() => import('./pages/admin/ListaEspera'));
+const DetalhesListaEspera = lazy(() => import('./pages/admin/DetalhesListaEspera'));
+const Alunos = lazy(() => import('./pages/admin/Alunos'));
+const DetalhesAlunoVisaoGeral = lazy(() => import('./pages/admin/DetalhesAlunoVisaoGeral'));
+const DetalhesAlunoFrequencia = lazy(() => import('./pages/admin/DetalhesAlunoFrequencia'));
+const DetalhesAlunoDocumentos = lazy(() => import('./pages/admin/DetalhesAlunoDocumentos'));
+const DetalhesAlunoHistorico = lazy(() => import('./pages/admin/DetalhesAlunoHistorico'));
+const TurmasAdmin = lazy(() => import('./pages/admin/Turmas'));
+const DetalhesTurmaAlunos = lazy(() => import('./pages/admin/DetalhesTurmaAlunos'));
+const DetalhesTurmaListaEspera = lazy(() => import('./pages/admin/DetalhesTurmaListaEspera'));
+const DetalhesTurmaHistorico = lazy(() => import('./pages/admin/DetalhesTurmaHistorico'));
+const Frequencia = lazy(() => import('./pages/admin/Frequencia'));
+const AvisosAdmin = lazy(() => import('./pages/admin/Avisos'));
+const Usuarios = lazy(() => import('./pages/admin/Usuarios'));
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
+import { Carregando } from './components/EstadoDados';
 
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Suspense fallback={<Carregando />}>
         <Routes>
           {/* Área pública */}
           <Route path="/" element={<HomePage />} />
@@ -183,6 +186,7 @@ function App() {
           {/* Qualquer URL desconhecida volta para a página inicial */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </AuthProvider>
     </BrowserRouter>
   );
