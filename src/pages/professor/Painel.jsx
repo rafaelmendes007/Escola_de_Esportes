@@ -12,7 +12,8 @@ function Painel() {
   const { dados: turmas, carregando, erro, recarregar } = useCarregar(() => carregarTurmasDoProfessor(usuario.uid), [usuario.uid]);
 
   const hoje = diaDeHoje();
-  const turmasHoje = (turmas || []).filter((turma) => (turma.dias || []).includes(hoje) && turma.status !== 'Encerrada');
+  const turmasAtivas = (turmas || []).filter((turma) => turma.status !== 'Encerrada');
+  const turmasHoje = turmasAtivas.filter((turma) => (turma.dias || []).includes(hoje));
   const primeiroNome = (usuario.nome || 'Professor').split(' ')[0];
 
   return (
@@ -28,11 +29,26 @@ function Painel() {
       {erro && <ErroCarga onTentarDeNovo={recarregar} />}
       {turmas && (
         turmasHoje.length === 0 ? (
-          <div className="painel-card">
-            <Vazio texto="Você não tem aula hoje. As aulas acontecem às terças e quintas.">
-              <Link to="/professor/turmas" className="painel-botao-contorno">Ver minhas turmas</Link>
-            </Vazio>
-          </div>
+          <>
+            <div className="painel-card mb-4">
+              <Vazio texto="Você não tem aula hoje. As aulas acontecem às terças e quintas.">
+                {turmasAtivas.length === 0 && (
+                  <Link to="/professor/turmas" className="painel-botao-contorno">Ver minhas turmas</Link>
+                )}
+              </Vazio>
+            </div>
+
+            {/* Sem aula hoje: mostra as turmas do professor para ele não ficar sem nada na tela */}
+            {turmasAtivas.length > 0 && (
+              <>
+                <h2 className="painel-titulo" style={{ fontSize: '1.25rem' }}>Suas turmas</h2>
+                <p className="painel-subtitulo mb-3">Turmas em que você é o professor responsável.</p>
+                <div className="d-flex flex-column gap-3">
+                  {turmasAtivas.map((turma) => <CardTurma key={turma.id} turma={turma} />)}
+                </div>
+              </>
+            )}
+          </>
         ) : (
           <div className="d-flex flex-column gap-3">
             {turmasHoje.map((turma) => <CardTurma key={turma.id} turma={turma} />)}
