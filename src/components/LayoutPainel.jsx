@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAutenticacao } from '../hooks/useAutenticacao';
 import { AZUL, AZUL_ESCURO, AZUL_MENU_ATIVO, AZUL_CLARO, FUNDO, TEXTO, CINZA_TEXTO, BORDA, VERMELHO } from './cores';
 
+const telaGrande = () => window.innerWidth >= 992;
+
 // Estrutura comum das telas logadas: menu lateral + barra superior.
 // menu: [{ to, texto, icone, ativo }]
-function LayoutPainel({ titulo, menu, perfil, linkAvisos, temAvisoNovo, children }) {
+function LayoutPainel({ titulo, menu, perfil, linkAvisos, temAvisoNovo, onAbrirAvisos, children }) {
   const { usuario, logout } = useAutenticacao();
   const navigate = useNavigate();
   // Nome de quem está logado (ou o perfil, enquanto não houver nome)
@@ -15,8 +17,14 @@ function LayoutPainel({ titulo, menu, perfil, linkAvisos, temAvisoNovo, children
     await logout();
     navigate('/login');
   };
-  const [menuAberto, setMenuAberto] = useState(false);
+  // No computador o menu começa aberto; no celular começa fechado
+  const [menuAberto, setMenuAberto] = useState(telaGrande);
   const [perfilAberto, setPerfilAberto] = useState(false);
+
+  // No celular a gaveta fecha ao escolher uma opção
+  const fecharNoCelular = () => {
+    if (!telaGrande()) setMenuAberto(false);
+  };
 
   return (
     <div className="d-flex min-vh-100" style={{ fontFamily: "'Inter', sans-serif", backgroundColor: FUNDO }}>
@@ -145,19 +153,39 @@ function LayoutPainel({ titulo, menu, perfil, linkAvisos, temAvisoNovo, children
           .painel-sidebar.aberto { transform: translateX(0); }
           .painel-topbar { padding: 0 16px; }
         }
+
+        /* No computador o botão ≡ mostra e esconde o menu lateral */
+        @media (min-width: 992px) {
+          .painel-sidebar:not(.aberto) { display: none; }
+        }
       `}</style>
 
       {/* Menu lateral */}
       <aside className={`painel-sidebar ${menuAberto ? 'aberto' : ''}`}>
-        <div className="fw-semibold mb-4" style={{ fontSize: '1.05rem', lineHeight: 1.2 }}>
-          Escola de Esporte
-          <br />
-          UNIFOR
+        <div className="d-flex justify-content-between align-items-start mb-4">
+          <div className="fw-semibold" style={{ fontSize: '1.05rem', lineHeight: 1.2 }}>
+            Escola de Esporte
+            <br />
+            UNIFOR
+          </div>
+          <button
+            type="button"
+            className="btn p-0 border-0 d-lg-none text-white"
+            aria-label="Fechar menu"
+            onClick={() => setMenuAberto(false)}
+          >
+            <i className="bi bi-x-lg"></i>
+          </button>
         </div>
 
         <nav className="d-flex flex-column gap-1">
           {menu.map((item) => (
-            <Link key={item.to} to={item.to} className={`painel-menu-item ${item.ativo ? 'ativo' : ''}`}>
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`painel-menu-item ${item.ativo ? 'ativo' : ''}`}
+              onClick={fecharNoCelular}
+            >
               <i className={`bi ${item.icone}`}></i> {item.texto}
             </Link>
           ))}
@@ -186,7 +214,8 @@ function LayoutPainel({ titulo, menu, perfil, linkAvisos, temAvisoNovo, children
             <button
               type="button"
               className="btn p-0 border-0"
-              aria-label="Abrir menu"
+              aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={menuAberto}
               onClick={() => setMenuAberto(!menuAberto)}
             >
               <i className="bi bi-list fs-5" style={{ color: TEXTO }}></i>
@@ -195,7 +224,7 @@ function LayoutPainel({ titulo, menu, perfil, linkAvisos, temAvisoNovo, children
           </div>
 
           <div className="d-flex align-items-center gap-4">
-            <Link to={linkAvisos} className="position-relative" aria-label="Avisos" style={{ color: TEXTO }}>
+            <Link to={linkAvisos} className="position-relative" aria-label="Avisos" style={{ color: TEXTO }} onClick={onAbrirAvisos}>
               <i className="bi bi-bell fs-5"></i>
               {temAvisoNovo && (
                 <span
