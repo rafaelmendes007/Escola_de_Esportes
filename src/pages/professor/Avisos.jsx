@@ -1,19 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import LayoutProfessor from '../../components/LayoutProfessor';
 import { TEXTO, CINZA_TEXTO, AZUL, AZUL_CLARO, BORDA, VERMELHO } from '../../components/cores';
 import { Carregando, ErroCarga, Vazio } from '../../components/EstadoDados';
 import { useAutenticacao } from '../../hooks/useAutenticacao';
 import { useCarregar } from '../../hooks/useCarregar';
 import { formatarDataHora } from '../../utils/datas';
+import { idsAvisosLidos, marcarAvisosComoLidos } from '../../utils/avisosLidos';
 import { carregarAvisosDoProfessor } from './dadosProfessor';
 
 function Avisos() {
   const { usuario } = useAutenticacao();
-  const { dados: avisos, carregando, erro, recarregar } = useCarregar(() => carregarAvisosDoProfessor(usuario.uid), [usuario.uid]);
-  // 'todos' ou 'novos' (publicados nos últimos 3 dias)
+  const { dados: dadosAvisos, carregando, erro, recarregar } = useCarregar(() => carregarAvisosDoProfessor(usuario.uid), [usuario.uid]);
+  // 'todos' ou 'novos' (dos últimos 3 dias e ainda não vistos)
   const [filtro, setFiltro] = useState('todos');
+  // Avisos já vistos antes de abrir a tela: os outros continuam com o selo "Novo" nesta visita
+  const [lidosAoAbrir] = useState(() => idsAvisosLidos(usuario.uid));
 
+  const avisos = dadosAvisos?.map((aviso) => ({ ...aviso, novo: aviso.novo && !lidosAoAbrir.includes(aviso.id) }));
   const novos = (avisos || []).filter((aviso) => aviso.novo);
+
+  // Abrir a tela de avisos marca todos como visualizados (o sino apaga a bolinha)
+  useEffect(() => {
+    if (dadosAvisos) marcarAvisosComoLidos(usuario.uid, dadosAvisos.map((aviso) => aviso.id));
+  }, [dadosAvisos, usuario.uid]);
   const avisosVisiveis = filtro === 'todos' ? avisos || [] : novos;
 
   // Estilo do botão de filtro (selecionado ou não)
