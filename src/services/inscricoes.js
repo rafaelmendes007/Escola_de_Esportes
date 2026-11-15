@@ -1,5 +1,6 @@
 import { collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, Timestamp, writeBatch } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { sha256 } from '../utils/sha256';
 import { somenteDigitos } from '../utils/validacao';
 
 // A inscrição fica em dois lugares:
@@ -25,10 +26,8 @@ export function normalizarProtocolo(texto) {
 }
 
 // O CPF não fica aberto no resumo: guardamos um hash dele junto com o protocolo
-async function hashCpf(protocolo, cpf) {
-  const bytes = new TextEncoder().encode(`${protocolo}:${somenteDigitos(cpf)}`);
-  const hash = await crypto.subtle.digest('SHA-256', bytes);
-  return Array.from(new Uint8Array(hash), (b) => b.toString(16).padStart(2, '0')).join('');
+function hashCpf(protocolo, cpf) {
+  return sha256(`${protocolo}:${somenteDigitos(cpf)}`);
 }
 
 // Salva a inscrição e o resumo de consulta de uma vez só. Devolve o protocolo.
